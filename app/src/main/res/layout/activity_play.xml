@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/cl_play"
+    tools:context="com.dedaodemo.ui.PlayActivity">
+
+
+
+    <ImageView
+        android:id="@+id/iv_blur"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        />
+    <ImageView
+        android:id="@+id/iv_cover"
+        android:layout_width="200dp" android:layout_height="220dp"
+        app:srcCompat="@drawable/song_image"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="68dp"
+        android:layout_above="@+id/textView3" android:layout_alignStart="@+id/textView3"/>
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="200dp"
+        android:layout_height="30dp"
+        android:text="报告标题"
+        android:gravity="center"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintHorizontal_bias="0.497"
+        tools:layout_editor_absoluteY="0dp"
+        android:layout_marginBottom="24dp"
+        android:layout_above="@+id/seekBar" android:layout_centerHorizontal="true"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout" app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="14dp" android:layout_marginRight="8dp"
+         android:layout_marginLeft="8dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
+        <ImageButton
+            android:id="@+id/btn_pre"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:background="@drawable/icons8_back_100" tools:layout_editor_absoluteY="20dp"
+            android:layout_marginLeft="8dp"
+        />
+        <Space
+            android:layout_width="40dp"
+            android:layout_height="wrap_content" android:layout_weight="1"/>
+        <ImageButton
+            android:id="@+id/btn_pause_c"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/icons8_pause_button_100"
+            />I
+        <ImageButton
+            android:id="@+id/btn_play_c"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            android:background="@drawable/icons8_play_button_circled_100" />
+        <Space
+            android:layout_width="40dp"
+            android:layout_height="wrap_content" android:layout_weight="1"/>
+        <ImageButton
+            android:id="@+id/btn_next"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/icons8_forward_100"/>
+    </LinearLayout>
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintVertical_bias="0.976"
+        android:layout_above="@+id/linearLayout"
+        android:layout_centerHorizontal="true"/>
+    <Space
+        android:layout_width="30dp"
+        android:layout_height="wrap_content" android:layout_weight="1"/>
+
+</RelativeLayout>

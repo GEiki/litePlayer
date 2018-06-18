@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/item_cardview_linear"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
+
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/list_card_item"
+        android:layout_width="match_parent"
+        android:layout_height="155dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="5dp"
+        android:elevation="8dip"
+        android:background="@drawable/shape_rectangle_with_radius"
+        android:focusable="false"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/linearLayout3"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:layout_marginStart="28dp"
+            android:layout_marginTop="4dp"
+            android:focusable="false"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+
+            <TextView
+                android:id="@+id/list_card_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:text="是标题"
+                android:focusable="false"
+                android:textColor="@android:color/black"
+                android:textSize="40sp" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_choose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:focusable="false"
+            android:layout_marginStart="56dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Button
+                android:id="@+id/btn_choose"
+                android:layout_width="31dp"
+                android:focusable="false"
+                android:layout_height="34dp"
+                android:background="@drawable/ic_action_mutichoose" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:text="多选" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_move"
+            android:layout_width="31dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="84dp"
+            android:focusable="false"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <Button
+                android:id="@+id/btn_move"
+                android:layout_width="31dp"
+                android:layout_height="34dp"
+                android:focusable="false"
+                android:background="@drawable/ic_action_move"
+                android:visibility="visible" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:focusable="false"
+                android:text="添加" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:focusable="false"
+            android:layout_marginStart="112dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ll_choose"
+            app:layout_constraintVertical_bias="1.0">
+
+            <Button
+                android:id="@+id/btn_delete"
+                android:layout_width="31dp"
+                android:layout_height="34dp"
+                android:focusable="false"
+                android:background="@drawable/ic_action_delete"
+                android:visibility="visible" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:focusable="false"
+                android:layout_height="wrap_content"
+                android:text="删除" />
+        </LinearLayout>
+
+
+        <ImageView
+            android:id="@+id/btn_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="80dp"
+            android:layout_marginTop="40dp"
+            android:focusable="false"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_action_pause_c" />
+
+        <ImageView
+            android:id="@+id/btn_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:focusable="false"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_action_more" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+
+</LinearLayout>

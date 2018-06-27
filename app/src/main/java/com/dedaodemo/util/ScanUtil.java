@@ -1,4 +1,4 @@
-package com.dedaodemo;
+package com.dedaodemo.util;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -7,7 +7,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.dedaodemo.model.Item;
+import com.dedaodemo.bean.Item;
 
 import java.io.File;
 import java.util.ArrayList;

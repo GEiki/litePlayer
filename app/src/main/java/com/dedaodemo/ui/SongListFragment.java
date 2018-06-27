@@ -1,35 +1,21 @@
 package com.dedaodemo.ui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
@@ -53,22 +39,22 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.dedaodemo.MusicService;
+import com.dedaodemo.adapter.MListAdapter;
+import com.dedaodemo.adapter.SongListAdapter;
+import com.dedaodemo.service.MusicService;
 import com.dedaodemo.R;
-import com.dedaodemo.ScanUtil;
+import com.dedaodemo.util.ScanUtil;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.HttpUtil;
-import com.dedaodemo.model.Item;
-import com.dedaodemo.model.SongList;
-import com.dedaodemo.model.SongViewModel;
-import com.loopeer.cardstack.CardStackView;
+import com.dedaodemo.bean.Item;
+import com.dedaodemo.bean.SongList;
+import com.dedaodemo.ViewModel.SongViewModel;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -193,7 +179,6 @@ public class SongListFragment extends Fragment implements NavigationView.OnNavig
     });
     private TabLayout tab_layout;
     private ViewPager view_pager;
-    private CardStackView card_stack_view;
     private MListAdapter mMListAdapter;
     private LinearLayout ll_test;
     private DrawerLayout drawerLayout;

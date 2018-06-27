@@ -10,21 +10,17 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 
 import android.os.IBinder;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 
 import android.support.v7.app.AppCompatActivity;
 
 
-import com.dedaodemo.MusicService;
+import com.dedaodemo.service.MusicService;
 import com.dedaodemo.R;
-import com.dedaodemo.model.SongList;
+import com.dedaodemo.bean.SongList;
 
 import java.lang.ref.WeakReference;
 

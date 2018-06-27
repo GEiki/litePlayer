@@ -1,4 +1,4 @@
-package com.dedaodemo.ui;
+package com.dedaodemo.adapter;
 
 import android.content.Context;
 import android.media.MediaPlayer;
@@ -10,7 +10,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
-import com.dedaodemo.model.Item;
+import com.dedaodemo.bean.Item;
 import com.dedaodemo.R;
 
 import java.util.ArrayList;

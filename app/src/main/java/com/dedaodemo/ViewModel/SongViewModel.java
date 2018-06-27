@@ -1,4 +1,4 @@
-package com.dedaodemo.model;
+package com.dedaodemo.ViewModel;
 
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
@@ -11,7 +11,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.Observable;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Message;
@@ -23,8 +22,9 @@ import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.HttpUtil;
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.MyDatabaseHelper;
+import com.dedaodemo.bean.Item;
+import com.dedaodemo.bean.SongList;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;

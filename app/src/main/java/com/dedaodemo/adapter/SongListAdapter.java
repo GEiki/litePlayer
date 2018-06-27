@@ -1,4 +1,4 @@
-package com.dedaodemo.ui;
+package com.dedaodemo.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.dedaodemo.R;
-import com.dedaodemo.model.SongList;
+import com.dedaodemo.bean.SongList;
 
 import java.util.ArrayList;
 

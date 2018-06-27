@@ -6,7 +6,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
-import com.dedaodemo.model.Item;
+import com.dedaodemo.bean.Item;
 
 import java.util.ArrayList;
 

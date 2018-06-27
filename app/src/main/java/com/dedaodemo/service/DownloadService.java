@@ -1,4 +1,4 @@
-package com.dedaodemo;
+package com.dedaodemo.service;
 
 import android.app.Service;
 import android.content.Intent;

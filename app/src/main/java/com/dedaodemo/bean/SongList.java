@@ -1,10 +1,11 @@
-package com.dedaodemo.model;
+package com.dedaodemo.bean;
 
 import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
+import com.dedaodemo.bean.Item;
+
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by guoss on 2018/4/15.

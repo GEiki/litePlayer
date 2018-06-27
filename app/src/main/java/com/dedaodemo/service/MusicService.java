@@ -1,11 +1,12 @@
-package com.dedaodemo;
+package com.dedaodemo.service;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 
-import com.dedaodemo.model.Item;
+import com.dedaodemo.MusicPlayer;
+import com.dedaodemo.bean.Item;
 
 import java.util.ArrayList;
 

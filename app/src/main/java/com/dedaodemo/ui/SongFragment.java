@@ -2,14 +2,10 @@ package com.dedaodemo.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,12 +16,12 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 
 import com.dedaodemo.R;
-import com.dedaodemo.model.Item;
-import com.dedaodemo.model.SongList;
-import com.dedaodemo.model.SongViewModel;
+import com.dedaodemo.adapter.MListAdapter;
+import com.dedaodemo.bean.Item;
+import com.dedaodemo.bean.SongList;
+import com.dedaodemo.ViewModel.SongViewModel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class SongFragment extends BaseBottomFragment {

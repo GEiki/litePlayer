@@ -1,4 +1,4 @@
-package com.dedaodemo.model;
+package com.dedaodemo.bean;
 
 import android.text.TextUtils;
 

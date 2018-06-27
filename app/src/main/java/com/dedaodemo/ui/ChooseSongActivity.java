@@ -1,6 +1,5 @@
 package com.dedaodemo.ui;
 
-import android.arch.lifecycle.ViewModelProvider;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.database.Cursor;
@@ -13,11 +12,12 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.dedaodemo.model.Item;
+import com.dedaodemo.adapter.ChooseAdapter;
+import com.dedaodemo.bean.Item;
 import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.R;
-import com.dedaodemo.model.SongList;
-import com.dedaodemo.model.SongViewModel;
+import com.dedaodemo.bean.SongList;
+import com.dedaodemo.ViewModel.SongViewModel;
 
 import java.util.ArrayList;
 import java.util.List;

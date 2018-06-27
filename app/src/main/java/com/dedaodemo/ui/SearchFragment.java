@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.dedaodemo.R;
-import com.dedaodemo.model.SongViewModel;
+import com.dedaodemo.ViewModel.SongViewModel;
 
 
 public class SearchFragment extends Fragment {

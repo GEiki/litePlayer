@@ -12,13 +12,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.dedaodemo.R;
-import com.dedaodemo.ViewModel.SongViewModel;
+import com.dedaodemo.ViewModel.Contracts.SearchContract;
+import com.dedaodemo.ViewModel.SearchViewModel;
 
 
 public class SearchFragment extends Fragment {
 
-    private SongListFragment.OnFragmentInteractionListener listener;
-    private SongViewModel viewModel;
+    private SearchContract.Presenter viewModel;
 
 
     public SearchFragment() {
@@ -28,7 +28,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = ViewModelProviders.of(getActivity()).get(SongViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(SearchViewModel.class);
     }
 
     @Override
@@ -39,12 +39,7 @@ public class SearchFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof SongListFragment.OnFragmentInteractionListener) {
-            listener = (SongListFragment.OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+
     }
     @Override
     public void onResume() {

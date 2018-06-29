@@ -1,82 +1,34 @@
 package com.dedaodemo.ui;
 
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
+import android.content.ContentValues;
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-
-import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
-
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
-
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Explode;
 
-
-import com.dedaodemo.service.MusicService;
+import com.dedaodemo.MyApplication;
+import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.R;
+import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.common.Constant;
+import com.dedaodemo.common.MusicServiceManager;
+import com.dedaodemo.common.SongManager;
 
-import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements SongListFragment.OnFragmentInteractionListener
+public class MainActivity extends AppCompatActivity
 {
+    private static final int FIRST_LAUNCH_FLAG = 0;
+    private static final String LAUNCH_FLAG = "launch";
+    private int launch_flags;
 
-
-
-    //使用静态内部类防止内存泄漏
-    private static class MyServiceConnection implements ServiceConnection {
-        public WeakReference<MainActivity> activityWeakReference;
-        public MyServiceConnection(WeakReference<MainActivity> activity){
-            activityWeakReference=activity;
-        }
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            MusicService.MyBinder myBinder=(MusicService.MyBinder)service;
-            activityWeakReference.get().musicService=myBinder.getService();
-
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
-    }
-
-    private class MusicReceiver extends BroadcastReceiver {
-        public MusicReceiver() {
-            super();
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.i("RECEIVER","onReceiver");
-
-            if(intent.getAction().equals(MusicService.ACTION_NEXT)){
-                int index = intent.getIntExtra("index",0);
-//                curSong = index;
-
-            }else if(intent.getAction().equals(MusicService.ACTION_FINISH)){
-
-
-            }else if(intent.getAction().equals(MusicService.ACTION_PRE)){
-                Log.i("RECEIVER","pre");
-                int index = intent.getIntExtra("index",0);
-//                curSong = index;
-            }
-        }
-    }
-
-
-
-    private MusicService musicService;
-    private MusicReceiver musicReceiver;
-    ServiceConnection conn=new MyServiceConnection(new WeakReference<MainActivity>(MainActivity.this));
 
 
     @Override
@@ -85,31 +37,49 @@ public class MainActivity extends AppCompatActivity implements SongListFragment.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.container_layout);
 
+        SharedPreferences sharedPreferences = getSharedPreferences(Constant.SP_KEY_LANUCH, MODE_PRIVATE);
+        launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
+        sharedPreferences.edit().putInt(LAUNCH_FLAG, launch_flags + 1).commit();
+
+        //初次启动加载数据库
+        if (launch_flags == FIRST_LAUNCH_FLAG) {
+            MyDatabaseHelper helper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
+            SQLiteDatabase db = helper.getWritableDatabase();
+            SongList songList = new SongList();
+            songList.setTitle("全部歌曲");
+            songList.setSongList(new ArrayList<Item>());
+            String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
+            db.execSQL(string);
+            ContentValues cv = new ContentValues();
+            cv.put("id", 0);
+            cv.put("title", songList.getTitle());
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年mm月dd日");
+            Date date = new Date(System.currentTimeMillis());
+            songList.setCreateDate(simpleDateFormat.format(date).toString());
+            cv.put("time", simpleDateFormat.format(date).toString());
+            cv.put("size", 0);
+            db.insert("song_lists", null, cv);
+            db.close();
+        }
+
+
         /**
          * 添加fragment
          * */
         final FragmentManager fm = getSupportFragmentManager();
-        SongListFragment songListFragment = (SongListFragment) fm.findFragmentById(R.id.fragment_container);
-        if(songListFragment == null){
-            songListFragment = SongListFragment.newInstance();
-            fm.beginTransaction().add(R.id.fragment_container,songListFragment,SongListFragment.TAG_SONG_LIST_FRAGMENT).commit();
+        SheetListFragment sheetListFragment = (SheetListFragment) fm.findFragmentById(R.id.fragment_container);
+        if (sheetListFragment == null) {
+            sheetListFragment = SheetListFragment.newInstance();
+            Explode explode = new Explode();
+            explode.setDuration(800);
+            sheetListFragment.setEnterTransition(explode);
+            sheetListFragment.setReturnTransition(explode);
+            sheetListFragment.setAllowEnterTransitionOverlap(true);
+            sheetListFragment.setAllowReturnTransitionOverlap(true);
+            fm.beginTransaction().add(R.id.fragment_container, sheetListFragment, SongListFragment.TAG_SONG_LIST_FRAGMENT).commit();
         }
 
-        /**
-         * 注册广播
-         * */
-        musicReceiver = new MusicReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(MusicService.ACTION_FINISH);
-        intentFilter.addAction(MusicService.ACTION_NEXT);
-        intentFilter.addAction(MusicService.ACTION_PRE);
-        registerReceiver(musicReceiver,intentFilter);
 
-        /**
-         * 绑定服务
-         * */
-        Intent intent  = new Intent(MainActivity.this,MusicService.class);
-        bindService(intent,conn,BIND_AUTO_CREATE);
 
         String[] permission={android.Manifest.permission.READ_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(MainActivity.this,permission,1);
@@ -130,57 +100,13 @@ public class MainActivity extends AppCompatActivity implements SongListFragment.
         super.onBackPressed();
     }
 
-    @Override
-    public void changeFragment(String TAG) {
-
-    }
 
     @Override
     public void onDestroy() {
-        unbindService(conn);
-        unregisterReceiver(musicReceiver);
+        MusicServiceManager.getInstance().unBindMusicService();
+        SongManager.getInstance().savePlayState();
         super.onDestroy();
     }
 
-    @Override
-    public void play(SongList list, int index) {
-        musicService.play(index,list.getSongList().getValue());
-    }
 
-    @Override
-    public boolean next() {
-
-        return musicService.next();
-    }
-
-    @Override
-    public boolean pre() {
-        return musicService.pre();
-    }
-
-    @Override
-    public void pause() {
-        musicService.pause();
-
-    }
-
-    @Override
-    public void replay() {
-        musicService.rePlay();
-    }
-
-    @Override
-    public int getProgress() {
-        return musicService.getCurrentPosition();
-    }
-
-    @Override
-    public long getDuration() {
-        return musicService.getDuration();
-    }
-
-    @Override
-    public void seekTo(int position) {
-        musicService.seekTo(position);
-    }
 }

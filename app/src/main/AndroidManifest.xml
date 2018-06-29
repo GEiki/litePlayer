@@ -29,7 +29,6 @@
             android:exported="true" />
 
         <activity android:name=".ui.CreateActivity" />
-        <activity android:name=".ui.ChooseSongActivity" />
         <activity
             android:name=".ui.SplashActivity"
             android:theme="@style/MAppTheme">
@@ -45,10 +44,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity
-            android:name=".ui.SearchActivity"
-            android:label="@string/title_activity_search"
-            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

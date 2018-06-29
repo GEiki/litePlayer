@@ -9,6 +9,8 @@
     android:layout_height="250dp"
     android:background="#0000"
     android:orientation="vertical"
+    android:layout_marginRight="8dp"
+    android:layout_marginLeft="8dp"
     app:behavior_peekHeight="60dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior"
     tools:layout_editor_absoluteY="25dp">

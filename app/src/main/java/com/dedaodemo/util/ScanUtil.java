@@ -1,10 +1,8 @@
 package com.dedaodemo.util;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.media.MediaMetadataRetriever;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 
 import com.dedaodemo.bean.Item;
@@ -19,87 +17,35 @@ import java.util.ArrayList;
 public class ScanUtil {
     private static final long TIME_TILTER = 60;
 
-    //传入ApplicationContext防止内存泄漏
-    public static ArrayList<Item> scanMusics(Context context){
-        ArrayList<Item> musics=new ArrayList<>();
-        String[] projection = new String[]{
-                MediaStore.Audio.AudioColumns.TITLE,
-                MediaStore.Audio.AudioColumns.SIZE,
-                MediaStore.Audio.AudioColumns.DATA,
-                MediaStore.Audio.AudioColumns.DURATION,
-                MediaStore.Audio.AudioColumns.ARTIST
-        };
-        Cursor cursor=context.getContentResolver().query(MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
-                                                            projection,
-                                                            null,
-                                                            null,
-                                                            null);
-        if(cursor != null) {
-            cursor.moveToNext();
-            while (cursor.moveToNext()) {
-                String src = cursor.getString(2);//音频路径
-                String name = cursor.getString(0);//音频名称不包括后缀名
-                String size = cursor.getString(1);//音频大小
-                String artist = cursor.getString(4);//作者
-                String duration = cursor.getString(3);//时长
-                Item item = new Item();
-                item.setPath("file://"+src);
-                item.setType(Item.LOCAL_MUSIC);
-                item.setTitle(name);
-                item.setSize(size);
-                item.setAuthor(artist);
-                item.setTime(duration);
-                musics.add(item);
-            }
-            cursor.close();
-        }
-        Cursor cursor2=context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                projection,
-                null,
-                null,
-                null);
-        if(cursor2 != null) {
-            cursor2.moveToNext();
-            while (cursor2.moveToNext()) {
-                String src = cursor2.getString(2);//音频路径
-                String name = cursor2.getString(0);//音频名称不包括后缀名
-                String size = cursor2.getString(1);//音频大小
-                String artist = cursor2.getString(4);//作者
-                String duration = cursor2.getString(3);//时长
-                Item item = new Item();
-                item.setPath("file://"+src);
-                item.setType(Item.LOCAL_MUSIC);
-                item.setTitle(name);
-                item.setSize(size);
-                item.setAuthor(artist);
-                item.setTime(duration);
-                musics.add(item);
-            }
-            cursor2.close();
-        }
-        return musics;
-
-
-
+    public interface ScanCallback {
+        public void scanFinished(ArrayList<Item> list);
     }
+
+
 
     /**
      * 遍历手机文件
      * */
-    public static ArrayList<Item> scanMusicFiles(Context context){
-        ArrayList<Item> list=new ArrayList<>();
-        File src = Environment.getExternalStorageDirectory();
-        File storage = src.getParentFile().getParentFile();
-        Log.i("ScanUtil",String.valueOf(src.getParentFile().isDirectory()));
-        //扫描外置存储卡
-        for (File f:storage.listFiles()){//考虑多张外置内存卡的情况
-            String n = f.getName();
-            if(!n.equals("emulated") && !n.equals("self")){
-                startScan(list,f);
+    public static void scanMusicFiles(Context context, final ScanCallback callback) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Item> list = new ArrayList<>();
+                File src = Environment.getExternalStorageDirectory();
+                File storage = src.getParentFile().getParentFile();
+                Log.i("ScanUtil", String.valueOf(src.getParentFile().isDirectory()));
+                //扫描外置存储卡
+                for (File f : storage.listFiles()) {//考虑多张外置内存卡的情况
+                    String n = f.getName();
+                    if (!n.equals("emulated") && !n.equals("self")) {
+                        startScan(list, f);
+                    }
+                }
+                startScan(list, src);//扫描内置存储卡
+                callback.scanFinished(list);
             }
-        }
-        startScan(list,src);//扫描内置存储卡
-        return list;
+        }).start();
+
 
     }
     private static void startScan(ArrayList<Item> list,File file){

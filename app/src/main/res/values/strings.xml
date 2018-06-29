@@ -5,28 +5,12 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-    <string name="title1">俄坠海直升机残骸水下209米被发现</string>
-    <string name="author1">海外网</string>
-    <string name="content1">
-        海外网10月29日电据路透社报道，救援人员称，在挪威斯瓦尔巴群岛附近失踪的米-8直升机残骸被发现，它们在深度209米的地方。救援人员推测失踪8人或已全部遇难，目前搜寻工作尚在进行。
-    </string>
-    <string name="time1">18:12</string>
-    <string name="author2">网易</string>
-    <string name="title2">特斯拉计划在挪威建造超级充电站</string>
-    <string name="content2">
-        新华社奥斯陆10月28日电（记者张淑惠　梁有昶）据挪威国家电视台28日报道，美国电动汽车公司特斯拉计划今年在挪威建造欧洲最大的超级充电站。报道说，超级充电站位于奥斯陆以南约65公里的小镇吕格，紧靠欧洲6号公路，建成后将配备42个超级充电桩。
-    </string>
-    <string name="time2">16:48</string>
-    <string name="author3">搜狐</string>
-    <string name="title3">德媒：中国制造逆袭德国</string>
-    <string name="content3">
-        现在被视为质量过硬代名词的“德国制造”，百年前还是低劣货的象征；如今，“中国制造”也正在甩开山寨货的帽子。本月，德国权威质量管理机构德国质量协会(DGQ)和德国市场研究机构“Innofact”公布的一项最新调查研究结果显示，
-        尽管依然存在负面形象，但“中国制造”在德国受欢迎度比其名声要好不少。这项调查显示，八成德国人认为“中国制造”是“德国制造”的对手，仅有11%的德国的消费者拒绝中国产品。
-    </string>
-    <string name="time3">15:16</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_search">SearchActivity</string>
     <string name="title_activity_songs">SongsActivity</string>
+
+    <string name="default_song_name">默认歌曲</string>
 </resources>

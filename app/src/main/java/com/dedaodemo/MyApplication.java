@@ -5,6 +5,7 @@ import android.content.Context;
 
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.dedaodemo.cache.MyFileNameGenerator;
+import com.dedaodemo.common.MusicServiceManager;
 
 /**
  * Created by guoss on 2018/4/26.
@@ -18,6 +19,8 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
+        //初始化播放服务
+        MusicServiceManager.getInstance().init();
     }
 
     public static HttpProxyCacheServer getProxyServer(){
@@ -41,4 +44,6 @@ public class MyApplication extends Application {
     public static Context getMyApplicationContext(){
         return mContext;
     }
+
+
 }

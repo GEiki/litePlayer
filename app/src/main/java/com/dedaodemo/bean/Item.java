@@ -2,13 +2,13 @@ package com.dedaodemo.bean;
 
 import android.text.TextUtils;
 
-import java.util.Date;
+import java.io.Serializable;
 
 /**
  * Created by guoss on 2017/10/27.
  */
 
-public class Item
+public class Item implements Serializable
 {
     public static final int INTERNET_MUSIC = 1;
     public static final int LOCAL_MUSIC = 2;

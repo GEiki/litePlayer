@@ -1,23 +1,20 @@
 package com.dedaodemo.bean;
 
-import android.arch.lifecycle.MutableLiveData;
 import android.util.Log;
 
-import com.dedaodemo.bean.Item;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by guoss on 2018/4/15.
  */
 
-public class SongList {
+public class SongList implements Serializable {
     private String title;
     private String description;
     private String createDate;
     private String size = "0";
     private int color;
-    private MutableLiveData<ArrayList<Item>> songList = new MutableLiveData<>();
     private ArrayList<Item> items = new ArrayList<>();
 
     public SongList(){
@@ -83,15 +80,12 @@ public class SongList {
         return items.size();
     }
 
-    public MutableLiveData<ArrayList<Item>> getSongList() {
-        if(songList.getValue() == null){
-            songList.setValue(new ArrayList<Item>());
-        }
-        return songList;
+    public ArrayList<Item> getSongList() {
+        return items;
     }
 
     public void setSongList(ArrayList<Item> songList) {
-        this.songList.setValue(songList);
+        this.items = songList;
     }
 
     public boolean addSong(Item item){
@@ -118,10 +112,5 @@ public class SongList {
         size = String.valueOf(count--);
         return  true;
     }
-    /**
-     * 通知数据更新
-     * */
-    public void update(){
-        songList.setValue(items);
-    }
+
 }

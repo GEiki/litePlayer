@@ -38,6 +38,7 @@ public class MusicServiceManager {
     }
 
     private static MusicServiceManager instance;
+    private boolean isServiceConnecting = false;
     private Context context = MyApplication.getMyApplicationContext();
     private Messenger messenger;
     private Messenger replyMessenger = new Messenger(new MessengerHandler());
@@ -45,11 +46,12 @@ public class MusicServiceManager {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             messenger = new Messenger(service);
+            isServiceConnecting = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
+            isServiceConnecting = false;
         }
     };
 
@@ -87,7 +89,9 @@ public class MusicServiceManager {
     }
 
     public void unBindMusicService() {
-        context.unbindService(serviceConnection);
+        if (isServiceConnecting) {
+            context.unbindService(serviceConnection);
+        }
     }
 
 }

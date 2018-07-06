@@ -122,6 +122,20 @@ public abstract class BaseBottomFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            baseViewModel.initBottomBar();
+        }
+        super.onHiddenChanged(hidden);
+    }
+
+    @Override
+    public void onResume() {
+        baseViewModel.initBottomBar();
+        super.onResume();
+    }
+
     public void setAdapter(ListAdapter adapter) {
         listView.setAdapter(adapter);
     }
@@ -240,7 +254,8 @@ public abstract class BaseBottomFragment extends Fragment {
                 Log.i("Bottom",String.valueOf(slideOffset));
             }
         });
-//        ((ViewGroup)getView()).addView(v);
+
+
     }
 
     /**

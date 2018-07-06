@@ -23,13 +23,24 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter {
 
     @Override
     public void playSong(SongList songList, Item item) {
-        SongManager.getInstance().play(songList, item);
-        updateCurrentSong(item);
-        updateCurrentSongList(songList);
+        if (!SongManager.getInstance().isPlaying()) {
+            SongManager.getInstance().play(songList, item);
+            updateCurrentSong(item);
+            updateCurrentSongList(songList);
+            updatePlayState(SongManager.getInstance().isPlaying());
+        }
     }
 
     public BaseViewModel() {
         super();
+    }
+
+
+    @Override
+    public void initBottomBar() {
+        updateCurrentSong(SongManager.getInstance().getCurrentSong());
+        updateCurrentSongList(SongManager.getInstance().getCurrentSongList());
+        updatePlayState(SongManager.getInstance().isPlaying());
     }
 
     @Override

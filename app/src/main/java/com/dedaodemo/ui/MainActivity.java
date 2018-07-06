@@ -104,9 +104,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         MusicServiceManager.getInstance().unBindMusicService();
-        SongManager.getInstance().savePlayState();
         super.onDestroy();
     }
 
-
+    @Override
+    protected void onPause() {
+        SongManager.getInstance().savePlayState();
+        super.onPause();
+    }
 }

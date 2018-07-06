@@ -14,6 +14,8 @@ import com.dedaodemo.common.SongManager;
 public class BaseContract {
 
     public interface Presenter {
+        public void initBottomBar();
+
         public void playSong(SongList songList, Item item);
 
         public void nextSong();

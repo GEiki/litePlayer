@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar_layout"
@@ -12,13 +13,15 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
+            app:elevation="0dp"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/white" />
+            android:popupTheme="@style/ToolbarPopupTheme"
+            android:background="?attr/colorPrimary" />
     </android.support.design.widget.AppBarLayout>
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="470dp"
+        android:layout_height="520dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="53dp"

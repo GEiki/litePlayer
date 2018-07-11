@@ -31,6 +31,10 @@ public class MusicServiceManager {
                     SongManager.getInstance().updateProgress(bundle.getInt(Constant.POSITION), bundle.getLong(Constant.DURATION));
                     break;
                 }
+                case Constant.ACTION_RE_PLAY: {
+                    SongManager.getInstance().onPlay();
+                    break;
+                }
                 default:
                     break;
             }

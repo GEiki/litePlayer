@@ -28,6 +28,12 @@ public class MusicService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.arg1) {
+                case Constant.ACTION_INIT: {//初始化
+                    Bundle bundle = msg.getData();
+                    SongList songList = (SongList) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
+                    initPlayer(songList.getSongList(), (Item) (bundle.getSerializable(Constant.CURRENT_SONG)), msg.replyTo);
+                    break;
+                }
                 case Constant.ACTION_PLAY: {//播放
                     Bundle bundle = msg.getData();
                     SongList songList = (SongList) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
@@ -39,7 +45,7 @@ public class MusicService extends Service {
                     break;
                 }
                 case Constant.ACTION_RE_PLAY: {//重新播放
-                    rePlay();
+                    rePlay(msg.replyTo);
                     break;
                 }
                 case Constant.ACTION_REQUEST_DURATION: {//获取时长
@@ -81,6 +87,28 @@ public class MusicService extends Service {
         return messenger.getBinder();
     }
 
+    public void initPlayer(ArrayList<Item> list, Item tmp, final Messenger replyMessenger) {
+        MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                try {
+                    Message msg = new Message();
+                    msg.arg1 = Constant.ACTION_COMPLETE;
+                    replyMessenger.send(msg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        MediaPlayer.OnPreparedListener onPreparedListener = new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+
+            }
+        };
+        mp.initPlayer(list, tmp, onCompletionListener, onPreparedListener);
+    }
+
     public void play(Item item, ArrayList<Item> list, final Messenger replyMessenger) {
         mp.play(list, item, new MediaPlayer.OnCompletionListener() {
             @Override
@@ -95,14 +123,34 @@ public class MusicService extends Service {
 
             }
         });
+        mp.setListener(new MusicPlayer.OnChangeListener() {
+            @Override
+            public void onPlay() {
+                try {
+                    Message msg = new Message();
+                    msg.arg1 = Constant.ACTION_RE_PLAY;
+                    replyMessenger.send(msg);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
     public void pause(){
             mp.pause();
             isPasusing=true;
     }
-    public void rePlay(){
+
+    public void rePlay(final Messenger replyMessenger) {
             mp.rePlay();
-            isPasusing = false;
+        try {
+            Message msg = new Message();
+            msg.arg1 = Constant.ACTION_RE_PLAY;
+            replyMessenger.send(msg);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        isPasusing = false;
     }
     public boolean isPasusing(){
         return isPasusing;

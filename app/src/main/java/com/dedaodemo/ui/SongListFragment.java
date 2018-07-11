@@ -5,9 +5,13 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.RelativeLayout;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
@@ -51,6 +56,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
         viewModel = ViewModelProviders.of((AppCompatActivity) getActivity()).get(SongListViewModel.class);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
@@ -64,6 +70,8 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
                              Bundle savedInstanceState) {
 
         View v = super.onCreateView(inflater, container, savedInstanceState);
+        addCardView(v, inflater);
+
         toolbar = getToolbar();
         toolbar.setTitle(songList.getTitle());
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -102,6 +110,17 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
             }
         });
         return v;
+    }
+
+    private void addCardView(View view, LayoutInflater inflater) {
+        CoordinatorLayout viewGroup = (CoordinatorLayout) view;
+        AppBarLayout appBarLayout = (AppBarLayout) viewGroup.getChildAt(0);
+        ViewGroup cardView = (ViewGroup) inflater.inflate(R.layout.song_list_header, null);
+        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 500);
+        cardView.setLayoutParams(lp);
+        appBarLayout.addView(cardView);
+        appBarLayout.setBackground(getResources().getDrawable(android.R.color.white));
+        viewGroup.invalidate();
     }
 
     @Override

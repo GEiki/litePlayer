@@ -49,7 +49,9 @@ public class MainActivity extends AppCompatActivity
             songList.setTitle("全部歌曲");
             songList.setSongList(new ArrayList<Item>());
             String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
+            String string2 = "create table if not exists " + Constant.SEARCH_SONG_LIST + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
             db.execSQL(string);
+            db.execSQL(string2);
             ContentValues cv = new ContentValues();
             cv.put("id", 0);
             cv.put("title", songList.getTitle());
@@ -104,12 +106,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onDestroy() {
         MusicServiceManager.getInstance().unBindMusicService();
+        SongManager.getInstance().savePlayState();
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
-        SongManager.getInstance().savePlayState();
         super.onPause();
     }
 }

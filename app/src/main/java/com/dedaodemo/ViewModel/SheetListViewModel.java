@@ -62,17 +62,11 @@ public class SheetListViewModel extends BaseViewModel implements LifecycleObserv
 
     @Override
     public void scanMusic() {
-        ToastUtil.showShort("后台扫描中");
         ScanUtil.scanMusicFiles(MyApplication.getMyApplicationContext(), new ScanUtil.ScanCallback() {
             @Override
             public void scanFinished(ArrayList<Item> list) {
                 model.addSongs(SongManager.getInstance().getSheetList().get(0), list);
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastUtil.showShort("扫描完毕");
-                    }
-                });
+                songListsLiveData.postValue(songListsLiveData.getValue());
 
             }
         });
@@ -97,6 +91,7 @@ public class SheetListViewModel extends BaseViewModel implements LifecycleObserv
     @Override
     public void createSongListSuccess(ArrayList<SongList> sheetList) {
         songListsLiveData.postValue(sheetList);
+
     }
 
     @Override
@@ -120,6 +115,10 @@ public class SheetListViewModel extends BaseViewModel implements LifecycleObserv
      */
     @Override
     public void removeSongList(SongList target) {
+        if (target.getTitle().equals("全部歌曲")) {
+            ToastUtil.showShort(mContext, "全部歌曲歌单不可移除");
+            return;
+        }
         model.removeSongList(target);
     }
 

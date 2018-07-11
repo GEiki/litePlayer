@@ -41,6 +41,7 @@ public class SearchViewModel extends BaseViewModel implements SearchContract.Vie
 
     }
 
+    @Override
     public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer) {
         searchSongList.observe(owner, observer);
     }

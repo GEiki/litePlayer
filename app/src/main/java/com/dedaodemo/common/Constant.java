@@ -49,6 +49,8 @@ public class Constant {
     public static final int ACTION_REQUEST_DURATION = 7;
     //定位
     public static final int ACTION_SEEK_TO = 8;
+    //初始化
+    public static final int ACTION_INIT = 9;
 
 
     /**
@@ -62,5 +64,8 @@ public class Constant {
     public static final String LIST_RECYCLE = "list_recycle";
     //单曲循环
     public static final String SINGLE_RECYCLE = "single_recycle";
+
+    //搜索列表名
+    public static final String SEARCH_SONG_LIST = "SeArCh";
 
 }

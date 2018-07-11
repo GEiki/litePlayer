@@ -8,8 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.dedaodemo.bean.Item;
 import com.dedaodemo.R;
+import com.dedaodemo.bean.Item;
 
 import java.util.ArrayList;
 
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 public class MListAdapter extends BaseAdapter
 {
     private Context mContext;
-    private ArrayList<Item> itemData = null;
+    private ArrayList<Item> itemData = new ArrayList<>();
     private int ChooseItem;
     public MListAdapter(Context context){
         mContext=context;

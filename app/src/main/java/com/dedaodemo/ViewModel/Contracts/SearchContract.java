@@ -1,5 +1,8 @@
 package com.dedaodemo.ViewModel.Contracts;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.Observer;
+
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 
@@ -14,6 +17,8 @@ public class SearchContract {
 
     public interface Presenter {
         public void searchSong(SearchBean bean);
+
+        public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer);
     }
 
     public interface ViewModel {

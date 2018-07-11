@@ -15,9 +15,7 @@ import java.util.ArrayList;
 
 public class MusicPlayer {
     public interface OnChangeListener{
-        public void onNext(int index);
-        public void onPre(int index);
-        public void onFinish();
+        public void onPlay();
     }
 
     public final static int ORDER=0;
@@ -25,7 +23,6 @@ public class MusicPlayer {
 
     private MediaPlayer mPlayer;
     private static MusicPlayer instance;
-    private MediaPlayer.OnPreparedListener onPreparedListener;
     private int mode = ORDER;
     private int index;
     private Context mContext;
@@ -61,14 +58,20 @@ public class MusicPlayer {
                     mPlayer.release();
                 }
                 }
-            initPlayer(list, item, completionListener);
+            initPlayer(list, item, completionListener, new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    mp.start();
+                    listener.onPlay();
+                }
+            });
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void initPlayer(ArrayList<Item> list, Item tmp, MediaPlayer.OnCompletionListener completionListener) {
+    public void initPlayer(ArrayList<Item> list, Item tmp, MediaPlayer.OnCompletionListener completionListener, MediaPlayer.OnPreparedListener preparedListener) {
         try {
             mPlayer = new MediaPlayer();
             String path = tmp.getPath();
@@ -81,13 +84,8 @@ public class MusicPlayer {
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mPlayer.prepareAsync();
 
-            MediaPlayer.OnPreparedListener mListener = new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mp.start();
-                }
-            };
-            mPlayer.setOnPreparedListener(mListener);
+
+            mPlayer.setOnPreparedListener(preparedListener);
 
             mPlayer.setOnCompletionListener(completionListener);
         } catch (Exception e) {
@@ -126,9 +124,14 @@ public class MusicPlayer {
 
 
     public long getDuration(){
+        if (mPlayer == null) {
+            return 0;
+        }
         return mPlayer.getDuration();
     }
     public void seekTo(int x){
+        if (mPlayer == null)
+            return;
         mPlayer.seekTo(x);
     }
     public int getCurrentPosition(){

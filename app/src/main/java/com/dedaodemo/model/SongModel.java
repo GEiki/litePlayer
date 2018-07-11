@@ -10,6 +10,7 @@ import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.common.SongManager;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -163,12 +164,20 @@ public class SongModel implements SheetListContract.Model, SongListContract.Mode
      */
     @Override
     public void removeSongList(SongList songList) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        String[] args = {songList.getTitle()};
-        db.delete("song_lists", "title=?", args);
-        String sql = "drop table " + songList.getTableName();
-        db.execSQL(sql);
-        db.close();
+        try {
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
+            String[] args = {songList.getTitle()};
+            db.delete("song_lists", "title=?", args);
+            String sql = "drop table " + songList.getTableName();
+            db.execSQL(sql);
+            db.close();
+            SongManager.getInstance().getSheetList().remove(songList);
+            sheetListViewModel.removeSongListSuccess(SongManager.getInstance().getSheetList());
+        } catch (Exception e) {
+            sheetListViewModel.removeSongListFail("data error");
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -176,18 +185,26 @@ public class SongModel implements SheetListContract.Model, SongListContract.Mode
      */
     @Override
     public void createSongList(SongList songList, int size) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
-        db.execSQL(string);
-        ContentValues cv = new ContentValues();
-        cv.put("id", size - 1);
-        cv.put("title", songList.getTitle());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年mm月dd日");
-        Date date = new Date(System.currentTimeMillis());
-        songList.setCreateDate(simpleDateFormat.format(date).toString());
-        cv.put("time", simpleDateFormat.format(date).toString());
-        cv.put("size", 0);
-        db.insert("song_lists", null, cv);
-        db.close();
+        try {
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
+            String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(title))";
+            db.execSQL(string);
+            ContentValues cv = new ContentValues();
+            cv.put("id", size + 1);
+            cv.put("title", songList.getTitle());
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年mm月dd日");
+            Date date = new Date(System.currentTimeMillis());
+            songList.setCreateDate(simpleDateFormat.format(date).toString());
+            cv.put("time", simpleDateFormat.format(date).toString());
+            cv.put("size", 0);
+            db.insert("song_lists", null, cv);
+            db.close();
+            SongManager.getInstance().getSheetList().add(songList);
+            sheetListViewModel.createSongListSuccess(SongManager.getInstance().getSheetList());
+        } catch (Exception e) {
+            sheetListViewModel.createSongListFail("database error");
+            e.printStackTrace();
+        }
+
     }
 }

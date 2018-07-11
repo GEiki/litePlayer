@@ -19,7 +19,7 @@ public class MyDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql="create table misc_info(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,PRIMARY KEY(id))";
+        String sql = "create table misc_info(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,PRIMARY KEY(title))";
         String sql2="create table song_lists(id int,title varchar(20),time varchar(20),size int,PRIMARY KEY(id))";
         Log.i(TAG,"Create table-------------->");
         db.execSQL(sql);

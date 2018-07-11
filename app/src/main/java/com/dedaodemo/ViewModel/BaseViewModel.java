@@ -9,7 +9,6 @@ import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.SongManager;
-import com.dedaodemo.util.ToastUtil;
 
 /**
  * Created by guoss on 2018/6/29.
@@ -22,12 +21,17 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter {
     protected MutableLiveData<String> playModeLiveData = new MutableLiveData<>();
 
     @Override
-    public void playSong(SongList songList, Item item) {
+    public void playSong(final SongList songList, final Item item) {
         if (!SongManager.getInstance().isPlaying()) {
-            SongManager.getInstance().play(songList, item);
-            updateCurrentSong(item);
-            updateCurrentSongList(songList);
-            updatePlayState(SongManager.getInstance().isPlaying());
+            SongManager.getInstance().play(songList, item, new SongManager.OnPlayListener() {
+                @Override
+                public void onPlay() {
+                    updateCurrentSong(item);
+                    updateCurrentSongList(songList);
+                    updatePlayState(SongManager.getInstance().isPlaying());
+                }
+            });
+
         }
     }
 
@@ -58,7 +62,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter {
         if (SongManager.getInstance().next()) {
             updateCurrentSong(SongManager.getInstance().getCurrentSong());
         } else {
-            ToastUtil.showShort("没有更多歌曲了");
+
         }
     }
 
@@ -67,7 +71,6 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter {
         if (SongManager.getInstance().pre()) {
             updateCurrentSong(SongManager.getInstance().getCurrentSong());
         } else {
-            ToastUtil.showShort("这已经是第一首歌");
         }
 
     }
@@ -80,8 +83,13 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter {
 
     @Override
     public void rePlay() {
-        SongManager.getInstance().rePlay();
-        updatePlayState(SongManager.getInstance().isPlaying());
+        SongManager.getInstance().rePlay(new SongManager.OnPlayListener() {
+            @Override
+            public void onPlay() {
+                updatePlayState(SongManager.getInstance().isPlaying());
+            }
+        });
+
     }
 
     @Override

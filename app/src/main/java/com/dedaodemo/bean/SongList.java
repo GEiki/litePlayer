@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 
 public class SongList implements Serializable {
-    private String title;
+    private String title = "默认歌单";
     private String description;
     private String createDate;
     private String size = "0";

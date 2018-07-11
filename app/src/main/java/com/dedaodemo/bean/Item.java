@@ -14,7 +14,7 @@ public class Item implements Serializable
     public static final int LOCAL_MUSIC = 2;
 
     private String author;
-    private String title;
+    private String title = "默认歌曲";
     private String time;
     private String content;
     private String path;

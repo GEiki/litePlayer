@@ -21,13 +21,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.SheetListViewModel;
+import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.adapter.SongListAdapter;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.SongManager;
@@ -35,7 +35,7 @@ import com.dedaodemo.common.SongManager;
 import java.util.ArrayList;
 
 
-public class SheetListFragment extends BaseBottomFragment implements NavigationView.OnNavigationItemSelectedListener, SongListAdapter.onMenuSongItemClickListener {
+public class SheetListFragment extends BaseBottomFragment implements NavigationView.OnNavigationItemSelectedListener, SongListAdapter.onMenuSongItemClickListener, BaseAdapter.OnItemClickListener {
 
     public static String SHEET_LIST_FRAGMENT = "SheetListFragment";
     public static String SHEET_BACK_STACK = "sheetBackStack";
@@ -87,8 +87,9 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         viewModel.observeSongLists(getActivity(), new Observer<ArrayList<SongList>>() {
             @Override
             public void onChanged(@Nullable ArrayList<SongList> songLists) {
-                SongListAdapter listAdapter = new SongListAdapter(getContext(), SheetListFragment.this);
-                listAdapter.setData(songLists);
+                SongListAdapter listAdapter = (SongListAdapter) getAdapter();
+                listAdapter.setOnMenuItemClickListener(SheetListFragment.this);
+                listAdapter.setmData(songLists);
                 setAdapter(listAdapter);
                 sheetList = songLists;
                 if (dialog != null && dialog.isShowing()) {
@@ -103,14 +104,15 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
 //        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
         initNavigationView(view);
-        setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SongListFragment songListFragment = SongListFragment.newInstance(sheetList.get(position));
-                showFragment(songListFragment, SheetListFragment.this);
-            }
-        });
+        setAdapter(new SongListAdapter(getContext()));
+        setOnItemClickListener(this);
         return view;
+    }
+
+    @Override
+    public void onItemClick(View v, int position) {
+        SongListFragment songListFragment = SongListFragment.newInstance(sheetList.get(position));
+        showFragment(songListFragment, SheetListFragment.this);
     }
 
     /**

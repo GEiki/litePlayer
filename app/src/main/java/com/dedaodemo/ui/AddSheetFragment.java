@@ -50,9 +50,10 @@ public class AddSheetFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_add_sheet, container, false);
-        et_sheet = (EditText) v.findViewById(R.id.et_sheet);
+        et_sheet = v.findViewById(R.id.et_sheet);
+        et_sheet.setSingleLine();
 
-        toolbar = (Toolbar) v.findViewById(R.id.toolbar);
+        toolbar = v.findViewById(R.id.toolbar);
         toolbar.setTitle("Lite");
         toolbar.setTitleMarginStart(30);
         toolbar.setTitleMarginEnd(30);
@@ -60,7 +61,7 @@ public class AddSheetFragment extends Fragment {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
 
-        viewModel = ViewModelProviders.of((AppCompatActivity) getActivity()).get(SheetListViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(SheetListViewModel.class);
         return v;
     }
 

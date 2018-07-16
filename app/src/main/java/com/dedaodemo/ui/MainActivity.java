@@ -16,7 +16,6 @@ import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
-import com.dedaodemo.common.MusicServiceManager;
 import com.dedaodemo.common.SongManager;
 
 import java.text.SimpleDateFormat;
@@ -105,7 +104,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDestroy() {
-        MusicServiceManager.getInstance().unBindMusicService();
+//        MusicServiceManager.getInstance().unBindMusicService();
         SongManager.getInstance().savePlayState();
         super.onDestroy();
     }

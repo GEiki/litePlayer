@@ -53,10 +53,7 @@ public class MusicPlayer {
         try {
             this.list = list;
             if (mPlayer != null) {
-                if (mPlayer.isPlaying()) {
-                    mPlayer.pause();
                     mPlayer.release();
-                }
                 }
             initPlayer(list, item, completionListener, new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -92,6 +89,12 @@ public class MusicPlayer {
             e.printStackTrace();
         }
 
+    }
+
+    public void setOnErrorListener(MediaPlayer.OnErrorListener errorListener) {
+        if (mPlayer != null) {
+            mPlayer.setOnErrorListener(errorListener);
+        }
     }
 
     public void pause(){

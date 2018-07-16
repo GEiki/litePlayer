@@ -5,9 +5,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,18 +18,19 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.RelativeLayout;
+import android.widget.ImageView;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.ViewModel.SongListViewModel;
+import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.util.Util;
 
 
-public class SongListFragment extends BaseBottomFragment implements View.OnClickListener {
+public class SongListFragment extends BaseBottomFragment implements View.OnClickListener, BaseAdapter.OnItemClickListener {
 
     public static String TAG_SONG_LIST_FRAGMENT = "SongListFragment";
     public static final String ARG_SONG_LIST = "songList";
@@ -70,8 +70,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
                              Bundle savedInstanceState) {
 
         View v = super.onCreateView(inflater, container, savedInstanceState);
-        addCardView(v, inflater);
-
+        addHeaderImgView(v, inflater);
         toolbar = getToolbar();
         toolbar.setTitle(songList.getTitle());
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -94,33 +93,31 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         viewModel.observeSongList(getActivity(), new Observer<SongList>() {
             @Override
             public void onChanged(@Nullable SongList songList) {
-                MListAdapter mListAdapter = new MListAdapter(getContext());
-                mListAdapter.setItemData(songList.getSongList());
+                MListAdapter mListAdapter = (MListAdapter) getAdapter();
+                mListAdapter.setmData(songList.getSongList());
                 setAdapter(mListAdapter);
             }
         });
         MListAdapter mListAdapter = new MListAdapter(getContext());
-        mListAdapter.setItemData(songList.getSongList());
+        mListAdapter.setmData(songList.getSongList());
         setAdapter(mListAdapter);
-
-        setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                play(position);
-            }
-        });
+        setOnItemClickListener(this);
         return v;
     }
 
-    private void addCardView(View view, LayoutInflater inflater) {
-        CoordinatorLayout viewGroup = (CoordinatorLayout) view;
-        AppBarLayout appBarLayout = (AppBarLayout) viewGroup.getChildAt(0);
-        ViewGroup cardView = (ViewGroup) inflater.inflate(R.layout.song_list_header, null);
-        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 500);
+    @Override
+    public void onItemClick(View v, int position) {
+        play(position);
+    }
+
+    private void addHeaderImgView(View view, LayoutInflater inflater) {
+        AppBarLayout appBarLayout = view.findViewById(R.id.app_bar_layout);
+        View cardView = new ImageView(getContext());
+        CollapsingToolbarLayout.LayoutParams lp = new CollapsingToolbarLayout.LayoutParams(CollapsingToolbarLayout.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 160));
+        lp.setCollapseMode(CollapsingToolbarLayout.LayoutParams.COLLAPSE_MODE_PARALLAX);
         cardView.setLayoutParams(lp);
-        appBarLayout.addView(cardView);
-        appBarLayout.setBackground(getResources().getDrawable(android.R.color.white));
-        viewGroup.invalidate();
+        ((ViewGroup) appBarLayout.getChildAt(0)).addView(cardView, 0);
+        view.invalidate();
     }
 
     @Override

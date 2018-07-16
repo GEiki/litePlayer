@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.util.Log;
 
 import com.dedaodemo.MusicPlayer;
 import com.dedaodemo.bean.Item;
@@ -133,6 +134,14 @@ public class MusicService extends Service {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+        });
+        mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mp, int what, int extra) {
+                Log.e("MediaPlayer", "错误码：" + String.valueOf(what));
+                mp.release();
+                return true;
             }
         });
     }

@@ -68,4 +68,7 @@ public class Constant {
     //搜索列表名
     public static final String SEARCH_SONG_LIST = "SeArCh";
 
+    //播放错误
+    public static final String PLAY_ERROR = "play_error";
+
 }

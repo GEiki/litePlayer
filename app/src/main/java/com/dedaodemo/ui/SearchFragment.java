@@ -18,23 +18,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
 import com.dedaodemo.ViewModel.SearchViewModel;
+import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.util.ToastUtil;
+import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
 
 
-public class SearchFragment extends BaseBottomFragment implements AdapterView.OnItemClickListener {
+public class SearchFragment extends BaseBottomFragment implements BaseAdapter.OnItemClickListener {
 
     private SearchContract.Presenter viewModel;
     private Toolbar toolbar;
@@ -70,13 +71,16 @@ public class SearchFragment extends BaseBottomFragment implements AdapterView.On
         viewModel.observeSearchSongList(getActivity(), new Observer<ArrayList<Item>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Item> items) {
-                MListAdapter adapter1 = new MListAdapter(getContext());
-                adapter1.setItemData(items);
-                setAdapter(adapter1);
-                searchList = items;
+                MListAdapter adapter1 = (MListAdapter) getAdapter();
+                if (adapter1 != null) {
+                    adapter1.setmData(items);
+                    setAdapter(adapter1);
+                    searchList = items;
+                }
+
             }
         });
-
+        setAdapter(new MListAdapter(getContext()));
         setOnItemClickListener(this);
 
         toolbar = getToolbar();
@@ -90,9 +94,42 @@ public class SearchFragment extends BaseBottomFragment implements AdapterView.On
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
-
+        addSearchView(v);
         return v;
     }
+
+    private void addSearchView(final View view) {
+        searchView = new SearchView(getContext());
+        searchView.setIconified(false);
+        searchView.onActionViewExpanded();
+        searchView.setQueryHint("请输入关键词搜索");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                SearchBean bean = new SearchBean();
+                bean.setKey(query);
+                bean.setSearchType(searchSource);
+                viewModel.searchSong(bean);
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                // 隐藏软键盘
+                imm.hideSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                searchView.clearFocus();
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        Toolbar.LayoutParams layoutParams = new Toolbar.LayoutParams(Util.dip2px(getContext(), 250), ViewGroup.LayoutParams.MATCH_PARENT);
+        searchView.setLayoutParams(layoutParams);
+        toolbar.addView(searchView);
+        view.invalidate();
+    }
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -110,8 +147,9 @@ public class SearchFragment extends BaseBottomFragment implements AdapterView.On
         return fragment;
     }
 
+
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onItemClick(View view, int position) {
         if (searchSongList == null) {
             searchSongList = new SongList();
             searchSongList.setTitle(Constant.SEARCH_SONG_LIST);
@@ -146,32 +184,11 @@ public class SearchFragment extends BaseBottomFragment implements AdapterView.On
         menu.clear();
         inflater.inflate(R.menu.base_menu, menu);
 
-        searchView = (SearchView) menu.getItem(0).getActionView();
-        searchView.setIconified(false);
-        searchView.onActionViewExpanded();
-        searchView.setQueryHint("请输入关键词搜索");
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                SearchBean bean = new SearchBean();
-                bean.setKey(query);
-                bean.setSearchType(searchSource);
-                viewModel.searchSong(bean);
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                // 隐藏软键盘
-                imm.hideSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), 0);
 
-                return true;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
 
 
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

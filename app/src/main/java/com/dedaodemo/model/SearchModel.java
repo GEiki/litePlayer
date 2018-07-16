@@ -65,7 +65,7 @@ public class SearchModel implements SearchContract.Model {
                                     Item item = new Item();
                                     item.setTitle(song.getString("title"));
                                     item.setAuthor(song.getString("author"));
-                                    item.setURL(song.getString("url"));
+                                    item.setPath(song.getString("url"));
                                     item.setLrc(song.getString("lrc"));
                                     item.setPic(song.getString("pic"));
                                     item.setType(Item.INTERNET_MUSIC);

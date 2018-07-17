@@ -71,4 +71,13 @@ public class Constant {
     //播放错误
     public static final String PLAY_ERROR = "play_error";
 
+    /**
+     * 通知栏广播action
+     */
+    public static final String ACTION_N_PRE = "com.dedaodemo.action.pre";
+    public static final String ACTION_N_PLAY = "com.dedaodemo.action.play";
+    public static final String ACTION_N_NEXT = "com.dedaodemo.action.next";
+    public static final String ACTION_N_PAUSE = "com.dedaodemo.action.pause";
+    public static final String ACTION_N_CLOSE = "com.dedaodemo.action.close";
+
 }

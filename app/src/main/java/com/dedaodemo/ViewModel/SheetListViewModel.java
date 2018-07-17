@@ -78,8 +78,6 @@ public class SheetListViewModel extends BaseViewModel implements LifecycleObserv
         SongManager.getInstance().setSheetList(sheetList);
         songListsLiveData.postValue(sheetList);
         SongManager.getInstance().init();
-        updateCurrentSongList(SongManager.getInstance().getCurrentSongList());
-        updateCurrentSong(SongManager.getInstance().getCurrentSong());
     }
 
     @Override

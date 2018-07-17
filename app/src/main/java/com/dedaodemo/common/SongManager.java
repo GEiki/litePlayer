@@ -1,5 +1,8 @@
 package com.dedaodemo.common;
 
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -38,6 +41,11 @@ public class SongManager {
     private static boolean isPlaying = false;
     private Context context = MyApplication.getMyApplicationContext();
     private OnPlayListener onPlayListener;
+
+    private MutableLiveData<SongList> curSongListLiveData = new MutableLiveData<>();
+    private MutableLiveData<Item> curSongLiveData = new MutableLiveData<>();
+    private MutableLiveData<Boolean> playStateLiveData = new MutableLiveData<>();
+    private MutableLiveData<String> playModeLiveData = new MutableLiveData<>();
 
     private SongManager() {
     }
@@ -82,6 +90,7 @@ public class SongManager {
             for (Item item : currentSongList.getSongList()) {
                 if (item.getTitle().equals(songName)) {
                     currentSong = item;
+                    curSongLiveData.postValue(currentSong);
                     break;
                 }
             }
@@ -91,28 +100,35 @@ public class SongManager {
         for (SongList songList : sheetList) {
             if (songList.getTitle().equals(songListName)) {
                 currentSongList = songList;
+                curSongListLiveData.postValue(currentSongList);
                 break;
             }
         }
         if (currentSongList == null) {
             currentSongList = new SongList();
             currentSongList.setTitle("全部歌曲");
+            curSongListLiveData.postValue(currentSongList);
         }
 
         Item defaultItem = new Item();
         defaultItem.setTitle("没有歌曲");
         currentSong = defaultItem;
+        curSongLiveData.postValue(currentSong);
         if (currentSongList.getSongList().size() != 0) {
             for (Item item : currentSongList.getSongList()) {
                 if (item.getTitle().equals(songName)) {
                     currentSong = item;
+                    curSongLiveData.postValue(currentSong);
                     break;
                 }
             }
         }
 
-        if (currentSong == null)
+        if (currentSong == null) {
             currentSong = defaultItem;
+            curSongLiveData.postValue(currentSong);
+        }
+
     }
 
     public void savePlayState() {
@@ -142,8 +158,11 @@ public class SongManager {
             return;
         }
         isPlaying = true;
+        playStateLiveData.postValue(isPlaying());
         currentSongList = songList;
         currentSong = item;
+        curSongLiveData.postValue(currentSong);
+        curSongListLiveData.postValue(currentSongList);
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constant.CURRENT_SONGLIST, currentSongList);
         bundle.putSerializable(Constant.CURRENT_SONG, currentSong);
@@ -152,6 +171,7 @@ public class SongManager {
 
     public void pause() {
         isPlaying = false;
+        playStateLiveData.postValue(isPlaying());
         Bundle bundle = new Bundle();
         MusicServiceManager.getInstance().sendMessage(bundle, Constant.ACTION_PAUSE);
     }
@@ -159,6 +179,7 @@ public class SongManager {
     public void rePlay(OnPlayListener onPlayListener) {
         this.onPlayListener = onPlayListener;
         isPlaying = true;
+        playStateLiveData.postValue(isPlaying());
         Bundle bundle = new Bundle();
         MusicServiceManager.getInstance().sendMessage(bundle, Constant.ACTION_RE_PLAY);
     }
@@ -172,6 +193,8 @@ public class SongManager {
         if (index == items.size() - 1)
             return false;
         currentSong = items.get(index + 1);
+        curSongLiveData.postValue(currentSong);
+        onPlayListener = null;
         play(currentSongList, currentSong);
         return true;
     }
@@ -180,15 +203,18 @@ public class SongManager {
      * 根据播放模式切换下一首歌曲
      */
     public void nextAccordingToMode() {
+        onPlayListener = null;
         if (playMode == Constant.ORDER) {
             next();
         } else if (playMode == Constant.RANDOM) {
             int index = (int) (Math.random() * (currentSongList.getSize() - 1));
             currentSong = currentSongList.getSongList().get(index);
+            curSongLiveData.postValue(currentSong);
             play(currentSongList, currentSong);
         } else if (playMode == Constant.LIST_RECYCLE) {
             if (!next()) {
                 currentSong = currentSongList.getSongList().get(0);
+                curSongLiveData.postValue(currentSong);
                 play(currentSongList, currentSong);
             }
         } else if (playMode == Constant.SINGLE_RECYCLE) {
@@ -204,12 +230,15 @@ public class SongManager {
         if (index == 0)
             return false;
         currentSong = items.get(index - 1);
+        curSongLiveData.postValue(currentSong);
+        onPlayListener = null;
         play(currentSongList, currentSong);
         return true;
     }
 
     public void changePlayMode(String mode) {
         playMode = mode;
+        playStateLiveData.postValue(isPlaying());
     }
 
     public String getPlayMode() {
@@ -296,5 +325,30 @@ public class SongManager {
         }
         cur.close();
         currentSongList = songList;
+        curSongListLiveData.postValue(currentSongList);
+    }
+
+    public void observeCurrentSong(LifecycleOwner owner, Observer<Item> observer) {
+        curSongLiveData.observe(owner, observer);
+    }
+
+    public void observeCurrentSongList(LifecycleOwner owner, Observer<SongList> observer) {
+        curSongListLiveData.observe(owner, observer);
+    }
+
+
+    public void observePlayState(LifecycleOwner owner, Observer<Boolean> observer) {
+        playStateLiveData.observe(owner, observer);
+    }
+
+    public void observePlayMode(LifecycleOwner owner, Observer<String> observer) {
+        playModeLiveData.observe(owner, observer);
+    }
+
+    public void notifyChange() {
+        curSongListLiveData.postValue(currentSongList);
+        curSongLiveData.postValue(currentSong);
+        playStateLiveData.postValue(isPlaying);
+        playModeLiveData.postValue(playMode);
     }
 }

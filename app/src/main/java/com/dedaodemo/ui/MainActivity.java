@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity
         launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
         sharedPreferences.edit().putInt(LAUNCH_FLAG, launch_flags + 1).commit();
 
-        //初次启动加载数据库
+        //初次启动初始化数据库
         if (launch_flags == FIRST_LAUNCH_FLAG) {
             MyDatabaseHelper helper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
             SQLiteDatabase db = helper.getWritableDatabase();

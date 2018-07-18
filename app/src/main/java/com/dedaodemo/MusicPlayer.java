@@ -138,6 +138,8 @@ public class MusicPlayer {
         mPlayer.seekTo(x);
     }
     public int getCurrentPosition(){
+        if (mPlayer == null)
+            return 0;
         return mPlayer.getCurrentPosition();
     }
     public void release(){

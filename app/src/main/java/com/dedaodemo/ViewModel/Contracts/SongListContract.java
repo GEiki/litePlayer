@@ -14,13 +14,15 @@ import java.util.ArrayList;
 
 public class SongListContract {
     public interface Presenter {
-        public void addSong(ArrayList<Item> items);
+        public void addSong(ArrayList<Item> items, SongList songList);
 
         public void removeSong(ArrayList<Item> items);
 
         public void setSongList(SongList songList);
 
         public void observeSongList(LifecycleOwner owner, Observer<SongList> observer);
+
+        public void removeObserveSongList(Observer<SongList> observer);
     }
 
     public interface ViewModel {

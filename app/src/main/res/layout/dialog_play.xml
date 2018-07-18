@@ -9,10 +9,10 @@
     <LinearLayout
         android:id="@+id/ll_title"
         android:layout_width="match_parent"
+        android:layout_margin="8dp"
         android:layout_height="65dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
         android:orientation="vertical"
         android:text="tv_title">
 

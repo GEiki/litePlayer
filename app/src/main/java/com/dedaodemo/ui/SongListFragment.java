@@ -6,9 +6,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.TransitionInflater;
 import android.util.Log;
@@ -25,12 +28,18 @@ import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.ViewModel.SongListViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
+import com.dedaodemo.adapter.ChooseSheetAdapter;
 import com.dedaodemo.adapter.MListAdapter;
+import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.common.SongManager;
+import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
+import java.util.ArrayList;
 
-public class SongListFragment extends BaseBottomFragment implements View.OnClickListener, BaseAdapter.OnItemClickListener {
+
+public class SongListFragment extends BaseBottomFragment implements View.OnClickListener, BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
 
     public static String TAG_SONG_LIST_FRAGMENT = "SongListFragment";
     public static final String ARG_SONG_LIST = "songList";
@@ -39,7 +48,10 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
     private Toolbar toolbar;
     AlertDialog loadingDialog;
+    BottomSheetDialog bottomSheetDialog;
     private SongListContract.Presenter viewModel;
+    private int preSize = 0;
+    private Observer<SongList> songListObserver;
 
 
     public SongListFragment() {
@@ -57,10 +69,12 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
-        viewModel = ViewModelProviders.of((AppCompatActivity) getActivity()).get(SongListViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(SongListViewModel.class);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
             songList = (SongList) bundle.getSerializable(ARG_SONG_LIST);
+            preSize = songList.getSize();
+            viewModel.setSongList(songList);
         }
         super.onCreate(savedInstanceState);
     }
@@ -89,19 +103,31 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
         View dialogView=LayoutInflater.from(getActivity()).inflate(R.layout.dialog_loading,null);
         loadingDialog=ab.setView(dialogView).create();
-
-        viewModel.observeSongList(getActivity(), new Observer<SongList>() {
-            @Override
-            public void onChanged(@Nullable SongList songList) {
-                MListAdapter mListAdapter = (MListAdapter) getAdapter();
-                mListAdapter.setmData(songList.getSongList());
-                setAdapter(mListAdapter);
-            }
-        });
         MListAdapter mListAdapter = new MListAdapter(getContext());
         mListAdapter.setmData(songList.getSongList());
         setAdapter(mListAdapter);
+        songListObserver = new Observer<SongList>() {
+            @Override
+            public void onChanged(@Nullable SongList mSongList) {
+                if (songList.getTitle().equals(mSongList.getTitle()) && mSongList.getSize() < preSize) {
+                    MListAdapter mListAdapter = (MListAdapter) getAdapter();
+                    mListAdapter.setmData(songList.getSongList());
+                    preSize = mSongList.getSize();
+                    setAdapter(mListAdapter);
+                    ToastUtil.showShort(getActivity(), "移除歌曲成功");
+                } else if (songList.getTitle().equals(mSongList.getTitle()) && mSongList.getSize() == preSize) {
+                    //do nothing
+                } else {
+                    ToastUtil.showShort(getActivity(), "添加成功");
+                }
+
+            }
+        };
+        viewModel.observeSongList(getActivity(), songListObserver);
+
         setOnItemClickListener(this);
+        MListAdapter adapter = (MListAdapter) getAdapter();
+        adapter.setOnItemAddClickListener(this);
         return v;
     }
 
@@ -195,9 +221,55 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
     }
 
+    @Override
+    public void onMenuItemClick(MenuItem item, int position) {
+        switch (item.getItemId()) {
+            case R.id.action_add_song: {
+                Item song = (Item) getAdapter().getmData().get(position);
+                showChooseSongListDialog(song);
+                break;
+            }
+            case R.id.action_remove: {
+                Item song = (Item) getAdapter().getmData().get(position);
+                ArrayList<Item> items = new ArrayList<>();
+                items.add(song);
+                viewModel.removeSong(items);
+                break;
+            }
+            default:
+                break;
+        }
+    }
 
+    private void showChooseSongListDialog(final Item item) {
+        if (bottomSheetDialog != null) {
+            bottomSheetDialog.show();
+            return;
+        }
+        bottomSheetDialog = new BottomSheetDialog(getContext());
+        RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
+        view.setLayoutManager(new LinearLayoutManager(getContext()));
+        final ChooseSheetAdapter adapter = new ChooseSheetAdapter(getContext());
+        adapter.setmData(SongManager.getInstance().getSheetList());
+        adapter.setOnItemClickListener(new BaseAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                ArrayList<Item> items = new ArrayList<Item>();
+                items.add(item);
+                viewModel.addSong(items, adapter.getmData().get(position));
+                if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+                    bottomSheetDialog.dismiss();
+                }
+            }
+        });
+        view.setAdapter(adapter);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
+    }
 
-
-
-
+    @Override
+    public void onDestroyView() {
+        viewModel.removeObserveSongList(songListObserver);
+        super.onDestroyView();
+    }
 }

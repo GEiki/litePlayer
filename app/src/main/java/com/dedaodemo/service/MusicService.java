@@ -235,7 +235,12 @@ public class MusicService extends Service {
         return isPasusing;
     }
     public long getDuration(){
-        return mp.getDuration();
+        if (mp != null) {
+            return mp.getDuration();
+        } else {
+            return 0;
+        }
+
     }
     public void seekTo(int misc){
         mp.seekTo(misc);
@@ -244,7 +249,11 @@ public class MusicService extends Service {
         return mp.isPrepared();
     }
     public int getCurrentPosition(){
-        return mp.getCurrentPosition();
+        if (mp != null) {
+            return mp.getCurrentPosition();
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -283,7 +292,6 @@ public class MusicService extends Service {
             PendingIntent pppIntent = PendingIntent.getBroadcast(this, 0, ppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             ppAction = new Notification.Action(R.drawable.ic_action_play, "播放", pppIntent);
         }
-
 
         Intent nextIntent = new Intent();
         nextIntent.setAction(Constant.ACTION_N_NEXT);

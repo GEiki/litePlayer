@@ -24,12 +24,12 @@ public class SongListViewModel extends BaseViewModel implements SongListContract
 
     @Override
     public void setSongList(SongList songList) {
-        songListLiveData.postValue(songList);
+        songListLiveData.setValue(songList);
     }
 
     @Override
-    public void addSong(ArrayList<Item> items) {
-        model.addSongToSongList(songListLiveData.getValue(), items);
+    public void addSong(ArrayList<Item> items, SongList songList) {
+        model.addSongToSongList(songList, items);
     }
 
     @Override
@@ -61,5 +61,10 @@ public class SongListViewModel extends BaseViewModel implements SongListContract
     @Override
     public void observeSongList(LifecycleOwner owner, Observer<SongList> observer) {
         songListLiveData.observe(owner, observer);
+    }
+
+    @Override
+    public void removeObserveSongList(Observer<SongList> observer) {
+        songListLiveData.removeObserver(observer);
     }
 }

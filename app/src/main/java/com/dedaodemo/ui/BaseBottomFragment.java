@@ -7,15 +7,12 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,12 +31,14 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.SongManager;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * 包含bottomPlaybar的fragment
  */
 public abstract class BaseBottomFragment extends Fragment {
 
-    private static final int ANIMATE_DURATION = 400;
     public static final String BASE_BACK_STACK = "base_back_stack";
 
     private RecyclerView recyclerView;
@@ -47,7 +46,6 @@ public abstract class BaseBottomFragment extends Fragment {
     private Toolbar toolbar;
     private BaseAdapter adapter;
 
-    private ConstraintLayout bottom_layout_expand;
     private RelativeLayout bottom_play_bar;
     private TextView iv_circle;
     private ImageView iv_play;
@@ -61,43 +59,23 @@ public abstract class BaseBottomFragment extends Fragment {
     public ImageButton btn_play_expand;
     public ImageButton btn_pause_expand;
     private ImageButton btn_next_expand;
-    private ImageButton btn_pre_expand;
     private SeekBar seekBar;
-    BottomSheetBehavior bottomSheetBehavior;
     private View.OnClickListener onClickListener;
-    private boolean isHidding = true;
     private BaseContract.Presenter baseViewModel;
     private Handler handler = new Handler();
-    private boolean progress_flag = true;
-    private boolean isThreadDown = true;
-
-    private Thread progressThread = new Thread(new Runnable() {
+    private Timer timer = new Timer(true);
+    private TimerTask progressTask = new TimerTask() {
         @Override
         public void run() {
-            isThreadDown = false;
-            while (SongManager.getInstance().isPlaying() && progress_flag && !Thread.interrupted()) {
                 baseViewModel.requestProgress(new SongManager.IProgressCallback() {
                     @Override
                     public void onResponse(int position, long duration) {
-                        int progress = (int) (100 * (position / duration));
-                        seekBar.setProgress(progress);
-                        Log.i("Positon", String.valueOf(position));
-                        Log.i("Progress", String.valueOf(progress));
-                        progress_flag = true;
+                        seekBar.setMax((int) duration);
+                        seekBar.setProgress(position);
                     }
                 });
-                //callback未被回调的时候不再发起请求
-                progress_flag = false;
-                try {
-                    Thread.sleep(1000);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (Thread.interrupted())
-                    isThreadDown = true;
-            }
         }
-    });
+    };
 
 
     public BaseBottomFragment() {
@@ -132,6 +110,8 @@ public abstract class BaseBottomFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         initBottomPlayBar(view);
+        //开始监听进度
+        timer.schedule(progressTask, 1500, 1500);
         initPlayDialog();
         observeLiveData();
 
@@ -192,7 +172,7 @@ public abstract class BaseBottomFragment extends Fragment {
 
     /**
      * speacialFlag返回true时被调用,用于需要在该baseBottomFragment外嵌套其他布局的情况
-     * 不需要时speacialFlag默认返回false且getBaseBottomBarView方法不需要实现
+     * 不需要时让specialFlag默认返回false且getBaseBottomBarView方法不需要实现
      */
     protected abstract View getBaseBottomBarView();
 
@@ -215,7 +195,10 @@ public abstract class BaseBottomFragment extends Fragment {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                baseViewModel.seekTo(progress);
+                if (fromUser) {
+                    baseViewModel.seekTo(progress);
+                }
+
             }
 
             @Override
@@ -229,6 +212,8 @@ public abstract class BaseBottomFragment extends Fragment {
             }
         });
         bottomSheetDialog.setContentView(view);
+
+
     }
 
     /**
@@ -249,14 +234,11 @@ public abstract class BaseBottomFragment extends Fragment {
         btn_play_expand.setOnClickListener(onClickListener);
         btn_next_expand = v.findViewById(R.id.btn_next_expand);
         btn_next_expand.setOnClickListener(onClickListener);
-//        btn_pre_expand = v.findViewById(R.id.btn_pre_expand);
-//        btn_pre_expand.setOnClickListener(onClickListener);
 
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 bottomSheetDialog.show();
-
 
             }
         });
@@ -337,9 +319,6 @@ public abstract class BaseBottomFragment extends Fragment {
                         iv_play.setVisibility(View.GONE);
                         iv_pause.setVisibility(View.VISIBLE);
                         baseViewModel.rePlay();
-                        if (isThreadDown) {
-                            progressThread.start();
-                        }
 
                         break;
                     }
@@ -359,9 +338,6 @@ public abstract class BaseBottomFragment extends Fragment {
                         btn_play_expand.setVisibility(View.GONE);
                             btn_pause_expand.setVisibility(View.VISIBLE);
                         baseViewModel.rePlay();
-                        if (isThreadDown) {
-                            progressThread.start();
-                        }
                         break;
                     }
                     case R.id.iv_next: {
@@ -410,8 +386,8 @@ public abstract class BaseBottomFragment extends Fragment {
     }
 
     @Override
-    public void onStop() {
-        progressThread.interrupt();
-        super.onStop();
+    public void onDestroyView() {
+        timer.cancel();
+        super.onDestroyView();
     }
 }

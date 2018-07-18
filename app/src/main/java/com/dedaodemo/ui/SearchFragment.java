@@ -6,8 +6,11 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,18 +27,20 @@ import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
 import com.dedaodemo.ViewModel.SearchViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
+import com.dedaodemo.adapter.ChooseSheetAdapter;
 import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
+import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
 
 
-public class SearchFragment extends BaseBottomFragment implements BaseAdapter.OnItemClickListener {
+public class SearchFragment extends BaseBottomFragment implements BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
 
     private SearchContract.Presenter viewModel;
     private Toolbar toolbar;
@@ -44,9 +49,10 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
 
     public static final String TAG = "SEARCH_FRAGMENT";
 
-    private String searchSource = Constant.TYPE_QQ;
+    private String searchSource = Constant.TYPE_WY;
     private ArrayList<Item> searchList;
     private SongList searchSongList;
+    private BottomSheetDialog bottomSheetDialog;
 
 
     public SearchFragment() {
@@ -80,7 +86,10 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
 
             }
         });
-        setAdapter(new MListAdapter(getContext()));
+        MListAdapter mListAdapter = new MListAdapter(getContext());
+        mListAdapter.setMenuId(R.menu.search_menu);
+        mListAdapter.setOnItemAddClickListener(this);
+        setAdapter(mListAdapter);
         setOnItemClickListener(this);
 
         toolbar = getToolbar();
@@ -102,7 +111,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         searchView = new SearchView(getContext());
         searchView.setIconified(false);
         searchView.onActionViewExpanded();
-        searchView.setQueryHint("请输入关键词搜索");
+        searchView.setQueryHint("当前搜索源为网易云");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -199,16 +208,19 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
             }
             case R.id.action_tx: {
                 searchSource = Constant.TYPE_QQ;
+                searchView.setQueryHint("当前搜索源为QQ音乐");
                 ToastUtil.showShort(getContext(), "搜索源变更为QQ音乐");
                 break;
             }
             case R.id.action_kg: {
                 searchSource = Constant.TYPE_KG;
+                searchView.setQueryHint("当前搜索源为酷狗");
                 ToastUtil.showShort(getContext(), "搜索源变更为酷狗音乐");
                 break;
             }
             case R.id.action_wy: {
                 searchSource = Constant.TYPE_WY;
+                searchView.setQueryHint("当前搜索源为网易云");
                 ToastUtil.showShort(getContext(), "搜索源变更为网易云音乐");
                 break;
             }
@@ -216,5 +228,41 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
                 break;
         }
         return true;
+    }
+
+    @Override
+    public void onMenuItemClick(MenuItem item, int position) {
+        switch (item.getItemId()) {
+            case R.id.action_add_song: {
+                showChooseSongListDialog((Item) getAdapter().getmData().get(position));
+                break;
+            }
+            default:
+                break;
+        }
+    }
+
+    private void showChooseSongListDialog(final Item item) {
+        if (bottomSheetDialog != null) {
+            bottomSheetDialog.show();
+            return;
+        }
+        bottomSheetDialog = new BottomSheetDialog(getContext());
+        RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
+        view.setLayoutManager(new LinearLayoutManager(getContext()));
+        final ChooseSheetAdapter adapter = new ChooseSheetAdapter(getContext());
+        adapter.setmData(SongManager.getInstance().getSheetList());
+        adapter.setOnItemClickListener(new BaseAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                viewModel.addSong(adapter.getmData().get(position), item);
+                if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+                    bottomSheetDialog.dismiss();
+                }
+            }
+        });
+        view.setAdapter(adapter);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.show();
     }
 }

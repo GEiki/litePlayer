@@ -105,6 +105,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         loadingDialog=ab.setView(dialogView).create();
         MListAdapter mListAdapter = new MListAdapter(getContext());
         mListAdapter.setmData(songList.getSongList());
+        mListAdapter.setMenuId(R.menu.song_menu);
         setAdapter(mListAdapter);
         songListObserver = new Observer<SongList>() {
             @Override
@@ -169,7 +170,6 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     @Override
     protected void play(int pos) {
         ((BaseViewModel) viewModel).playSong(songList, songList.getSongList().get(pos));
-
     }
 
     @Override

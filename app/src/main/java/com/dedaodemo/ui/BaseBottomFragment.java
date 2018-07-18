@@ -30,6 +30,7 @@ import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.SongManager;
+import com.dedaodemo.util.ToastUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -247,12 +248,13 @@ public abstract class BaseBottomFragment extends Fragment {
 
     }
 
-    public void hideBottomBar() {
-        bottom_play_bar.setVisibility(View.GONE);
-    }
-
-    public void showBottomBar() {
-        bottom_play_bar.setVisibility(View.VISIBLE);
+    /**
+     * 停止进度条监听
+     */
+    public void stopProgressListen() {
+        if (timer != null) {
+            timer.cancel();
+        }
     }
 
 
@@ -306,6 +308,14 @@ public abstract class BaseBottomFragment extends Fragment {
                     btn_pause_expand.setVisibility(View.GONE);
                 }
                 //播放状态变化
+            }
+        });
+        baseViewModel.observeErrorState(getActivity(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(@Nullable Boolean errorFlags) {
+                if (errorFlags) {
+                    ToastUtil.showShort(getActivity(), "出了点错误，请重试或换一首歌曲");
+                }
             }
         });
     }
@@ -388,6 +398,7 @@ public abstract class BaseBottomFragment extends Fragment {
     @Override
     public void onDestroyView() {
         timer.cancel();
+        baseViewModel.removeObserves(getActivity());
         super.onDestroyView();
     }
 }

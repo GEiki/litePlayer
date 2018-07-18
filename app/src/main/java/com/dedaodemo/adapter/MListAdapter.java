@@ -8,7 +8,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
@@ -27,6 +26,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
     }
 
     private OnMenuItemOnClickListener onMenuItemOnClickListener;
+    private int menuId;
 
     public MListAdapter(Context mContext) {
         setmContext(mContext);
@@ -41,12 +41,21 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
         this.onMenuItemOnClickListener = onItemAddClickListener;
     }
 
+    public int getMenuId() {
+        return menuId;
+    }
+
+    public void setMenuId(int menuId) {
+        this.menuId = menuId;
+    }
+
     @Override
     public MViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(getmContext()).inflate(R.layout.misc_item, parent, false);
         MViewHolder mViewHolder = new MViewHolder(view);
         return mViewHolder;
     }
+
 
     @Override
     public void onBindViewHolder(MViewHolder holder, final int position) {
@@ -65,7 +74,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(getmContext(), v);
                 MenuInflater inflater = popupMenu.getMenuInflater();
-                inflater.inflate(R.menu.song_menu, popupMenu.getMenu());
+                inflater.inflate(menuId, popupMenu.getMenu());
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
@@ -96,14 +105,14 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
     public class MViewHolder extends RecyclerView.ViewHolder {
         TextView tv_title;
         TextView tv_artist;
-        LinearLayout layout;
+        View layout;
         ImageView iv_add;
 
         public MViewHolder(View itemView) {
             super(itemView);
             tv_artist = itemView.findViewById(R.id.tv_artist);
             tv_title = itemView.findViewById(R.id.tv_title);
-            layout = itemView.findViewById(R.id.ll_item);
+            layout = itemView;
             iv_add = itemView.findViewById(R.id.iv_add);
         }
     }

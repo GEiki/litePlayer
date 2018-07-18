@@ -51,6 +51,8 @@ public class Constant {
     public static final int ACTION_SEEK_TO = 8;
     //初始化
     public static final int ACTION_INIT = 9;
+    //出错
+    public static final int ACTION_ERROR = 10;
 
 
     /**

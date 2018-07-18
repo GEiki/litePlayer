@@ -39,5 +39,10 @@ public class BaseContract {
         public void observePlayState(LifecycleOwner owner, Observer<Boolean> observer);
 
         public void observePlayMode(LifecycleOwner owner, Observer<String> observer);
+
+        public void observeErrorState(LifecycleOwner owner, Observer<Boolean> observer);
+
+        public void removeObserves(LifecycleOwner owner);
+
     }
 }

@@ -209,8 +209,15 @@ public class MusicService extends Service {
         mp.setOnErrorListener(new MediaPlayer.OnErrorListener() {
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra) {
-                Log.e("MediaPlayer", "错误码：" + String.valueOf(what));
-                mp.release();
+                try {
+                    Log.e("MediaPlayer", "错误码：" + String.valueOf(what));
+                    Message msg = new Message();
+                    msg.arg1 = Constant.ACTION_ERROR;
+                    replyMessenger.send(msg);
+                    mp.release();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 return true;
             }
         });
@@ -235,7 +242,7 @@ public class MusicService extends Service {
         return isPasusing;
     }
     public long getDuration(){
-        if (mp != null) {
+        if (mp != null && isPrepared()) {
             return mp.getDuration();
         } else {
             return 0;
@@ -243,13 +250,14 @@ public class MusicService extends Service {
 
     }
     public void seekTo(int misc){
-        mp.seekTo(misc);
+        if (mp != null && isPrepared())
+            mp.seekTo(misc);
     }
     public boolean isPrepared(){
         return mp.isPrepared();
     }
     public int getCurrentPosition(){
-        if (mp != null) {
+        if (mp != null && isPrepared()) {
             return mp.getCurrentPosition();
         } else {
             return 0;

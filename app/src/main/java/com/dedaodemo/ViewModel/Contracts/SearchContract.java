@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
+import com.dedaodemo.bean.SongList;
 
 import java.util.ArrayList;
 
@@ -18,6 +19,7 @@ public class SearchContract {
     public interface Presenter {
         public void searchSong(SearchBean bean);
 
+        public void addSong(SongList songList, Item item);
         public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer);
     }
 
@@ -29,5 +31,9 @@ public class SearchContract {
 
     public interface Model {
         public void searchSongOnline(SearchBean bean);
+
+        public void saveStateFromSearch(SongList songList);
+
+        public SongList loadStateFromSearch();
     }
 }

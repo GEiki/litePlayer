@@ -3,6 +3,7 @@ package com.dedaodemo.ViewModel;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModel;
@@ -18,12 +19,19 @@ import com.dedaodemo.common.SongManager;
 
 public class BaseViewModel extends ViewModel implements BaseContract.Presenter, LifecycleObserver {
 
+    private MutableLiveData<Boolean> errorFlags = new MutableLiveData<>();
+
+
     @Override
     public void playSong(final SongList songList, final Item item) {
         SongManager.getInstance().play(songList, item, new SongManager.OnPlayListener() {
             @Override
             public void onPlay() {
+            }
 
+            @Override
+            public void onError() {
+                errorFlags.postValue(true);
             }
         });
 
@@ -78,6 +86,11 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
             @Override
             public void onPlay() {
             }
+
+            @Override
+            public void onError() {
+                errorFlags.postValue(true);
+            }
         });
 
     }
@@ -92,21 +105,35 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void observeCurrentSong(LifecycleOwner owner, Observer<Item> observer) {
-        SongManager.getInstance().observeCurrentSong(owner, observer);
+        SongManager.getInstance().getCurSongLiveData().observe(owner, observer);
     }
 
     @Override
     public void observeCurrentSongList(LifecycleOwner owner, Observer<SongList> observer) {
-        SongManager.getInstance().observeCurrentSongList(owner, observer);
+        SongManager.getInstance().getCurSongListLiveData().observe(owner, observer);
     }
 
     @Override
     public void observePlayState(LifecycleOwner owner, Observer<Boolean> observer) {
-        SongManager.getInstance().observePlayState(owner, observer);
+        SongManager.getInstance().getPlayStateLiveData().observe(owner, observer);
     }
 
     @Override
     public void observePlayMode(LifecycleOwner owner, Observer<String> observer) {
-        SongManager.getInstance().observePlayMode(owner, observer);
+        SongManager.getInstance().getPlayModeLiveData().observe(owner, observer);
+    }
+
+    @Override
+    public void observeErrorState(LifecycleOwner owner, Observer<Boolean> observer) {
+        errorFlags.observe(owner, observer);
+    }
+
+    @Override
+    public void removeObserves(LifecycleOwner owner) {
+        SongManager.getInstance().getCurSongLiveData().removeObservers(owner);
+        SongManager.getInstance().getCurSongListLiveData().removeObservers(owner);
+        SongManager.getInstance().getPlayStateLiveData().removeObservers(owner);
+        SongManager.getInstance().getPlayModeLiveData().removeObservers(owner);
+        errorFlags.removeObservers(owner);
     }
 }

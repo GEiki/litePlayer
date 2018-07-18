@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
+    android:background="@drawable/btn_background"
     android:layout_height="58dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -14,7 +15,6 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="28dp"
-
             android:paddingTop="6dp"
             android:textSize="16dp"
             android:paddingLeft="10dp"

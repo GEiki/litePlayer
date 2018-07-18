@@ -29,6 +29,10 @@ public class MusicPlayer {
     private OnChangeListener listener;
     private ArrayList<Item> list;
     private boolean isPrepared;
+    /**
+     * 在线音乐标志
+     */
+    private boolean INTERNET_MUSIC_FLAG = false;
 
     private MusicPlayer(Context context){
         mPlayer = null;
@@ -59,6 +63,7 @@ public class MusicPlayer {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mp.start();
+                    isPrepared = true;
                     listener.onPlay();
                 }
             });
@@ -75,13 +80,14 @@ public class MusicPlayer {
             if (tmp.getType() == Item.INTERNET_MUSIC) {//读取在线音乐
                 path = MyApplication.getProxyServer().getProxyUrl(path);//请求重定向至代理服务器
                 mPlayer.setDataSource(mContext, Uri.parse(path));
+                INTERNET_MUSIC_FLAG = true;
             } else {//读取本地音乐
+                INTERNET_MUSIC_FLAG = false;
                 mPlayer.setDataSource(mContext, Uri.parse(path));
             }
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            isPrepared = false;
             mPlayer.prepareAsync();
-
-
             mPlayer.setOnPreparedListener(preparedListener);
 
             mPlayer.setOnCompletionListener(completionListener);
@@ -147,7 +153,7 @@ public class MusicPlayer {
             mPlayer.release();
     }
     public boolean isPrepared(){
-        return mPlayer == null?false:true;
+        return isPrepared;
     }
 
     public void setListener(OnChangeListener listener) {

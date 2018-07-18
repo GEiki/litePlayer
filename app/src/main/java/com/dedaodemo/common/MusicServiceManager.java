@@ -35,6 +35,10 @@ public class MusicServiceManager {
                     SongManager.getInstance().onPlay();
                     break;
                 }
+                case Constant.ACTION_ERROR: {
+                    SongManager.getInstance().onError();
+                    break;
+                }
                 default:
                     break;
             }

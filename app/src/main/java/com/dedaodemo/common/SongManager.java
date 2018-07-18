@@ -1,20 +1,15 @@
 package com.dedaodemo.common;
 
-import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Observer;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 
 import com.dedaodemo.MyApplication;
-import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.model.SearchModel;
 
 import java.util.ArrayList;
 
@@ -26,6 +21,8 @@ public class SongManager {
 
     public interface OnPlayListener {
         public void onPlay();
+
+        public void onError();
     }
 
     public interface IProgressCallback {
@@ -148,21 +145,27 @@ public class SongManager {
         }
     }
 
+    public void onError() {
+        if (onPlayListener != null) {
+            onPlayListener.onError();
+        }
+    }
+
     public void play(SongList songList, Item item, OnPlayListener playListener) {
         this.onPlayListener = playListener;
         play(songList, item);
     }
 
     public void play(SongList songList, Item item) {
+        currentSongList = songList;
+        currentSong = item;
+        curSongLiveData.postValue(currentSong);
+        curSongListLiveData.postValue(currentSongList);
         if (currentSongList.getSize() == 0) {
             return;
         }
         isPlaying = true;
         playStateLiveData.postValue(isPlaying());
-        currentSongList = songList;
-        currentSong = item;
-        curSongLiveData.postValue(currentSong);
-        curSongListLiveData.postValue(currentSongList);
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constant.CURRENT_SONGLIST, currentSongList);
         bundle.putSerializable(Constant.CURRENT_SONG, currentSong);
@@ -278,29 +281,7 @@ public class SongManager {
      * 用于存储当前播放的搜索列表
      */
     public void saveSearchListSongList(SongList songList) {
-        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
-        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
-
-        String sql = "drop table " + songList.getTableName();
-        db.execSQL(sql);
-        String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(title))";
-        db.execSQL(string);
-        ArrayList<Item> items = songList.getSongList();
-        for (Item item : items) {
-            if (!songList.containItem(item)) {
-                songList.addSong(item);
-                ContentValues cv = new ContentValues();
-                cv.put("id", item.getId());
-                cv.put("title", item.getTitle());
-                cv.put("author", item.getAuthor());
-                cv.put("time", item.getTime());
-                cv.put("path", item.getPath());
-                cv.put("size", item.getSize());
-                cv.put("type", item.getType());
-                db.insertOrThrow(songList.getTableName(), null, cv);
-            }
-        }
-        db.close();
+        new SearchModel(null).saveStateFromSearch(songList);
     }
 
     /**
@@ -308,41 +289,25 @@ public class SongManager {
      */
 
     public void getSearchSongListFromLocal() {
-        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
-        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
-        SongList songList = new SongList();
-        songList.setTitle(Constant.SEARCH_SONG_LIST);
-        Cursor cur = db.query(Constant.SEARCH_SONG_LIST, null, null, null, null, null, "id", null);
-        while (cur.moveToNext()) {
-            Item a = new Item();
-            a.setTitle(cur.getString(1));//title
-            a.setAuthor(cur.getString(2));//Author
-            a.setTime(cur.getString(3));//time
-            a.setPath(cur.getString(4));//path
-            a.setSize(String.valueOf(cur.getInt(5)));//size
-            a.setType(cur.getInt(6));//type
-            songList.addSong(a);
-        }
-        cur.close();
-        currentSongList = songList;
+
+        currentSongList = new SearchModel(null).loadStateFromSearch();
         curSongListLiveData.postValue(currentSongList);
     }
 
-    public void observeCurrentSong(LifecycleOwner owner, Observer<Item> observer) {
-        curSongLiveData.observe(owner, observer);
+    public MutableLiveData<SongList> getCurSongListLiveData() {
+        return curSongListLiveData;
     }
 
-    public void observeCurrentSongList(LifecycleOwner owner, Observer<SongList> observer) {
-        curSongListLiveData.observe(owner, observer);
+    public MutableLiveData<Item> getCurSongLiveData() {
+        return curSongLiveData;
     }
 
-
-    public void observePlayState(LifecycleOwner owner, Observer<Boolean> observer) {
-        playStateLiveData.observe(owner, observer);
+    public MutableLiveData<Boolean> getPlayStateLiveData() {
+        return playStateLiveData;
     }
 
-    public void observePlayMode(LifecycleOwner owner, Observer<String> observer) {
-        playModeLiveData.observe(owner, observer);
+    public MutableLiveData<String> getPlayModeLiveData() {
+        return playModeLiveData;
     }
 
     public void notifyChange() {

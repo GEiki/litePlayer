@@ -1,10 +1,16 @@
 package com.dedaodemo.model;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.dedaodemo.MyApplication;
+import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
+import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.HttpUtil;
 
@@ -55,6 +61,10 @@ public class SearchModel implements SearchContract.Model {
                 @Override
                 public void onSuccess(int statusCode, JSONObject response) {
                     try {
+                        if (viewModel == null) {
+                            Log.e("SearchModel", "viewModel can not be NULL");
+                            return;
+                        }
                         Log.i("SearchResult", response.toString());
                         if (response != null && response.toString().contains("ResultCode")) {
                             if (response.getInt("ResultCode") == 1) {
@@ -96,5 +106,54 @@ public class SearchModel implements SearchContract.Model {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void saveStateFromSearch(SongList songList) {
+        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
+        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+
+        String sql = "drop table if exists " + songList.getTableName();
+        db.execSQL(sql);
+        String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
+        db.execSQL(string);
+        ArrayList<Item> items = songList.getSongList();
+        int i = 0;
+        for (Item item : items) {
+            ContentValues cv = new ContentValues();
+            cv.put("id", i);
+            cv.put("title", item.getTitle());
+            cv.put("author", item.getAuthor());
+            cv.put("time", item.getTime());
+            cv.put("path", item.getPath());
+            cv.put("size", item.getSize());
+            cv.put("type", item.getType());
+            db.insertOrThrow(songList.getTableName(), null, cv);
+            i++;
+        }
+        db.close();
+    }
+
+    @Override
+    public SongList loadStateFromSearch() {
+        MyDatabaseHelper myDatabaseHelper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
+        SQLiteDatabase db = myDatabaseHelper.getWritableDatabase();
+        SongList songList = new SongList();
+        songList.setTitle(Constant.SEARCH_SONG_LIST);
+        Cursor cur = db.query(songList.getTableName(), null, null, null, null, null, "id", null);
+        while (cur.moveToNext()) {
+            Item a = new Item();
+            a.setTitle(cur.getString(1));//title
+            a.setAuthor(cur.getString(2));//Author
+            a.setTime(cur.getString(3));//time
+            a.setPath(cur.getString(4));//path
+            a.setSize(String.valueOf(cur.getInt(5)));//size
+            a.setType(cur.getInt(6));//type
+            songList.addSong(a);
+        }
+        cur.close();
+        db.close();
+
+        return songList;
     }
 }

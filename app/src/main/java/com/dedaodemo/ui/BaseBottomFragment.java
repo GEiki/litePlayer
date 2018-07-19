@@ -29,6 +29,7 @@ import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
 
@@ -51,6 +52,9 @@ public abstract class BaseBottomFragment extends Fragment {
     private TextView iv_circle;
     private ImageView iv_play;
     private ImageView iv_pause;
+    private ImageView iv_loop;
+    private ImageView iv_single;
+    private ImageView iv_random;
     private TextView tv_title;
     private TextView tv_aritist;
 
@@ -185,6 +189,15 @@ public abstract class BaseBottomFragment extends Fragment {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_play, null);
         view.findViewById(R.id.iv_next).setOnClickListener(onClickListener);
         view.findViewById(R.id.iv_pre).setOnClickListener(onClickListener);
+        iv_loop = view.findViewById(R.id.iv_loop)
+        ;
+        iv_loop.setOnClickListener(onClickListener);
+        iv_single = view.findViewById(R.id.iv_single)
+        ;
+        iv_single.setOnClickListener(onClickListener);
+        iv_random = view.findViewById(R.id.iv_random)
+        ;
+        iv_random.setOnClickListener(onClickListener);
         iv_pause = view.findViewById(R.id.iv_pause);
         iv_pause.setOnClickListener(onClickListener);
         iv_play = view.findViewById(R.id.iv_play);
@@ -240,7 +253,6 @@ public abstract class BaseBottomFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 bottomSheetDialog.show();
-
             }
         });
 
@@ -365,6 +377,27 @@ public abstract class BaseBottomFragment extends Fragment {
                     case R.id.iv_pre: {
                         pre();
                         seekBar.setProgress(0);
+                        break;
+                    }
+                    case R.id.iv_loop: {
+                        iv_loop.setVisibility(View.GONE);
+                        iv_single.setVisibility(View.VISIBLE);
+                        ToastUtil.showShort(getActivity(), "已切换到单曲循环");
+                        changeMode(Constant.MOED_SINGLE_RECYCLE);
+                        break;
+                    }
+                    case R.id.iv_single: {
+                        iv_single.setVisibility(View.GONE);
+                        iv_random.setVisibility(View.VISIBLE);
+                        changeMode(Constant.MODE_RANDOM);
+                        ToastUtil.showShort(getActivity(), "已切换到随机播放");
+                        break;
+                    }
+                    case R.id.iv_random: {
+                        iv_random.setVisibility(View.GONE);
+                        iv_loop.setVisibility(View.VISIBLE);
+                        changeMode(Constant.MODE_LIST_RECYCLE);
+                        ToastUtil.showShort(getActivity(), "已切换到列表循环");
                         break;
                     }
                     default:break;

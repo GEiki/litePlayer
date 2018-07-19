@@ -160,9 +160,6 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id) {
-            case R.id.action_settings: {
-                break;
-            }
             case R.id.action_search: {
                 Fragment searchFragment = SearchFragment.newInstance();
                 showFragment(searchFragment, SheetListFragment.this);

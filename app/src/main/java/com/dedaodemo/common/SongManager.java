@@ -34,7 +34,7 @@ public class SongManager {
     private static SongList currentSongList = new SongList();
     private static Item currentSong = new Item();
     private static IProgressCallback callback;
-    private static String playMode = Constant.ORDER;
+    private static String playMode = Constant.MODE_ORDER;
     private static boolean isPlaying = false;
     private Context context = MyApplication.getMyApplicationContext();
     private OnPlayListener onPlayListener;
@@ -207,20 +207,20 @@ public class SongManager {
      */
     public void nextAccordingToMode() {
         onPlayListener = null;
-        if (playMode == Constant.ORDER) {
+        if (playMode == Constant.MODE_ORDER) {
             next();
-        } else if (playMode == Constant.RANDOM) {
+        } else if (playMode == Constant.MODE_RANDOM) {
             int index = (int) (Math.random() * (currentSongList.getSize() - 1));
             currentSong = currentSongList.getSongList().get(index);
             curSongLiveData.postValue(currentSong);
             play(currentSongList, currentSong);
-        } else if (playMode == Constant.LIST_RECYCLE) {
+        } else if (playMode == Constant.MODE_LIST_RECYCLE) {
             if (!next()) {
                 currentSong = currentSongList.getSongList().get(0);
                 curSongLiveData.postValue(currentSong);
                 play(currentSongList, currentSong);
             }
-        } else if (playMode == Constant.SINGLE_RECYCLE) {
+        } else if (playMode == Constant.MOED_SINGLE_RECYCLE) {
             play(currentSongList, currentSong);
         }
     }

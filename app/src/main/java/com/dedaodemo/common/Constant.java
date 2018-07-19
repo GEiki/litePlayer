@@ -59,13 +59,13 @@ public class Constant {
      * 播放顺序
      */
     //顺序
-    public static final String ORDER = "order";
+    public static final String MODE_ORDER = "order";
     //随机
-    public static final String RANDOM = "random";
+    public static final String MODE_RANDOM = "random";
     //列表循环
-    public static final String LIST_RECYCLE = "list_recycle";
+    public static final String MODE_LIST_RECYCLE = "list_recycle";
     //单曲循环
-    public static final String SINGLE_RECYCLE = "single_recycle";
+    public static final String MOED_SINGLE_RECYCLE = "single_recycle";
 
     //搜索列表名
     public static final String SEARCH_SONG_LIST = "SeArCh";

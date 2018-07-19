@@ -216,7 +216,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         menu.clear();
-        inflater.inflate(R.menu.base_menu, menu);
+//        inflater.inflate(R.menu.base_menu, menu);
 
 
     }

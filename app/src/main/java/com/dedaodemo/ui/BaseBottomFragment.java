@@ -32,6 +32,7 @@ import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
+import com.dedaodemo.util.Util;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -55,6 +56,8 @@ public abstract class BaseBottomFragment extends Fragment {
     private ImageView iv_loop;
     private ImageView iv_single;
     private ImageView iv_random;
+    private TextView tv_duration;
+    private TextView tv_progress;
     private TextView tv_title;
     private TextView tv_aritist;
 
@@ -77,6 +80,9 @@ public abstract class BaseBottomFragment extends Fragment {
                     public void onResponse(int position, long duration) {
                         seekBar.setMax((int) duration);
                         seekBar.setProgress(position);
+                        tv_progress.setText(Util.durationToformat(position));
+                        tv_duration.setText(Util.durationToformat(duration));
+
                     }
                 });
         }
@@ -115,9 +121,9 @@ public abstract class BaseBottomFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         initBottomPlayBar(view);
-        //开始监听进度
-        timer.schedule(progressTask, 1500, 1500);
         initPlayDialog();
+        //开始监听进度
+        timer.schedule(progressTask, 1000, 1000);
         observeLiveData();
 
         return view;
@@ -189,14 +195,11 @@ public abstract class BaseBottomFragment extends Fragment {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_play, null);
         view.findViewById(R.id.iv_next).setOnClickListener(onClickListener);
         view.findViewById(R.id.iv_pre).setOnClickListener(onClickListener);
-        iv_loop = view.findViewById(R.id.iv_loop)
-        ;
+        iv_loop = view.findViewById(R.id.iv_loop);
         iv_loop.setOnClickListener(onClickListener);
-        iv_single = view.findViewById(R.id.iv_single)
-        ;
+        iv_single = view.findViewById(R.id.iv_single);
         iv_single.setOnClickListener(onClickListener);
-        iv_random = view.findViewById(R.id.iv_random)
-        ;
+        iv_random = view.findViewById(R.id.iv_random);
         iv_random.setOnClickListener(onClickListener);
         iv_pause = view.findViewById(R.id.iv_pause);
         iv_pause.setOnClickListener(onClickListener);
@@ -204,6 +207,8 @@ public abstract class BaseBottomFragment extends Fragment {
         iv_play.setOnClickListener(onClickListener);
         tv_title = view.findViewById(R.id.tv_title);
         tv_aritist = view.findViewById(R.id.tv_artist);
+        tv_duration = view.findViewById(R.id.tv_duration);
+        tv_progress = view.findViewById(R.id.tv_progress);
         seekBar = view.findViewById(R.id.seekBar);
         seekBar.setMax(100);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {

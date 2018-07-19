@@ -17,4 +17,16 @@ public class Util {
         return (int) TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
     }
+
+    /**
+     * duration转换为分秒
+     */
+    public static String durationToformat(long duration) {
+        int second = (int) duration / 1000;
+        int min = second / 60;
+        int sec = second % 60;
+        StringBuilder sb = new StringBuilder();
+        sb.append(min).append(":").append(sec);
+        return sb.toString();
+    }
 }

@@ -173,8 +173,8 @@ public class MusicService extends Service {
         };
         MediaPlayer.OnPreparedListener onPreparedListener = new MediaPlayer.OnPreparedListener() {
             @Override
-            public void onPrepared(MediaPlayer mp) {
-
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                mp.setPrepared(true);
             }
         };
         mp.initPlayer(list, tmp, onCompletionListener, onPreparedListener);

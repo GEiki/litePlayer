@@ -115,6 +115,10 @@ public class MusicPlayer {
         }
     }
 
+    public void setPrepared(boolean prepared) {
+        isPrepared = prepared;
+    }
+
     public void rePlay(){
         try{
             if(mPlayer!=null){

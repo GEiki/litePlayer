@@ -248,9 +248,9 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     }
 
     @Override
-    public void onMenuItemClick(MenuItem item, int position) {
-        switch (item.getItemId()) {
-            case R.id.action_add_song: {
+    public void onMenuItemClick(View view, int position) {
+        switch (view.getId()) {
+            case R.id.tv_move: {
                 showChooseSongListDialog(mListAdapter.getmData().get(position));
                 break;
             }

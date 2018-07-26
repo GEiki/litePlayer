@@ -263,14 +263,14 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     }
 
     @Override
-    public void onMenuItemClick(MenuItem item, int position) {
-        switch (item.getItemId()) {
-            case R.id.action_add_song: {
+    public void onMenuItemClick(View view, int position) {
+        switch (view.getId()) {
+            case R.id.tv_move: {
                 Item song = adapter.getmData().get(position);
                 showChooseSongListDialog(song);
                 break;
             }
-            case R.id.action_remove: {
+            case R.id.tv_delete: {
                 Item song = adapter.getmData().get(position);
                 ArrayList<Item> items = new ArrayList<>();
                 items.add(song);

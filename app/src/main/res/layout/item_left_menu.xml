@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="right">
+
+    <TextView
+        android:text="添加到"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:id="@+id/tv_move"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_green_light"
+
+        />
+
+    <TextView
+        android:text="移除"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:id="@+id/tv_delete"
+        android:layout_width="80dp"
+        android:textSize="20sp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_red_light" />
+
+</LinearLayout>

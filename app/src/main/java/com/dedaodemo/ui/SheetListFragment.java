@@ -93,7 +93,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         initRecyclerView();
-        
+
         sheetListObserve = new Observer<ArrayList<SongList>>() {
             @Override
             public void onChanged(@Nullable ArrayList<SongList> songLists) {

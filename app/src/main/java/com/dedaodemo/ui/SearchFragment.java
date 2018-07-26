@@ -6,7 +6,9 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,6 +47,9 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     private SearchContract.Presenter viewModel;
     private Toolbar toolbar;
     private SearchView searchView;
+    private MListAdapter mListAdapter;
+    private RecyclerView recyclerView;
+    private Observer<ArrayList<Item>> searchObserve;
 
 
     public static final String TAG = "SEARCH_FRAGMENT";
@@ -62,7 +67,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
-        viewModel = ViewModelProviders.of(getActivity()).get(SearchViewModel.class);
+        viewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
 
         super.onCreate(savedInstanceState);
 
@@ -74,23 +79,23 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
 
 
         View v = super.onCreateView(inflater, container, null);
-        viewModel.observeSearchSongList(getActivity(), new Observer<ArrayList<Item>>() {
+
+        initRecyclerView((ViewGroup) v);
+
+        //注册观察搜索列表
+        searchObserve = new Observer<ArrayList<Item>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Item> items) {
-                MListAdapter adapter1 = (MListAdapter) getAdapter();
-                if (adapter1 != null) {
-                    adapter1.setmData(items);
-                    setAdapter(adapter1);
+                if (mListAdapter != null) {
+                    mListAdapter.setmData(items);
+                    recyclerView.setAdapter(mListAdapter);
                     searchList = items;
                 }
 
             }
-        });
-        MListAdapter mListAdapter = new MListAdapter(getContext());
-        mListAdapter.setMenuId(R.menu.search_menu);
-        mListAdapter.setOnItemAddClickListener(this);
-        setAdapter(mListAdapter);
-        setOnItemClickListener(this);
+        };
+        viewModel.observeSearchSongList(this, searchObserve);
+
 
         toolbar = getToolbar();
         toolbar.setTitle("搜索");
@@ -105,6 +110,21 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         setHasOptionsMenu(true);
         addSearchView(v);
         return v;
+    }
+
+    private void initRecyclerView(ViewGroup viewGroup) {
+        recyclerView = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.recycler_view, null);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 485));
+        layoutParams.setMargins(8, 0, 8, 0);
+        layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
+        recyclerView.setLayoutParams(layoutParams);
+        viewGroup.addView(recyclerView, 1);
+        mListAdapter = new MListAdapter(getContext());
+        mListAdapter.setMenuId(R.menu.search_menu);
+        mListAdapter.setOnItemAddClickListener(this);
+        mListAdapter.setOnItemClickListener(this);
+        recyclerView.setAdapter(mListAdapter);
     }
 
     private void addSearchView(final View view) {
@@ -234,7 +254,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     public void onMenuItemClick(MenuItem item, int position) {
         switch (item.getItemId()) {
             case R.id.action_add_song: {
-                showChooseSongListDialog((Item) getAdapter().getmData().get(position));
+                showChooseSongListDialog(mListAdapter.getmData().get(position));
                 break;
             }
             default:
@@ -264,5 +284,11 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         view.setAdapter(adapter);
         bottomSheetDialog.setContentView(view);
         bottomSheetDialog.show();
+    }
+
+    @Override
+    public void onDestroyView() {
+        viewModel.removeObserveSearchSongList(searchObserve);
+        super.onDestroyView();
     }
 }

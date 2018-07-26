@@ -29,6 +29,7 @@ public class SearchViewModel extends BaseViewModel implements SearchContract.Vie
     private SongModel songModel = new SongModel(this);
     private MutableLiveData<ArrayList<Item>> searchSongList = new MutableLiveData<>();
 
+
     @Override
     public void seekTo(int progress) {
         SongManager.getInstance().seekTo(progress);
@@ -52,6 +53,11 @@ public class SearchViewModel extends BaseViewModel implements SearchContract.Vie
     @Override
     public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer) {
         searchSongList.observe(owner, observer);
+    }
+
+    @Override
+    public void removeObserveSearchSongList(Observer<ArrayList<Item>> observer) {
+        searchSongList.removeObserver(observer);
     }
 
     @Override

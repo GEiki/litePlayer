@@ -41,7 +41,7 @@ public class SongModel implements SheetListContract.Model, SongListContract.Mode
             @Override
             public void run() {
                 //获取歌单列表
-                SQLiteDatabase db = databaseHelper.getReadableDatabase();
+                SQLiteDatabase db = databaseHelper.getWritableDatabase();
                 Cursor cursor = db.query("song_lists", null, null, null, null, null, "id", null);
                 ArrayList<SongList> sheetList = new ArrayList<>();
                 while (cursor.moveToNext()) {

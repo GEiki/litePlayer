@@ -4,12 +4,12 @@
 
     <item android:id="@+id/action_search"
           android:title="Search"
-        android:icon="@drawable/ic_action_search"
+        android:icon="@drawable/ic_action_search_light"
           app:showAsAction="always"
         />
     <item
         android:id="@+id/action_add_song_list"
         android:title="添加歌单"
-        android:icon="@drawable/ic_action_add_list"
+        android:icon="@drawable/ic_action_add_list_light"
         app:showAsAction="always" />
 </menu>

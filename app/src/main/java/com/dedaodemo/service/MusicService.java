@@ -22,7 +22,6 @@ import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.ui.MainActivity;
 
 import java.util.ArrayList;
@@ -32,42 +31,57 @@ public class MusicService extends Service {
     public MusicService() {
     }
 
+    /**
+     * 通知栏广播监听
+     */
     public class NotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
-                case Constant.ACTION_N_NEXT: {
-                    Log.i("ACTION", "NEXT");
-                    SongManager.getInstance().next();
-                    buildNotification();
-                    break;
+            try {
+                switch (intent.getAction()) {
+                    case Constant.ACTION_N_NEXT: {
+                        Log.i("ACTION", "NEXT");
+                        Message message = new Message();
+                        message.arg1 = Constant.ACTION_NEXT_SONG;
+                        replyMessenger.send(message);
+                        break;
+                    }
+                    case Constant.ACTION_N_PAUSE: {
+                        Log.i("ACTION", "PAUSE");
+                        Message message = new Message();
+                        message.arg1 = Constant.ACTION_PAUSE;
+                        replyMessenger.send(message);
+                        break;
+                    }
+                    case Constant.ACTION_N_PRE: {
+                        Log.i("ACTION", "PRE");
+                        Message message = new Message();
+                        message.arg1 = Constant.ACTION_PRE_SONG;
+                        replyMessenger.send(message);
+                        break;
+                    }
+                    case Constant.ACTION_N_PLAY: {
+                        Log.i("ACTION", "PLAY");
+                        rePlay(replyMessenger);
+                        Message message = new Message();
+                        message.arg1 = Constant.ACTION_RE_PLAY;
+                        replyMessenger.send(message);
+                        isPasusing = false;
+                        buildNotification();
+                        break;
+                    }
+                    case Constant.ACTION_N_CLOSE: {
+                        mp.pause();
+                        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                        notificationManager.cancel(CHANNEL_ID);
+                        stopSelf();
+                        break;
+                    }
                 }
-                case Constant.ACTION_N_PAUSE: {
-                    Log.i("ACTION", "PAUSE");
-                    SongManager.getInstance().pause();
-                    buildNotification();
-                    break;
-                }
-                case Constant.ACTION_N_PRE: {
-                    Log.i("ACTION", "PRE");
-                    SongManager.getInstance().pre();
-                    buildNotification();
-                    break;
-                }
-                case Constant.ACTION_N_PLAY: {
-                    Log.i("ACTION", "PLAY");
-                    SongManager.getInstance().rePlay(null);
-                    buildNotification();
-                    break;
-                }
-                case Constant.ACTION_N_CLOSE: {
-                    mp.pause();
-                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    notificationManager.cancel(CHANNEL_ID);
-                    break;
-
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
         }
     }
 
@@ -82,24 +96,30 @@ public class MusicService extends Service {
             switch (msg.arg1) {
                 case Constant.ACTION_INIT: {//初始化
                     Bundle bundle = msg.getData();
-                    SongList songList = (SongList) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
-                    initPlayer(songList.getSongList(), (Item) (bundle.getSerializable(Constant.CURRENT_SONG)), msg.replyTo);
+                    curSongList = (SongList) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
+                    curSong = (Item) (bundle.getSerializable(Constant.CURRENT_SONG));
+                    initPlayer(curSongList.getSongList(), curSong, msg.replyTo);
+                    replyMessenger = msg.replyTo;
                     break;
                 }
                 case Constant.ACTION_PLAY: {//播放
                     Bundle bundle = msg.getData();
-                    SongList songList = (SongList) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
-                    play((Item) (bundle.getSerializable(Constant.CURRENT_SONG)), songList.getSongList(), msg.replyTo);
+                    curSongList = (SongList) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
+                    curSong = (Item) (bundle.getSerializable(Constant.CURRENT_SONG));
+                    play(curSong, curSongList.getSongList(), msg.replyTo);
+                    isPasusing = false;
                     buildNotification();
                     break;
                 }
                 case Constant.ACTION_PAUSE: {//暂停
                     pause();
+                    isPasusing = true;
                     buildNotification();
                     break;
                 }
                 case Constant.ACTION_RE_PLAY: {//重新播放
                     rePlay(msg.replyTo);
+                    isPasusing = false;
                     buildNotification();
                     break;
                 }
@@ -140,21 +160,13 @@ public class MusicService extends Service {
     public static final int CHANNEL_ID = 2314;
     private Notification.Builder notificationBuilder;
     private NotificationReceiver notificationReceiver;
-
+    private SongList curSongList;
+    private Item curSong;
+    private Messenger replyMessenger;
 
 
     @Override
     public IBinder onBind(final Intent intent) {
-        mp=MusicPlayer.getInstance(MusicService.this);
-        buildNotification();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Constant.ACTION_N_PAUSE);
-        intentFilter.addAction(Constant.ACTION_N_PRE);
-        intentFilter.addAction(Constant.ACTION_N_NEXT);
-        intentFilter.addAction(Constant.ACTION_N_PLAY);
-        intentFilter.addAction(Constant.ACTION_N_CLOSE);
-        notificationReceiver = new NotificationReceiver();
-        registerReceiver(notificationReceiver, intentFilter);
         return messenger.getBinder();
     }
 
@@ -227,6 +239,22 @@ public class MusicService extends Service {
             isPasusing=true;
     }
 
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        mp = MusicPlayer.getInstance(MusicService.this);
+        buildNotification();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constant.ACTION_N_PAUSE);
+        intentFilter.addAction(Constant.ACTION_N_PRE);
+        intentFilter.addAction(Constant.ACTION_N_NEXT);
+        intentFilter.addAction(Constant.ACTION_N_PLAY);
+        intentFilter.addAction(Constant.ACTION_N_CLOSE);
+        notificationReceiver = new NotificationReceiver();
+        registerReceiver(notificationReceiver, intentFilter);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     public void rePlay(final Messenger replyMessenger) {
             mp.rePlay();
         try {
@@ -266,6 +294,7 @@ public class MusicService extends Service {
 
     @Override
     public void onDestroy() {
+        Log.i("Service", "destroy");
         if (mp != null && notificationReceiver != null) {
             mp.release();
             unregisterReceiver(notificationReceiver);
@@ -278,6 +307,9 @@ public class MusicService extends Service {
      * 构建通知栏播放器
      */
     private void buildNotification() {
+        if (curSong == null) {
+            return;
+        }
         Intent intent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
@@ -291,7 +323,7 @@ public class MusicService extends Service {
 
         Intent ppIntent = new Intent();
         Notification.Action ppAction;
-        if (SongManager.getInstance().isPlaying()) {
+        if (!isPasusing) {
             ppIntent.setAction(Constant.ACTION_N_PAUSE);
             PendingIntent pppIntent = PendingIntent.getBroadcast(this, 0, ppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             ppAction = new Notification.Action(R.drawable.ic_action_pause, "暂停", pppIntent);
@@ -315,8 +347,8 @@ public class MusicService extends Service {
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
         mediaStyle.setShowActionsInCompactView(1, 2);
         notificationBuilder = new Notification.Builder(this)
-                .setContentTitle(SongManager.getInstance().getCurrentSong().getTitle())
-                .setContentText(SongManager.getInstance().getCurrentSong().getAuthor())
+                .setContentTitle(curSong.getTitle())
+                .setContentText(curSong.getAuthor())
                 .addAction(preAction)
                 .addAction(ppAction)
                 .addAction(nextAction)
@@ -332,5 +364,19 @@ public class MusicService extends Service {
         notificationManagerCompat.notify(CHANNEL_ID, notification);
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        Log.i("Service", "Unbind");
+        if (mp != null) {
+            mp.release();
+        }
+        return super.onUnbind(intent);
+    }
 
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(CHANNEL_ID);
+        super.onTaskRemoved(rootIntent);
+    }
 }

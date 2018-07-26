@@ -77,7 +77,6 @@ public class SheetListViewModel extends BaseViewModel implements LifecycleObserv
     public void loadDataSuccess(ArrayList<SongList> sheetList) {
         SongManager.getInstance().setSheetList(sheetList);
         songListsLiveData.postValue(sheetList);
-        SongManager.getInstance().init();
     }
 
     @Override
@@ -143,7 +142,13 @@ public class SheetListViewModel extends BaseViewModel implements LifecycleObserv
     public void observeSongLists(LifecycleOwner owner, Observer<ArrayList<SongList>> observer) {
         songListsLiveData.observe(owner, observer);
     }
-//    public void observeCurrentSong(LifecycleOwner owner,Observer<Item> observer) {
+
+    @Override
+    public void removeObserveSongLists(Observer<ArrayList<SongList>> observer) {
+        songListsLiveData.removeObserver(observer);
+    }
+
+    //    public void observeCurrentSong(LifecycleOwner owner,Observer<Item> observer) {
 //        curSongLiveData.observe(owner,observer);
 //    }
 //    public void observeCurrentSongList(LifecycleOwner owner,Observer<SongList> observer) {

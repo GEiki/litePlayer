@@ -2,18 +2,14 @@ package com.dedaodemo.ui;
 
 
 import android.arch.lifecycle.Observer;
-import android.content.Context;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +22,6 @@ import android.widget.TextView;
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.BaseContract;
-import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
@@ -44,10 +39,10 @@ public abstract class BaseBottomFragment extends Fragment {
 
     public static final String BASE_BACK_STACK = "base_back_stack";
 
-    private RecyclerView recyclerView;
+    //    private RecyclerView recyclerView;
     private BottomSheetDialog bottomSheetDialog;
     private Toolbar toolbar;
-    private BaseAdapter adapter;
+//    private BaseAdapter adapter;
 
     private RelativeLayout bottom_play_bar;
     private TextView iv_circle;
@@ -118,39 +113,21 @@ public abstract class BaseBottomFragment extends Fragment {
             view = getBaseBottomBarView();
         }
         toolbar = view.findViewById(R.id.toolbar);
-        recyclerView = view.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        recyclerView = view.findViewById(R.id.recycler_view);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         initBottomPlayBar(view);
         initPlayDialog();
         //开始监听进度
         timer.schedule(progressTask, 1000, 1000);
         observeLiveData();
+        baseViewModel.initBottomBar();
 
         return view;
     }
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        if (!hidden) {
-            baseViewModel.initBottomBar();
-        }
-        super.onHiddenChanged(hidden);
-    }
 
-    @Override
-    public void onResume() {
-        baseViewModel.initBottomBar();
-        super.onResume();
-    }
 
-    public void setAdapter(BaseAdapter adapter) {
-        recyclerView.setAdapter(adapter);
-        this.adapter = adapter;
-    }
 
-    public BaseAdapter getAdapter() {
-        return adapter;
-    }
 
     /**
      * fragment跳转
@@ -173,9 +150,6 @@ public abstract class BaseBottomFragment extends Fragment {
         return toolbar;
     }
 
-    public void setOnItemClickListener(final BaseAdapter.OnItemClickListener listener) {
-        adapter.setOnItemClickListener(listener);
-    }
     /**
      * 返回true时父类会调用getBaseBottomFlag
      * */
@@ -265,52 +239,36 @@ public abstract class BaseBottomFragment extends Fragment {
 
     }
 
-    /**
-     * 停止进度条监听
-     */
-    public void stopProgressListen() {
-        if (timer != null) {
-            timer.cancel();
-        }
-    }
 
-
-    /**
-     * dip转换为px
-     * */
-    private int dip2px(Context context, float dipValue) {
-        Resources r = context.getResources();
-        return (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, dipValue, r.getDisplayMetrics());
-    }
 
 
     /**
      * 添加观察者
      */
     private void observeLiveData() {
-        baseViewModel.observeCurrentSong(getActivity(), new Observer<Item>() {
+        baseViewModel.observeCurrentSong(this, new Observer<Item>() {
             @Override
             public void onChanged(@Nullable Item item) {
                 tv_title.setText(item.getTitle());
                 tv_title_expand.setText(item.getTitle());
                 tv_aritist.setText(item.getAuthor());
                 tv_artist_expand.setText(item.getAuthor());
+                Log.i("onChange", "title");
             }
         });
-        baseViewModel.observeCurrentSongList(getActivity(), new Observer<SongList>() {
+        baseViewModel.observeCurrentSongList(this, new Observer<SongList>() {
             @Override
             public void onChanged(@Nullable SongList songList) {
                 //歌单变化
             }
         });
-        baseViewModel.observePlayMode(getActivity(), new Observer<String>() {
+        baseViewModel.observePlayMode(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 //播放模式变化
             }
         });
-        baseViewModel.observePlayState(getActivity(), new Observer<Boolean>() {
+        baseViewModel.observePlayState(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean isPlaying) {
                 if (isPlaying) {
@@ -327,7 +285,7 @@ public abstract class BaseBottomFragment extends Fragment {
                 //播放状态变化
             }
         });
-        baseViewModel.observeErrorState(getActivity(), new Observer<Boolean>() {
+        baseViewModel.observeErrorState(this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean errorFlags) {
                 if (errorFlags) {
@@ -436,7 +394,8 @@ public abstract class BaseBottomFragment extends Fragment {
     @Override
     public void onDestroyView() {
         timer.cancel();
-        baseViewModel.removeObserves(getActivity());
+        baseViewModel.removeObserves(this);
         super.onDestroyView();
     }
+
 }

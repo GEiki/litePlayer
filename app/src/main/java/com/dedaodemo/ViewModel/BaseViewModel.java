@@ -27,6 +27,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         SongManager.getInstance().play(songList, item, new SongManager.OnPlayListener() {
             @Override
             public void onPlay() {
+                SongManager.getInstance().getPlayStateLiveData().postValue(true);
             }
 
             @Override
@@ -85,6 +86,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         SongManager.getInstance().rePlay(new SongManager.OnPlayListener() {
             @Override
             public void onPlay() {
+                SongManager.getInstance().getPlayStateLiveData().postValue(true);
             }
 
             @Override

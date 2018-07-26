@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.util.Log;
 
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.service.MusicService;
@@ -43,6 +44,22 @@ public class MusicServiceManager {
                     SongManager.getInstance().nextAccordingToMode();
                     break;
                 }
+                case Constant.ACTION_CLOSE: {
+                    MusicServiceManager.getInstance().unBindMusicService();
+                    break;
+                }
+                case Constant.ACTION_NEXT_SONG: {
+                    SongManager.getInstance().next();
+                    break;
+                }
+                case Constant.ACTION_PAUSE: {
+                    SongManager.getInstance().pause();
+                    break;
+                }
+                case Constant.ACTION_PRE_SONG: {
+                    SongManager.getInstance().pre();
+                    break;
+                }
                 default:
                     break;
             }
@@ -57,8 +74,11 @@ public class MusicServiceManager {
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i("ServiceConnect", "Connect Success");
             messenger = new Messenger(service);
             isServiceConnecting = true;
+            //连接建立后初始化播放器
+            SongManager.getInstance().init();
         }
 
         @Override
@@ -85,7 +105,7 @@ public class MusicServiceManager {
 
     public void init() {
         Intent intent = new Intent(context, MusicService.class);
-        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        context.startService(intent);
     }
 
     public void sendMessage(Bundle bundle, int arg) {
@@ -98,6 +118,10 @@ public class MusicServiceManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void bindService(Intent intent) {
+        context.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void unBindMusicService() {

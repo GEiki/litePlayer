@@ -54,7 +54,7 @@ public class AddSheetFragment extends Fragment {
         et_sheet.setSingleLine();
 
         toolbar = v.findViewById(R.id.toolbar);
-        toolbar.setTitle("Lite");
+        toolbar.setTitle("添加歌单");
         toolbar.setTitleMarginStart(30);
         toolbar.setTitleMarginEnd(30);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);

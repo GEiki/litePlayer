@@ -12,17 +12,21 @@
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/white" />
-    </android.support.design.widget.AppBarLayout>
+            android:layout_marginTop="15dp"
+            android:layout_height="?attr/actionBarSize">
 
-    <EditText
-        android:id="@+id/et_sheet"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_marginTop="16dp"
-        android:maxLines="1"
-        android:layout_below="@+id/app_bar_layout" />
+            <EditText
+                android:id="@+id/et_sheet"
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:hint="请输入歌单名称"
+                android:maxLines="1"
+                android:layout_below="@+id/app_bar_layout" />
+        </android.support.v7.widget.Toolbar>
+
+    </android.support.design.widget.AppBarLayout>
 
 
 </RelativeLayout>

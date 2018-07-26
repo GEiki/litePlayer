@@ -45,5 +45,4 @@ public class MyApplication extends Application {
         return mContext;
     }
 
-
 }

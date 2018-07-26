@@ -5,14 +5,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ll_bottom_play_bar"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="60dp"
     android:background="#0000"
-    android:layout_marginTop="500dp"
     android:orientation="vertical"
+    android:layout_gravity="bottom"
     tools:layout_editor_absoluteY="25dp">
-
-
-
 
 
 
@@ -40,8 +37,12 @@
             <TextView
                 android:id="@+id/tv_title_expand"
                 android:layout_width="215dp"
-                android:layout_height="28dp"
+                android:layout_height="wrap_content"
                 android:text="未知歌曲"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:singleLine="true"
+                android:focusableInTouchMode="true"
                 android:layout_alignParentLeft="true"
                 android:layout_marginLeft="80dp"
                 android:layout_marginTop="8dp"

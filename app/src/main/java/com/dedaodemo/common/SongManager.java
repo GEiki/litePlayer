@@ -262,9 +262,12 @@ public class SongManager {
 
 
     public void requestProgress(IProgressCallback callback) {
-        this.callback = callback;
-        Bundle bundle = new Bundle();
-        MusicServiceManager.getInstance().sendMessage(bundle, Constant.ACTION_REQUEST_DURATION);
+        if (isPlaying) {
+            this.callback = callback;
+            Bundle bundle = new Bundle();
+            MusicServiceManager.getInstance().sendMessage(bundle, Constant.ACTION_REQUEST_DURATION);
+        }
+
     }
 
     public void updateProgress(int position, long duration) {
@@ -272,9 +275,12 @@ public class SongManager {
     }
 
     public void seekTo(int progress) {
-        Bundle bundle = new Bundle();
-        bundle.putInt(Constant.POSITION, progress);
-        MusicServiceManager.getInstance().sendMessage(bundle, Constant.ACTION_SEEK_TO);
+        if (isPlaying) {
+            Bundle bundle = new Bundle();
+            bundle.putInt(Constant.POSITION, progress);
+            MusicServiceManager.getInstance().sendMessage(bundle, Constant.ACTION_SEEK_TO);
+        }
+
     }
 
     /**

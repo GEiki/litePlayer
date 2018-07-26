@@ -2,6 +2,7 @@ package com.dedaodemo.ui;
 
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -16,7 +17,9 @@ import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
+import com.dedaodemo.common.MusicServiceManager;
 import com.dedaodemo.common.SongManager;
+import com.dedaodemo.service.MusicService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,6 +38,10 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.container_layout);
+
+        //绑定音乐服务
+        Intent intent = new Intent(this, MusicService.class);
+        MusicServiceManager.getInstance().bindService(intent);
 
         SharedPreferences sharedPreferences = getSharedPreferences(Constant.SP_KEY_LANUCH, MODE_PRIVATE);
         launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
@@ -86,6 +93,7 @@ public class MainActivity extends AppCompatActivity
         ActivityCompat.requestPermissions(MainActivity.this,permission,1);
 
 
+
     }
 
     @Override
@@ -104,8 +112,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDestroy() {
-//        MusicServiceManager.getInstance().unBindMusicService();
         SongManager.getInstance().savePlayState();
+        MusicServiceManager.getInstance().unBindMusicService();
         super.onDestroy();
     }
 

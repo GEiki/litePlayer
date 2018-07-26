@@ -94,7 +94,7 @@ public class SongList implements Serializable {
         }
         if (items.contains(item))
             return false;
-        items.add(item);
+        items.add(0, item);
         int count = Integer.valueOf(size);
         size = String.valueOf(count++);
         return true;

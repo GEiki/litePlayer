@@ -25,6 +25,8 @@ public class SheetListContract {
         public void scanMusic();
 
         public void observeSongLists(LifecycleOwner owner, Observer<ArrayList<SongList>> observer);
+
+        void removeObserveSongLists(Observer<ArrayList<SongList>> observer);
     }
 
     public interface ViewModel {

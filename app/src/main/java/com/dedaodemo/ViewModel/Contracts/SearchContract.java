@@ -21,6 +21,8 @@ public class SearchContract {
 
         public void addSong(SongList songList, Item item);
         public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer);
+
+        public void removeObserveSearchSongList(Observer<ArrayList<Item>> observer);
     }
 
     public interface ViewModel {

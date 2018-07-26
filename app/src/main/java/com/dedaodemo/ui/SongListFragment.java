@@ -3,11 +3,13 @@ package com.dedaodemo.ui;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +25,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
@@ -49,6 +56,9 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     private Toolbar toolbar;
     AlertDialog loadingDialog;
     BottomSheetDialog bottomSheetDialog;
+    private ImageView iv_head;
+    private RecyclerView recyclerView;
+    private MListAdapter adapter;
     private SongListContract.Presenter viewModel;
     private int preSize = 0;
     private Observer<SongList> songListObserver;
@@ -69,7 +79,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
-        viewModel = ViewModelProviders.of(getActivity()).get(SongListViewModel.class);
+        viewModel = ViewModelProviders.of(this).get(SongListViewModel.class);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
             songList = (SongList) bundle.getSerializable(ARG_SONG_LIST);
@@ -97,24 +107,25 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         setHasOptionsMenu(true);
 
 
-        /*
+        /**
         * 初始化dialog
         * */
-        AlertDialog.Builder ab=new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder ab = new AlertDialog.Builder(getActivity());
         View dialogView=LayoutInflater.from(getActivity()).inflate(R.layout.dialog_loading,null);
         loadingDialog=ab.setView(dialogView).create();
-        MListAdapter mListAdapter = new MListAdapter(getContext());
-        mListAdapter.setmData(songList.getSongList());
-        mListAdapter.setMenuId(R.menu.song_menu);
-        setAdapter(mListAdapter);
+
+        initRecyclerView((ViewGroup) v);
+
+        /**
+         * 注册观察歌单
+         * */
         songListObserver = new Observer<SongList>() {
             @Override
             public void onChanged(@Nullable SongList mSongList) {
                 if (songList.getTitle().equals(mSongList.getTitle()) && mSongList.getSize() < preSize) {
-                    MListAdapter mListAdapter = (MListAdapter) getAdapter();
-                    mListAdapter.setmData(songList.getSongList());
+                    adapter.setmData(songList.getSongList());
                     preSize = mSongList.getSize();
-                    setAdapter(mListAdapter);
+                    recyclerView.setAdapter(adapter);
                     ToastUtil.showShort(getActivity(), "移除歌曲成功");
                 } else if (songList.getTitle().equals(mSongList.getTitle()) && mSongList.getSize() == preSize) {
                     //do nothing
@@ -125,11 +136,23 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
             }
         };
         viewModel.observeSongList(getActivity(), songListObserver);
-
-        setOnItemClickListener(this);
-        MListAdapter adapter = (MListAdapter) getAdapter();
-        adapter.setOnItemAddClickListener(this);
         return v;
+    }
+
+    private void initRecyclerView(ViewGroup viewGroup) {
+        recyclerView = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.recycler_view, null);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 485));
+        layoutParams.setMargins(8, 0, 8, 0);
+        layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
+        recyclerView.setLayoutParams(layoutParams);
+        viewGroup.addView(recyclerView, 1);
+        adapter = new MListAdapter(getContext());
+        adapter.setmData(songList.getSongList());
+        adapter.setMenuId(R.menu.song_menu);
+        recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(this);
+        adapter.setOnItemAddClickListener(this);
     }
 
     @Override
@@ -139,12 +162,43 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
     private void addHeaderImgView(View view, LayoutInflater inflater) {
         AppBarLayout appBarLayout = view.findViewById(R.id.app_bar_layout);
-        View cardView = new ImageView(getContext());
-        CollapsingToolbarLayout.LayoutParams lp = new CollapsingToolbarLayout.LayoutParams(CollapsingToolbarLayout.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 160));
+        iv_head = new ImageView(getContext());
+        CollapsingToolbarLayout.LayoutParams lp = new CollapsingToolbarLayout.LayoutParams(CollapsingToolbarLayout.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 250));
         lp.setCollapseMode(CollapsingToolbarLayout.LayoutParams.COLLAPSE_MODE_PARALLAX);
-        cardView.setLayoutParams(lp);
-        ((ViewGroup) appBarLayout.getChildAt(0)).addView(cardView, 0);
-        view.invalidate();
+        lp.setParallaxMultiplier(0.5f);
+        iv_head.setLayoutParams(lp);
+        iv_head.setScaleType(ImageView.ScaleType.FIT_XY);
+        //添加到布局中
+        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) appBarLayout.getChildAt(0);
+        collapsingToolbarLayout.addView(iv_head, 0);
+        //尝试加载专辑封面
+        Item item = null;
+        if (songList.getSongList() != null && !songList.getSongList().isEmpty()) {
+            item = songList.getSongList().get(0);
+        }
+
+        if (item == null || item.getType() == Item.LOCAL_MUSIC) {
+            Glide.with(getContext())
+                    .load(R.drawable.default_songlist_background)
+                    .into(iv_head);
+        } else {
+            Glide.with(getContext())
+                    .asDrawable()
+                    .load(item.getPic()).listener(new RequestListener<Drawable>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                    Glide.with(getContext())
+                            .load(R.drawable.default_songlist_background)
+                            .into(iv_head);
+                    return true;
+                }
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    return false;
+                }
+            }).into(iv_head);
+        }
     }
 
     @Override
@@ -225,12 +279,12 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     public void onMenuItemClick(MenuItem item, int position) {
         switch (item.getItemId()) {
             case R.id.action_add_song: {
-                Item song = (Item) getAdapter().getmData().get(position);
+                Item song = adapter.getmData().get(position);
                 showChooseSongListDialog(song);
                 break;
             }
             case R.id.action_remove: {
-                Item song = (Item) getAdapter().getmData().get(position);
+                Item song = adapter.getmData().get(position);
                 ArrayList<Item> items = new ArrayList<>();
                 items.add(song);
                 viewModel.removeSong(items);

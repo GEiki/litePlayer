@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -47,13 +46,13 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     private RecyclerView recyclerView;
     private SongListAdapter songListAdapter;
     private SheetListContract.Presenter viewModel;
-    private CoordinatorLayout baseBottomBarLayout;
     private ArrayList<SongList> sheetList;
     private AlertDialog dialog;
     private Observer<ArrayList<SongList>> sheetListObserve;
 
 
     private Toolbar toolbar;
+    private View mView;
     private DrawerLayout drawerLayout;
 
 
@@ -78,17 +77,14 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sheet_list, container, false);
-        initNavigationView(view);
-        baseBottomBarLayout = view.findViewById(R.id.base_bottom_bar_view);
-        //让父类初始化baseBottomBarLayout
+        mView = inflater.inflate(R.layout.fragment_sheet_list, container, false);
         super.onCreateView(inflater, container, savedInstanceState);
-        toolbar = getToolbar();
+        toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle("Lite");
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
         toolbar.setTitleMarginStart(30);
         toolbar.setTitleMarginEnd(30);
-        CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) toolbar.getLayoutParams();
+        AppBarLayout.LayoutParams layoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         layoutParams.setMargins(0, Util.dip2px(getContext(), 20), 0, 0);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
@@ -113,19 +109,23 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         //设置返回键
 //        ((AppCompatActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
-        initNavigationView(view);
+        initNavigationView(mView);
         toolbar.setNavigationIcon(R.drawable.ic_action_navgation);
-        return view;
+        return mView;
+    }
+
+    @Override
+    public View getParentView() {
+        return ((ViewGroup) mView).getChildAt(0);
     }
 
     private void initRecyclerView() {
-        recyclerView = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.recycler_view, null);
+        recyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 485));
         layoutParams.setMargins(8, 0, 8, 0);
         layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
         recyclerView.setLayoutParams(layoutParams);
-        baseBottomBarLayout.addView(recyclerView, 1);
         songListAdapter = new SongListAdapter(getContext());
         songListAdapter.setOnItemClickListener(this);
         recyclerView.setAdapter(songListAdapter);
@@ -137,21 +137,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         showFragment(songListFragment, SheetListFragment.this);
     }
 
-    /**
-     * 返回true时父类会调用getBaseBottomFlag
-     */
-    @Override
-    protected boolean speacialFlag() {
-        return true;
-    }
 
-    /**
-     * speacialFlag返回true时被调用
-     */
-    @Override
-    protected View getBaseBottomBarView() {
-        return baseBottomBarLayout;
-    }
 
     @Override
     protected BaseViewModel getViewModel() {

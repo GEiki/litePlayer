@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -43,7 +42,6 @@ public abstract class BaseBottomFragment extends Fragment {
 
     //    private RecyclerView recyclerView;
     private BottomSheetDialog bottomSheetDialog;
-    private Toolbar toolbar;
 //    private BaseAdapter adapter;
 
     private RelativeLayout bottom_play_bar;
@@ -110,14 +108,10 @@ public abstract class BaseBottomFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_base_bottom_bar, container, false);
-        if (speacialFlag()) {
-            view = getBaseBottomBarView();
-        }
-        toolbar = view.findViewById(R.id.toolbar);
+        View view = getParentView();
 //        recyclerView = view.findViewById(R.id.recycler_view);
 //        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        initBottomPlayBar(view);
+        initBottomPlayBar((ViewGroup) view);
         initPlayDialog();
         //开始监听进度
         timer.schedule(progressTask, 1000, 1000);
@@ -148,20 +142,12 @@ public abstract class BaseBottomFragment extends Fragment {
                 .commit();
     }
 
-    public Toolbar getToolbar() {
-        return toolbar;
-    }
+
 
     /**
-     * 返回true时父类会调用getBaseBottomFlag
+     * 该方法应该返回父布局，用于添加底层播放栏
      * */
-    protected abstract boolean speacialFlag();
-
-    /**
-     * speacialFlag返回true时被调用,用于需要在该baseBottomFragment外嵌套其他布局的情况
-     * 不需要时让specialFlag默认返回false且getBaseBottomBarView方法不需要实现
-     */
-    protected abstract View getBaseBottomBarView();
+    public abstract View getParentView();
 
     /**
      * 初始化播放窗口
@@ -214,10 +200,10 @@ public abstract class BaseBottomFragment extends Fragment {
     /**
      * 初始化底层播放栏
      */
-    private void initBottomPlayBar(View v) {
+    private void initBottomPlayBar(ViewGroup v) {
 
         initOnClickListener();
-        bottom_play_bar = v.findViewById(R.id.ll_bottom_play_bar);
+        bottom_play_bar = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.bottom_play_bar, null, false);
         bottom_play_bar.setVisibility(View.VISIBLE);
 
         //设置behavior响应滑动
@@ -227,14 +213,14 @@ public abstract class BaseBottomFragment extends Fragment {
         layoutParams.setBehavior(new FooterBehavior());
         bottom_play_bar.setLayoutParams(layoutParams);
 
-        iv_circle = v.findViewById(R.id.iv_circle);
-        tv_artist_expand = v.findViewById(R.id.tv_artist_expand);
-        tv_title_expand = v.findViewById(R.id.tv_title_expand);
-        btn_pause_expand = v.findViewById(R.id.btn_pause_expand);
+        iv_circle = bottom_play_bar.findViewById(R.id.iv_circle);
+        tv_artist_expand = bottom_play_bar.findViewById(R.id.tv_artist_expand);
+        tv_title_expand = bottom_play_bar.findViewById(R.id.tv_title_expand);
+        btn_pause_expand = bottom_play_bar.findViewById(R.id.btn_pause_expand);
         btn_pause_expand.setOnClickListener(onClickListener);
-        btn_play_expand = v.findViewById(R.id.btn_play_expand);
+        btn_play_expand = bottom_play_bar.findViewById(R.id.btn_play_expand);
         btn_play_expand.setOnClickListener(onClickListener);
-        btn_next_expand = v.findViewById(R.id.btn_next_expand);
+        btn_next_expand = bottom_play_bar.findViewById(R.id.btn_next_expand);
         btn_next_expand.setOnClickListener(onClickListener);
 
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
@@ -243,6 +229,8 @@ public abstract class BaseBottomFragment extends Fragment {
                 bottomSheetDialog.show();
             }
         });
+
+        v.addView(bottom_play_bar);
 
 
 

@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -41,7 +40,6 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
-import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
 
@@ -54,6 +52,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
 
     private Toolbar toolbar;
+    private View mView;
     AlertDialog loadingDialog;
     BottomSheetDialog bottomSheetDialog;
     private ImageView iv_head;
@@ -93,9 +92,11 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View v = super.onCreateView(inflater, container, savedInstanceState);
-        addHeaderImgView(v, inflater);
-        toolbar = getToolbar();
+        mView = inflater.inflate(R.layout.fragment_song_list, null, false);
+        //添加底层播放栏
+        super.onCreateView(inflater, container, savedInstanceState);
+        addHeaderImgView(mView, inflater);
+        toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle(songList.getTitle());
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
@@ -114,7 +115,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         View dialogView=LayoutInflater.from(getActivity()).inflate(R.layout.dialog_loading,null);
         loadingDialog=ab.setView(dialogView).create();
 
-        initRecyclerView((ViewGroup) v);
+        initRecyclerView((ViewGroup) mView);
 
         /**
          * 注册观察歌单
@@ -136,17 +137,21 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
             }
         };
         viewModel.observeSongList(getActivity(), songListObserver);
-        return v;
+        return mView;
+    }
+
+    @Override
+    public View getParentView() {
+        return mView;
     }
 
     private void initRecyclerView(ViewGroup viewGroup) {
-        recyclerView = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.recycler_view, null);
+        recyclerView = mView.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         layoutParams.setMargins(8, 0, 8, 0);
         layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
         recyclerView.setLayoutParams(layoutParams);
-        viewGroup.addView(recyclerView, 1);
         adapter = new MListAdapter(getContext());
         adapter.setmData(songList.getSongList());
         adapter.setMenuId(R.menu.song_menu);
@@ -161,16 +166,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     }
 
     private void addHeaderImgView(View view, LayoutInflater inflater) {
-        AppBarLayout appBarLayout = view.findViewById(R.id.app_bar_layout);
-        iv_head = new ImageView(getContext());
-        CollapsingToolbarLayout.LayoutParams lp = new CollapsingToolbarLayout.LayoutParams(CollapsingToolbarLayout.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 250));
-        lp.setCollapseMode(CollapsingToolbarLayout.LayoutParams.COLLAPSE_MODE_PARALLAX);
-        lp.setParallaxMultiplier(0.5f);
-        iv_head.setLayoutParams(lp);
-        iv_head.setScaleType(ImageView.ScaleType.FIT_XY);
-        //添加到布局中
-        CollapsingToolbarLayout collapsingToolbarLayout = (CollapsingToolbarLayout) appBarLayout.getChildAt(0);
-        collapsingToolbarLayout.addView(iv_head, 0);
+        iv_head = mView.findViewById(R.id.iv_head);
         //尝试加载专辑封面
         Item item = null;
         if (songList.getSongList() != null && !songList.getSongList().isEmpty()) {
@@ -206,15 +202,6 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         return (BaseViewModel) viewModel;
     }
 
-    @Override
-    protected boolean speacialFlag() {
-        return false;
-    }
-
-    @Override
-    protected View getBaseBottomBarView() {
-        return null;
-    }
 
     @Override
     protected void setBottomBarVisibility(int visibility) {

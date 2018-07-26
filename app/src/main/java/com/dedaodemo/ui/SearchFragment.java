@@ -50,6 +50,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     private MListAdapter mListAdapter;
     private RecyclerView recyclerView;
     private Observer<ArrayList<Item>> searchObserve;
+    private View mView;
 
 
     public static final String TAG = "SEARCH_FRAGMENT";
@@ -77,10 +78,10 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        mView = inflater.inflate(R.layout.fragment_search, null, false);
+        super.onCreateView(inflater, container, null);
 
-        View v = super.onCreateView(inflater, container, null);
-
-        initRecyclerView((ViewGroup) v);
+        initRecyclerView((ViewGroup) mView);
 
         //注册观察搜索列表
         searchObserve = new Observer<ArrayList<Item>>() {
@@ -97,7 +98,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         viewModel.observeSearchSongList(this, searchObserve);
 
 
-        toolbar = getToolbar();
+        toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle("搜索");
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
@@ -108,18 +109,22 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
-        addSearchView(v);
-        return v;
+        addSearchView(mView);
+        return mView;
+    }
+
+    @Override
+    public View getParentView() {
+        return mView;
     }
 
     private void initRecyclerView(ViewGroup viewGroup) {
-        recyclerView = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.recycler_view, null);
+        recyclerView = viewGroup.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 485));
         layoutParams.setMargins(8, 0, 8, 0);
         layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
         recyclerView.setLayoutParams(layoutParams);
-        viewGroup.addView(recyclerView, 1);
         mListAdapter = new MListAdapter(getContext());
         mListAdapter.setMenuId(R.menu.search_menu);
         mListAdapter.setOnItemAddClickListener(this);
@@ -188,20 +193,12 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         ((BaseViewModel) viewModel).playSong(searchSongList, searchList.get(position));
     }
 
-    @Override
-    protected boolean speacialFlag() {
-        return false;
-    }
 
     @Override
     protected void play(int pos) {
 
     }
 
-    @Override
-    protected View getBaseBottomBarView() {
-        return null;
-    }
 
     @Override
     protected BaseViewModel getViewModel() {

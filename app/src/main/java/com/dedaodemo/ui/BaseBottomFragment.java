@@ -6,10 +6,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.transition.Explode;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.behavior.FooterBehavior;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
@@ -218,6 +220,13 @@ public abstract class BaseBottomFragment extends Fragment {
         bottom_play_bar = v.findViewById(R.id.ll_bottom_play_bar);
         bottom_play_bar.setVisibility(View.VISIBLE);
 
+        //设置behavior响应滑动
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 65f));
+        layoutParams.gravity = Gravity.BOTTOM;
+        bottom_play_bar.setBackground(getResources().getDrawable(R.color.transparent, null));
+        layoutParams.setBehavior(new FooterBehavior());
+        bottom_play_bar.setLayoutParams(layoutParams);
+
         iv_circle = v.findViewById(R.id.iv_circle);
         tv_artist_expand = v.findViewById(R.id.tv_artist_expand);
         tv_title_expand = v.findViewById(R.id.tv_title_expand);
@@ -253,7 +262,6 @@ public abstract class BaseBottomFragment extends Fragment {
                 tv_title_expand.setText(item.getTitle());
                 tv_aritist.setText(item.getAuthor());
                 tv_artist_expand.setText(item.getAuthor());
-                Log.i("onChange", "title");
             }
         });
         baseViewModel.observeCurrentSongList(this, new Observer<SongList>() {

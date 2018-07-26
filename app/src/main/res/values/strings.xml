@@ -13,4 +13,5 @@
     <string name="title_activity_songs">SongsActivity</string>
 
     <string name="default_song_name">默认歌曲</string>
+    <string name="behavior_footer">com.dedaodemo.behavior.footerBehavior</string>
 </resources>

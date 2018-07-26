@@ -366,10 +366,6 @@ public class MusicService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        Log.i("Service", "Unbind");
-        if (mp != null) {
-            mp.release();
-        }
         return super.onUnbind(intent);
     }
 
@@ -377,6 +373,9 @@ public class MusicService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancel(CHANNEL_ID);
+        if (mp != null) {
+            mp.release();
+        }
         super.onTaskRemoved(rootIntent);
     }
 }

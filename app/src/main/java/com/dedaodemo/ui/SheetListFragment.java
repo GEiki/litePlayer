@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -87,8 +88,12 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
         toolbar.setTitleMarginStart(30);
         toolbar.setTitleMarginEnd(30);
+        CollapsingToolbarLayout.LayoutParams layoutParams = (CollapsingToolbarLayout.LayoutParams) toolbar.getLayoutParams();
+        layoutParams.setMargins(0, Util.dip2px(getContext(), 20), 0, 0);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+
         initRecyclerView();
+        
         sheetListObserve = new Observer<ArrayList<SongList>>() {
             @Override
             public void onChanged(@Nullable ArrayList<SongList> songLists) {

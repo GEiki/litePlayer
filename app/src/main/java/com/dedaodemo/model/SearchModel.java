@@ -6,13 +6,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.dedaodemo.MyApplication;
-import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.HttpUtil;
+import com.dedaodemo.database.MyDatabaseHelper;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,6 +23,7 @@ import java.util.ArrayList;
  * Created by Guoss on 2018/6/27.
  */
 
+@Deprecated
 public class SearchModel implements SearchContract.Model {
     private static final String TRANSCODE = "TransCode";
     private static final String OPENID = "OpenId";
@@ -78,7 +79,7 @@ public class SearchModel implements SearchContract.Model {
                                     item.setPath(song.getString("url"));
                                     item.setLrc(song.getString("lrc"));
                                     item.setPic(song.getString("pic"));
-                                    item.setType(Item.INTERNET_MUSIC);
+                                    item.setType(Constant.INTERNET_MUSIC);
                                     itemList.add(item);
                                 }
                                 viewModel.onSearchSuccess(itemList);
@@ -147,7 +148,7 @@ public class SearchModel implements SearchContract.Model {
             a.setAuthor(cur.getString(2));//Author
             a.setTime(cur.getString(3));//time
             a.setPath(cur.getString(4));//path
-            a.setSize(String.valueOf(cur.getInt(5)));//size
+            a.setSize(cur.getInt(5));//size
             a.setType(cur.getInt(6));//type
             songList.addSong(a);
         }

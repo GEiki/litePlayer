@@ -5,12 +5,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.dedaodemo.MyApplication;
-import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.SongManager;
+import com.dedaodemo.database.MyDatabaseHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import java.util.Date;
 /**
  * Created by Guoss on 2018/6/27.
  */
-
+@Deprecated
 public class SongModel implements SheetListContract.Model, SongListContract.Model {
     private MyDatabaseHelper databaseHelper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
 
@@ -48,7 +48,7 @@ public class SongModel implements SheetListContract.Model, SongListContract.Mode
                     SongList songList = new SongList();
                     songList.setTitle(cursor.getString(1));
                     songList.setCreateDate(cursor.getString(2));
-                    songList.setSize(cursor.getString(3));
+                    songList.setSize(cursor.getInt(3));
                     sheetList.add(songList);
                 }
                 cursor.close();
@@ -61,7 +61,7 @@ public class SongModel implements SheetListContract.Model, SongListContract.Mode
                         a.setAuthor(cur.getString(2));//Author
                         a.setTime(cur.getString(3));//time
                         a.setPath(cur.getString(4));//path
-                        a.setSize(String.valueOf(cur.getInt(5)));//size
+                        a.setSize(cur.getInt(5));//size
                         a.setType(cur.getInt(6));//type
                         songList.addSong(a);
                     }

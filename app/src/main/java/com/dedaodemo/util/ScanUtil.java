@@ -6,9 +6,15 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.dedaodemo.bean.Item;
+import com.dedaodemo.common.Constant;
 
 import java.io.File;
 import java.util.ArrayList;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.annotations.NonNull;
 
 /**
  * Created by guoss on 2018/2/23.
@@ -26,10 +32,10 @@ public class ScanUtil {
     /**
      * 遍历手机文件
      * */
-    public static void scanMusicFiles(Context context, final ScanCallback callback) {
-        new Thread(new Runnable() {
+    public static Observable scanMusicFiles(Context context) {
+        return Observable.create(new ObservableOnSubscribe<ArrayList<Item>>() {
             @Override
-            public void run() {
+            public void subscribe(@NonNull ObservableEmitter<ArrayList<Item>> emitter) throws Exception {
                 ArrayList<Item> list = new ArrayList<>();
                 File src = Environment.getExternalStorageDirectory();
                 File storage = src.getParentFile().getParentFile();
@@ -42,11 +48,10 @@ public class ScanUtil {
                     }
                 }
                 startScan(list, src);//扫描内置存储卡
-                callback.scanFinished(list);
+                emitter.onNext(list);
+                emitter.onComplete();
             }
-        }).start();
-
-
+        });
     }
     private static void startScan(ArrayList<Item> list,File file){
         if(!file.isDirectory()) {
@@ -69,10 +74,10 @@ public class ScanUtil {
                     }
                     Item item = new Item();
                     item.setPath("file://"+src);
-                    item.setType(Item.LOCAL_MUSIC);
+                    item.setType(Constant.LOCAL_MUSIC);
                     String[] strings = title.split("\\.");
                     item.setTitle(strings[0]);
-                    item.setSize(size);
+                    item.setSize(Long.valueOf(size));
                     item.setAuthor(artist);
                     item.setTime(duration);
                     list.add(item);

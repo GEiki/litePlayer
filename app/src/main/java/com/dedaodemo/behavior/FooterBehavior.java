@@ -6,7 +6,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
 import android.view.animation.Interpolator;
@@ -40,7 +39,6 @@ public class FooterBehavior extends CoordinatorLayout.Behavior<View> {
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
 
         int top = Math.abs(dependency.getTop());
-        Log.i(TAG, String.valueOf(preTop - top));
         if (isShow && child.getVisibility() == View.VISIBLE && !isAnimationOn && preTop - top < 0) {
             hide(child);
         } else if (!isShow && child.getVisibility() == View.INVISIBLE && !isAnimationOn && preTop - top > 0) {

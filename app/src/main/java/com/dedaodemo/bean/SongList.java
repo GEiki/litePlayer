@@ -1,5 +1,10 @@
 package com.dedaodemo.bean;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.io.Serializable;
@@ -9,21 +14,35 @@ import java.util.ArrayList;
  * Created by guoss on 2018/4/15.
  */
 
+@Entity
 public class SongList implements Serializable {
-    private String title = "默认歌单";
+
+
+    @PrimaryKey
+    @NonNull
+    @ColumnInfo(name = "sheet_name")
+    private String title;
+
     private String description;
+
     private String createDate;
-    private String size = "0";
+
+    private int size;
+
+    @Ignore
     private int color;
+
+    @Ignore
     private ArrayList<Item> items = new ArrayList<>();
 
     public SongList(){
     }
 
-    public void setSize(String size) {
+    public void setSize(int size) {
         this.size = size;
     }
 
+    @Ignore
     public boolean containItem(Item item){
 
         for(Item i : items){
@@ -33,14 +52,17 @@ public class SongList implements Serializable {
         return false;
     }
 
+    @Ignore
     public int getColor() {
         return color;
     }
 
+    @Ignore
     public void setColor(int color) {
         this.color = color;
     }
 
+    @Ignore
     public String getTableName(){
         if(title != null){
             char[] chars=title.toCharArray();
@@ -80,14 +102,17 @@ public class SongList implements Serializable {
         return items.size();
     }
 
+    @Ignore
     public ArrayList<Item> getSongList() {
         return items;
     }
 
+    @Ignore
     public void setSongList(ArrayList<Item> songList) {
         this.items = songList;
     }
 
+    @Ignore
     public boolean addSong(Item item){
         if(item == null){
             return false;
@@ -95,11 +120,13 @@ public class SongList implements Serializable {
         if (items.contains(item))
             return false;
         items.add(0, item);
-        int count = Integer.valueOf(size);
-        size = String.valueOf(count++);
+        int count = size;
+        size = ++count;
         return true;
 
     }
+
+    @Ignore
     public boolean removeSong(Item item){
         if(item == null){
             return false;
@@ -109,7 +136,7 @@ public class SongList implements Serializable {
         }
         items.remove(item);
         int count = Integer.valueOf(size);
-        size = String.valueOf(count--);
+        size = --count;
         return  true;
     }
 

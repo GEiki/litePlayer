@@ -3,6 +3,9 @@ package com.dedaodemo.model;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.reactivex.Observable;
 
 /**
@@ -16,13 +19,15 @@ public interface ISongModel {
      */
     Observable addSong(SongList songList, Item item);
 
+    Observable addSongs(SongList songList, ArrayList<Item> list);
+
     /**
      * 从歌单中移除歌曲
      */
-    Observable removeSong(SongList songList, Item item);
+    Observable removeSong(SongList songList, ArrayList<Item> item);
 
     /**
      * 加载歌单中的歌曲
      */
-    Observable loadSongData(SongList songList);
+    Observable<List<Item>> loadSongData(SongList songList);
 }

@@ -24,7 +24,6 @@
 
         <service
             android:name=".service.MusicService"
-            android:process=":remote"
             android:enabled="true"
             android:exported="true" />
 

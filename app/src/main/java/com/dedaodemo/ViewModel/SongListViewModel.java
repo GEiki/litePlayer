@@ -3,59 +3,162 @@ package com.dedaodemo.ViewModel;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.util.Log;
 
+import com.dedaodemo.MyApplication;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.common.SongManager;
-import com.dedaodemo.model.SongModel;
+import com.dedaodemo.model.ISheetModel;
+import com.dedaodemo.model.ISongModel;
+import com.dedaodemo.model.impl.SheetModelImpl;
+import com.dedaodemo.model.impl.SongModelImpl;
+import com.dedaodemo.util.ToastUtil;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Guoss on 2018/6/28.
  */
 
-public class SongListViewModel extends BaseViewModel implements SongListContract.ViewModel, SongListContract.Presenter {
+public class SongListViewModel extends ViewModel implements SongListContract.Presenter {
 
     private MutableLiveData<SongList> songListLiveData = new MutableLiveData<>();
-    private SongListContract.Model model = new SongModel(this);
+    private MutableLiveData<List<SongList>> sheetList = new MutableLiveData<>();
+    private ISongModel model = new SongModelImpl();
+    private ISheetModel sheetModel = new SheetModelImpl();
+
 
 
     @Override
-    public void setSongList(SongList songList) {
-        songListLiveData.setValue(songList);
+    public void loadSongData(final SongList songList) {
+        model.loadSongData(songList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new io.reactivex.Observer<List<Item>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull List<Item> o) {
+                        if (o != null) {
+                            songList.setSongList((ArrayList<Item>) o);
+                            songListLiveData.setValue(songList);
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.e("LoadSongData", e.getMessage());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     @Override
     public void addSong(ArrayList<Item> items, SongList songList) {
-        model.addSongToSongList(songList, items);
+        model.addSongs(songList, items)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new io.reactivex.Observer() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Object o) {
+                        ToastUtil.showShort(MyApplication.getMyApplicationContext(), "添加成功");
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+    @Override
+    public void removeSong(final ArrayList<Item> items) {
+        model.removeSong(songListLiveData.getValue(), items)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new io.reactivex.Observer() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull Object o) {
+                        SongList songList = songListLiveData.getValue();
+                        songList.getSongList().removeAll(items);
+                        songListLiveData.setValue(songList);
+                        ToastUtil.showShort(MyApplication.getMyApplicationContext(), "移除成功");
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     @Override
-    public void requestProgress(SongManager.IProgressCallback callback) {
-        SongManager.getInstance().requestProgress(callback);
+    public MutableLiveData<List<SongList>> getSheetListLiveData() {
+        return sheetList;
     }
 
     @Override
-    public void removeSong(ArrayList<Item> items) {
-        model.removeSongFromSongList(songListLiveData.getValue(), items);
-    }
+    public void loadSheetList() {
+        sheetModel.loadData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new io.reactivex.Observer<List<SongList>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
-    @Override
-    public void seekTo(int progress) {
-        SongManager.getInstance().seekTo(progress);
-    }
+                    }
 
+                    @Override
+                    public void onNext(@NonNull List<SongList> o) {
+                        sheetList.setValue(o);
+                    }
 
-    @Override
-    public void onAddSongSuccess(SongList songList) {
-        songListLiveData.postValue(songList);
-    }
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.e("loadSheetList", e.getMessage());
+                    }
 
-    @Override
-    public void onRemoveSongSuccess(SongList songList) {
-        songListLiveData.postValue(songList);
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     @Override

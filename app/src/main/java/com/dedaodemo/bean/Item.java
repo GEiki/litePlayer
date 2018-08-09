@@ -1,6 +1,11 @@
 package com.dedaodemo.bean;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
+
+import com.dedaodemo.common.Constant;
 
 import java.io.Serializable;
 
@@ -8,18 +13,18 @@ import java.io.Serializable;
  * Created by guoss on 2017/10/27.
  */
 
+@Entity(primaryKeys = {"song_name", "author_name"})
 public class Item implements Serializable
 {
-    public static final int INTERNET_MUSIC = 1;
-    public static final int LOCAL_MUSIC = 2;
-
+    @NonNull
+    @ColumnInfo(name = "author_name")
     private String author;
-    private String title = "默认歌曲";
+    @NonNull
+    @ColumnInfo(name = "song_name")
+    private String title;
     private String time;
-    private String content;
     private String path;
-    private String size;
-    private String URL;
+    private long size;
     private String lrc;
     private String pic;
     private int type;
@@ -29,7 +34,7 @@ public class Item implements Serializable
     }
 
     public void setType(int type) {
-        if(type != INTERNET_MUSIC && type != LOCAL_MUSIC){
+        if (type != Constant.INTERNET_MUSIC && type != Constant.LOCAL_MUSIC) {
             throw new IllegalArgumentException("invaild type");
         }else {
             this.type = type;
@@ -53,23 +58,16 @@ public class Item implements Serializable
         this.pic = pic;
     }
 
-    public String getURL() {
-        return URL;
-    }
-
-    public void setURL(String URL) {
-        this.URL = URL;
-    }
 
     public int getId() {
         return title.hashCode();
     }
 
-    public String getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -104,15 +102,6 @@ public class Item implements Serializable
     }
 
 
-    public String getContent()
-    {
-        return content;
-    }
-
-    public void setContent(String content)
-    {
-        this.content = content;
-    }
 
     public String getTime()
     {

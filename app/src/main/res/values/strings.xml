@@ -14,4 +14,5 @@
 
     <string name="default_song_name">默认歌曲</string>
     <string name="behavior_footer">com.dedaodemo.behavior.footerBehavior</string>
+    <string name="sheet_local_music">本地音乐</string>
 </resources>

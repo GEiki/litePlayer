@@ -20,8 +20,8 @@ public interface ItemDao {
     @Query("SELECT * FROM Item")
     List<Item> queryAll();
 
-    @Query("SELECT * FROM item WHERE title = song_name AND author = author_name")
-    Item queryByName(String song_name, String author_name);
+    @Query("SELECT * FROM item WHERE song_name = :title AND author_name = :author")
+    Item queryByName(String title, String author);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Item... items);

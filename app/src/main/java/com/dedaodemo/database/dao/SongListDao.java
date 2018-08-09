@@ -17,7 +17,7 @@ import java.util.List;
 @Dao
 public interface SongListDao {
 
-    @Query("SELECT　* FROM SongList")
+    @Query("SELECT * FROM SongList")
     List<SongList> queryAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

@@ -2,6 +2,7 @@ package com.dedaodemo.ui;
 
 
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -26,12 +27,10 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.behavior.FooterBehavior;
 import com.dedaodemo.common.Constant;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * 包含bottomPlaybar的fragment
@@ -67,21 +66,7 @@ public abstract class BaseBottomFragment extends Fragment {
     private BaseContract.Presenter baseViewModel;
     private Handler handler = new Handler();
     private Timer timer = new Timer(true);
-    private TimerTask progressTask = new TimerTask() {
-        @Override
-        public void run() {
-                baseViewModel.requestProgress(new SongManager.IProgressCallback() {
-                    @Override
-                    public void onResponse(int position, long duration) {
-                        seekBar.setMax((int) duration);
-                        seekBar.setProgress(position);
-                        tv_progress.setText(Util.durationToformat(position));
-                        tv_duration.setText(Util.durationToformat(duration));
 
-                    }
-                });
-        }
-    };
 
 
     public BaseBottomFragment() {
@@ -98,12 +83,11 @@ public abstract class BaseBottomFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        baseViewModel = getViewModel();
+        baseViewModel = ViewModelProviders.of(getActivity()).get(BaseViewModel.class);
         if (getArguments() != null) {
         }
     }
 
-    protected abstract BaseViewModel getViewModel();
 
     @Nullable
     @Override
@@ -113,8 +97,6 @@ public abstract class BaseBottomFragment extends Fragment {
 //        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         initBottomPlayBar((ViewGroup) view);
         initPlayDialog();
-        //开始监听进度
-        timer.schedule(progressTask, 1000, 1000);
         observeLiveData();
         baseViewModel.initBottomBar();
 
@@ -243,30 +225,36 @@ public abstract class BaseBottomFragment extends Fragment {
      * 添加观察者
      */
     private void observeLiveData() {
-        baseViewModel.observeCurrentSong(this, new Observer<Item>() {
+        baseViewModel.observeData(BaseViewModel.CURRENT_SONG_DATA, this, new Observer<Item>() {//注册当前歌曲观察者
             @Override
             public void onChanged(@Nullable Item item) {
+                if (item == null) {
+                    return;
+                }
                 tv_title.setText(item.getTitle());
                 tv_title_expand.setText(item.getTitle());
                 tv_aritist.setText(item.getAuthor());
                 tv_artist_expand.setText(item.getAuthor());
             }
         });
-        baseViewModel.observeCurrentSongList(this, new Observer<SongList>() {
+        baseViewModel.observeData(BaseViewModel.CURRENT_LIST_DATA, this, new Observer<SongList>() {
             @Override
             public void onChanged(@Nullable SongList songList) {
                 //歌单变化
             }
         });
-        baseViewModel.observePlayMode(this, new Observer<String>() {
+        baseViewModel.observeData(BaseViewModel.PLAY_MODE_DATA, this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 //播放模式变化
             }
         });
-        baseViewModel.observePlayState(this, new Observer<Boolean>() {
+        baseViewModel.observeData(BaseViewModel.IS_PLAYING_DATA, this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean isPlaying) {
+                if (isPlaying == null) {
+                    return;
+                }
                 if (isPlaying) {
                     iv_play.setVisibility(View.GONE);
                     iv_pause.setVisibility(View.VISIBLE);
@@ -281,9 +269,11 @@ public abstract class BaseBottomFragment extends Fragment {
                 //播放状态变化
             }
         });
-        baseViewModel.observeErrorState(this, new Observer<Boolean>() {
+        baseViewModel.observeData(BaseViewModel.ERROR_FLAGS_DATA, this, new Observer<Boolean>() {
             @Override
             public void onChanged(@Nullable Boolean errorFlags) {
+                if (errorFlags == null)
+                    return;
                 if (errorFlags) {
                     ToastUtil.showShort(getActivity(), "出了点错误，请重试或换一首歌曲");
                 }
@@ -369,7 +359,9 @@ public abstract class BaseBottomFragment extends Fragment {
         bottom_play_bar.setVisibility(visibility);
     }
 
-    protected abstract void play(int pos);
+    public void play(SongList songList, Item item) {
+        baseViewModel.playSong(songList, item);
+    }
 
     private void pause() {
         baseViewModel.pause();

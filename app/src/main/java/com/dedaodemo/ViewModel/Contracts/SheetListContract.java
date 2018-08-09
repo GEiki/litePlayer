@@ -29,19 +29,6 @@ public class SheetListContract {
         void removeObserveSongLists(Observer<ArrayList<SongList>> observer);
     }
 
-    public interface ViewModel {
-        public void loadDataSuccess(ArrayList<SongList> sheetList);
-
-        public void loadFail(String msg);
-
-        public void createSongListSuccess(ArrayList<SongList> sheetList);
-
-        public void removeSongListSuccess(ArrayList<SongList> sheetList);
-
-        public void createSongListFail(String msg);
-
-        public void removeSongListFail(String msg);
-    }
 
     public interface Model {
         public void addSongs(SongList songList, ArrayList<Item> items);

@@ -1,10 +1,10 @@
 package com.dedaodemo.model;
 
+import com.dedaodemo.bean.CurrentPlayStateBean;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.Observable;
 
@@ -15,11 +15,14 @@ import io.reactivex.Observable;
 public interface ISheetModel {
     Observable addSongs(SongList songList, ArrayList<Item> items);
 
-    Observable createSongList(SongList songList, int size);
+    Observable createSongList(SongList songList);
 
     Observable removeSongList(SongList songList);
 
     Observable loadData();
 
-    Observable saveState(List<Item> list, Item item);
+    Observable saveState(CurrentPlayStateBean currentPlayStateBean);
+
+    Observable loadPlayList();
+
 }

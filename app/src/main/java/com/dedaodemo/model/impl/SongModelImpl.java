@@ -5,6 +5,7 @@ import com.dedaodemo.bean.SongList;
 import com.dedaodemo.model.ISongModel;
 import com.dedaodemo.util.DatabaseUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -31,11 +32,13 @@ public class SongModelImpl implements ISongModel {
     }
 
     @Override
-    public Observable removeSong(final SongList songList, final Item item) {
+    public Observable addSongs(final SongList songList, final ArrayList<Item> list) {
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Boolean> emitter) throws Exception {
-                DatabaseUtil.deleteSongFromSongList(songList, item);
+                for (Item item : list) {
+                    DatabaseUtil.insertSongToSongList(songList, item);
+                }
                 emitter.onNext(true);
                 emitter.onComplete();
             }
@@ -43,7 +46,21 @@ public class SongModelImpl implements ISongModel {
     }
 
     @Override
-    public Observable loadSongData(final SongList songList) {
+    public Observable removeSong(final SongList songList, final ArrayList<Item> items) {
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Boolean> emitter) throws Exception {
+                for (Item item : items) {
+                    DatabaseUtil.deleteSongFromSongList(songList, item);
+                }
+                emitter.onNext(true);
+                emitter.onComplete();
+            }
+        });
+    }
+
+    @Override
+    public Observable<List<Item>> loadSongData(final SongList songList) {
         return Observable.create(new ObservableOnSubscribe<List<Item>>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<List<Item>> emitter) throws Exception {

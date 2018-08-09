@@ -55,6 +55,8 @@ public class Constant {
     public static final int ACTION_ERROR = 10;
     //关闭
     public static final int ACTION_CLOSE = 11;
+    //更新播放状态
+    public static final int ACTION_UPDATE_STATE = 12;
 
 
     /**
@@ -83,5 +85,31 @@ public class Constant {
     public static final String ACTION_N_NEXT = "com.dedaodemo.action.next";
     public static final String ACTION_N_PAUSE = "com.dedaodemo.action.pause";
     public static final String ACTION_N_CLOSE = "com.dedaodemo.action.close";
+    public static final String ACTION_N_RE_PLAY = "com.dedaodemo.action.replay";
+    public static final String ACTION_N_PLAYING = "com.dedaodemo.action.playing";
+    public static final String ACTION_N_POSITION = "com.dedaodemo.action.position";
+    public static final String ACTION_N_SEEK_TO = "com.dedaodemo.action.seekto";
+    public static final String ACTION_N_INIT = "com.dedaodemo.action.init";
+
+    /**
+     * 表名
+     */
+    public static final String STATE_TABLE_NAME = "current_play_list";
+    public static final String ALL_SONG_TABLE_NAME = "全部歌曲";
+
+    /**
+     * 歌曲类型
+     */
+    public static final int INTERNET_MUSIC = 1;
+    public static final int LOCAL_MUSIC = 2;
+
+    public class CurrentPlayState {
+        public static final String KEY_PLAY_LIST = "playList";
+    }
+
+    public static final String BASE_BACK_STACK = "base_back_stack";
+    public static final String FRAGMENT_FLAGS = "fragment_flags";
+
+
 
 }

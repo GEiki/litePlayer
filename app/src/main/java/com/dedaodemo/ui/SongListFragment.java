@@ -30,7 +30,6 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.R;
-import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.ViewModel.SongListViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
@@ -38,17 +37,17 @@ import com.dedaodemo.adapter.ChooseSheetAdapter;
 import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.common.SongManager;
-import com.dedaodemo.util.ToastUtil;
+import com.dedaodemo.common.Constant;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class SongListFragment extends BaseBottomFragment implements View.OnClickListener, BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
 
     public static String TAG_SONG_LIST_FRAGMENT = "SongListFragment";
     public static final String ARG_SONG_LIST = "songList";
-    private SongList songList;
+    private SongList mSongList;
 
 
     private Toolbar toolbar;
@@ -81,9 +80,9 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         viewModel = ViewModelProviders.of(this).get(SongListViewModel.class);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
-            songList = (SongList) bundle.getSerializable(ARG_SONG_LIST);
-            preSize = songList.getSize();
-            viewModel.setSongList(songList);
+            mSongList = (SongList) bundle.getSerializable(ARG_SONG_LIST);
+            preSize = mSongList.getSize();
+            viewModel.loadSongData(mSongList);
         }
         super.onCreate(savedInstanceState);
     }
@@ -97,7 +96,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         super.onCreateView(inflater, container, savedInstanceState);
         addHeaderImgView(mView, inflater);
         toolbar = mView.findViewById(R.id.toolbar);
-        toolbar.setTitle(songList.getTitle());
+        toolbar.setTitle(mSongList.getTitle());
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         /**
@@ -123,17 +122,10 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         songListObserver = new Observer<SongList>() {
             @Override
             public void onChanged(@Nullable SongList mSongList) {
-                if (songList.getTitle().equals(mSongList.getTitle()) && mSongList.getSize() < preSize) {
-                    adapter.setmData(songList.getSongList());
-                    preSize = mSongList.getSize();
-                    recyclerView.setAdapter(adapter);
-                    ToastUtil.showShort(getActivity(), "移除歌曲成功");
-                } else if (songList.getTitle().equals(mSongList.getTitle()) && mSongList.getSize() == preSize) {
-                    //do nothing
-                } else {
-                    ToastUtil.showShort(getActivity(), "添加成功");
-                }
-
+                if (mSongList == null)
+                    return;
+                adapter.setmData(mSongList.getSongList());
+                recyclerView.setAdapter(adapter);
             }
         };
         viewModel.observeSongList(getActivity(), songListObserver);
@@ -153,7 +145,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
         recyclerView.setLayoutParams(layoutParams);
         adapter = new MListAdapter(getContext());
-        adapter.setmData(songList.getSongList());
+        adapter.setmData(mSongList.getSongList());
         adapter.setMenuId(R.menu.song_menu);
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(this);
@@ -162,18 +154,18 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
     @Override
     public void onItemClick(View v, int position) {
-        play(position);
+        play(mSongList, mSongList.getSongList().get(position));
     }
 
     private void addHeaderImgView(View view, LayoutInflater inflater) {
         iv_head = mView.findViewById(R.id.iv_head);
         //尝试加载专辑封面
         Item item = null;
-        if (songList.getSongList() != null && !songList.getSongList().isEmpty()) {
-            item = songList.getSongList().get(0);
+        if (mSongList.getSongList() != null && !mSongList.getSongList().isEmpty()) {
+            item = mSongList.getSongList().get(0);
         }
 
-        if (item == null || item.getType() == Item.LOCAL_MUSIC) {
+        if (item == null || item.getType() == Constant.LOCAL_MUSIC) {
             Glide.with(getContext())
                     .load(R.drawable.default_songlist_background)
                     .into(iv_head);
@@ -197,10 +189,6 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         }
     }
 
-    @Override
-    protected BaseViewModel getViewModel() {
-        return (BaseViewModel) viewModel;
-    }
 
 
     @Override
@@ -208,10 +196,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         super.setBottomBarVisibility(visibility);
     }
 
-    @Override
-    protected void play(int pos) {
-        ((BaseViewModel) viewModel).playSong(songList, songList.getSongList().get(pos));
-    }
+
 
     @Override
     public void onResume() {
@@ -291,13 +276,21 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
         view.setLayoutManager(new LinearLayoutManager(getContext()));
         final ChooseSheetAdapter adapter = new ChooseSheetAdapter(getContext());
-        adapter.setmData(SongManager.getInstance().getSheetList());
+        viewModel.getSheetListLiveData().observe(this, new Observer<List<SongList>>() {
+            @Override
+            public void onChanged(@Nullable List<SongList> o) {
+                adapter.setmData((ArrayList<SongList>) o);
+            }
+        });
         adapter.setOnItemClickListener(new BaseAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 ArrayList<Item> items = new ArrayList<Item>();
                 items.add(item);
-                viewModel.addSong(items, adapter.getmData().get(position));
+                SongList songList = adapter.getmData().get(position);
+                if (!songList.getTitle().equals(mSongList.getTitle())) {
+                    viewModel.addSong(items, adapter.getmData().get(position));
+                }
                 if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
                     bottomSheetDialog.dismiss();
                 }
@@ -306,6 +299,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         view.setAdapter(adapter);
         bottomSheetDialog.setContentView(view);
         bottomSheetDialog.show();
+        viewModel.loadSheetList();
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.dedaodemo;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDex;
 
 import com.danikula.videocache.HttpProxyCacheServer;
 import com.dedaodemo.cache.MyFileNameGenerator;
@@ -21,6 +22,12 @@ public class MyApplication extends Application {
         mContext = getApplicationContext();
         //初始化播放服务
         MusicServiceManager.getInstance().init();
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
     }
 
     public static HttpProxyCacheServer getProxyServer(){

@@ -25,11 +25,7 @@ public class SearchContract {
         public void removeObserveSearchSongList(Observer<ArrayList<Item>> observer);
     }
 
-    public interface ViewModel {
-        public void onSearchSuccess(ArrayList<Item> resultList);
 
-        public void onSearchFail(String msg);
-    }
 
     public interface Model {
         public void searchSongOnline(SearchBean bean);

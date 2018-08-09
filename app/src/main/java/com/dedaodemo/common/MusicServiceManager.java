@@ -18,59 +18,43 @@ import com.dedaodemo.service.MusicService;
  */
 
 public class MusicServiceManager {
+    public interface OnMusicListener {
+        void onMusicCallBack(int msg);
+    }
 
-    private static class MessengerHandler extends android.os.Handler {
+    public interface OnProgressListener {
+        void progress(int position, long duration);
+    }
+
+    private OnMusicListener onPlayListener;
+    private OnProgressListener onProgressListener;
+
+    private class MessengerHandler extends android.os.Handler {
+
+
         public MessengerHandler() {
             super();
         }
 
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.arg1) {
-                case Constant.ACTION_REQUEST_DURATION: {
-                    Bundle bundle = msg.getData();
-                    SongManager.getInstance().updateProgress(bundle.getInt(Constant.POSITION), bundle.getLong(Constant.DURATION));
-                    break;
-                }
-                case Constant.ACTION_RE_PLAY: {
-                    SongManager.getInstance().onPlay();
-                    break;
-                }
-                case Constant.ACTION_ERROR: {
-                    SongManager.getInstance().onError();
-                    break;
-                }
-                case Constant.ACTION_COMPLETE: {
-                    SongManager.getInstance().nextAccordingToMode();
-                    break;
-                }
-                case Constant.ACTION_CLOSE: {
-                    MusicServiceManager.getInstance().unBindMusicService();
-                    break;
-                }
-                case Constant.ACTION_NEXT_SONG: {
-                    SongManager.getInstance().next();
-                    break;
-                }
-                case Constant.ACTION_PAUSE: {
-                    SongManager.getInstance().pause();
-                    break;
-                }
-                case Constant.ACTION_PRE_SONG: {
-                    SongManager.getInstance().pre();
-                    break;
-                }
-                default:
-                    break;
+            if (msg.arg1 == Constant.ACTION_REQUEST_DURATION && onProgressListener != null) {
+                Bundle bundle = msg.getData();
+                onProgressListener.progress(bundle.getInt(Constant.POSITION), bundle.getLong(Constant.DURATION));
+            } else if (onPlayListener != null) {
+                onPlayListener.onMusicCallBack(msg.arg1);
             }
+
         }
     }
+
 
     private static MusicServiceManager instance;
     private boolean isServiceConnecting = false;
     private Context context = MyApplication.getMyApplicationContext();
     private Messenger messenger;
     private Messenger replyMessenger = new Messenger(new MessengerHandler());
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -78,7 +62,6 @@ public class MusicServiceManager {
             messenger = new Messenger(service);
             isServiceConnecting = true;
             //连接建立后初始化播放器
-            SongManager.getInstance().init();
         }
 
         @Override
@@ -92,6 +75,7 @@ public class MusicServiceManager {
 
     }
 
+
     public static MusicServiceManager getInstance() {
         if (instance == null) {
             synchronized (MusicServiceManager.class) {
@@ -101,6 +85,15 @@ public class MusicServiceManager {
             }
         }
         return instance;
+    }
+
+
+    public void setOnPlayListener(OnMusicListener onPlayListener) {
+        this.onPlayListener = onPlayListener;
+    }
+
+    public void setOnProgressListener(OnProgressListener onProgressListener) {
+        this.onProgressListener = onProgressListener;
     }
 
     public void init() {

@@ -5,7 +5,6 @@ import android.arch.lifecycle.Observer;
 
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.common.SongManager;
 
 /**
  * Created by guoss on 2018/6/29.
@@ -14,35 +13,37 @@ import com.dedaodemo.common.SongManager;
 public class BaseContract {
 
     public interface Presenter {
-        public void initBottomBar();
+        void initBottomBar();
 
-        public void playSong(SongList songList, Item item);
+        void playSong(SongList songList, Item item);
 
-        public void nextSong();
+        void nextSong();
 
-        public void preSong();
+        void preSong();
 
-        public void pause();
+        void pause();
 
-        public void rePlay();
+        void rePlay();
 
-        public void setPlayMode(String mode);
+        void setPlayMode(String mode);
 
-        public void requestProgress(SongManager.IProgressCallback callback);
+        void seekTo(int progress);
 
-        public void seekTo(int progress);
+        boolean observeData(String name, LifecycleOwner owner, Observer observer);
 
-        public void observeCurrentSong(LifecycleOwner owner, Observer<Item> observer);
+        void removeObserves(LifecycleOwner owner);
 
-        public void observeCurrentSongList(LifecycleOwner owner, Observer<SongList> observer);
+    }
 
-        public void observePlayState(LifecycleOwner owner, Observer<Boolean> observer);
+    public interface ViewModel {
+        void onLoadBottomBarStateSuccess(SongList songList, Item item);
 
-        public void observePlayMode(LifecycleOwner owner, Observer<String> observer);
+        void onSaveBottomBarStateSuccess();
+    }
 
-        public void observeErrorState(LifecycleOwner owner, Observer<Boolean> observer);
+    public interface Model {
+        void loadBottomBarState();
 
-        public void removeObserves(LifecycleOwner owner);
-
+        void saveBottomBarState(SongList songList, Item item);
     }
 }

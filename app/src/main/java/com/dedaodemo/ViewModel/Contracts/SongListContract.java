@@ -1,6 +1,7 @@
 package com.dedaodemo.ViewModel.Contracts;
 
 import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 
 import com.dedaodemo.bean.Item;
@@ -14,26 +15,19 @@ import java.util.ArrayList;
 
 public class SongListContract {
     public interface Presenter {
-        public void addSong(ArrayList<Item> items, SongList songList);
+        void addSong(ArrayList<Item> items, SongList songList);
 
-        public void removeSong(ArrayList<Item> items);
+        void removeSong(ArrayList<Item> items);
 
-        public void setSongList(SongList songList);
+        void loadSongData(SongList songList);
 
-        public void observeSongList(LifecycleOwner owner, Observer<SongList> observer);
+        void loadSheetList();
 
-        public void removeObserveSongList(Observer<SongList> observer);
+        MutableLiveData getSheetListLiveData();
+
+        void observeSongList(LifecycleOwner owner, Observer<SongList> observer);
+
+        void removeObserveSongList(Observer<SongList> observer);
     }
 
-    public interface ViewModel {
-        public void onAddSongSuccess(SongList songList);
-
-        public void onRemoveSongSuccess(SongList songList);
-    }
-
-    public interface Model {
-        public void addSongToSongList(SongList songList, ArrayList<Item> items);
-
-        public void removeSongFromSongList(SongList songList, ArrayList<Item> items);
-    }
 }

@@ -6,6 +6,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 
 import com.dedaodemo.bean.Item;
+import com.dedaodemo.common.Constant;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,8 @@ public class MusicPlayer {
     private OnChangeListener listener;
     private ArrayList<Item> list;
     private boolean isPrepared;
+    private MediaPlayer.OnCompletionListener completionListener;
+    private MediaPlayer.OnPreparedListener preparedListener;
     /**
      * 在线音乐标志
      */
@@ -52,32 +55,33 @@ public class MusicPlayer {
         return instance;
     }
 
-    public void play(ArrayList<Item> list, Item item, MediaPlayer.OnCompletionListener completionListener) {
+    public void play(ArrayList<Item> list, Item item) {
 
         try {
             this.list = list;
             if (mPlayer != null) {
                     mPlayer.release();
                 }
-            initPlayer(list, item, completionListener, new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mp.start();
-                    isPrepared = true;
-                    listener.onPlay();
-                }
-            });
+            initPlayer(list, item, completionListener, preparedListener);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public void setCompletionListener(MediaPlayer.OnCompletionListener completionListener) {
+        this.completionListener = completionListener;
+    }
+
+    public void setPreparedListener(MediaPlayer.OnPreparedListener preparedListener) {
+        this.preparedListener = preparedListener;
+    }
+
     public void initPlayer(ArrayList<Item> list, Item tmp, MediaPlayer.OnCompletionListener completionListener, MediaPlayer.OnPreparedListener preparedListener) {
         try {
             mPlayer = new MediaPlayer();
             String path = tmp.getPath();
-            if (tmp.getType() == Item.INTERNET_MUSIC) {//读取在线音乐
+            if (tmp.getType() == Constant.INTERNET_MUSIC) {//读取在线音乐
                 path = MyApplication.getProxyServer().getProxyUrl(path);//请求重定向至代理服务器
                 mPlayer.setDataSource(mContext, Uri.parse(path));
                 INTERNET_MUSIC_FLAG = true;
@@ -132,6 +136,9 @@ public class MusicPlayer {
     }
 
     public boolean isPlaying(){
+        if (mPlayer == null) {
+            return false;
+        }
             return mPlayer.isPlaying();
     }
 

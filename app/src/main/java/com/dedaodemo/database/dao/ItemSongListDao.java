@@ -17,8 +17,11 @@ import java.util.List;
 @Dao
 public interface ItemSongListDao {
 
-    @Query("SELECT * FROM ItemSongList WHERE sheet_name LIKE sheet")
+    @Query("SELECT * FROM ItemSongList WHERE sheet_name = :sheet")
     List<ItemSongList> queryBySheetName(String sheet);
+
+    @Query("SELECT * FROM ItemSongList")
+    List<ItemSongList> queryAll();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(ItemSongList... itemSongLists);

@@ -1,8 +1,10 @@
 package com.dedaodemo.ui;
 
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -18,11 +20,12 @@ import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.SheetListViewModel;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,6 +35,7 @@ public class AddSheetFragment extends Fragment {
     private EditText et_sheet;
     private Toolbar toolbar;
     private SheetListContract.Presenter viewModel;
+    private List<SongList> sheetList;
     public static final String TAG = "ADD_SHEET_FRAGMENT";
 
 
@@ -62,6 +66,13 @@ public class AddSheetFragment extends Fragment {
         setHasOptionsMenu(true);
 
         viewModel = ViewModelProviders.of(getActivity()).get(SheetListViewModel.class);
+        viewModel.observeSongLists(this, new Observer<ArrayList<SongList>>() {
+            @Override
+            public void onChanged(@Nullable ArrayList<SongList> songLists) {
+                sheetList = songLists;
+            }
+        });
+        viewModel.loadData();
         return v;
     }
 
@@ -96,6 +107,7 @@ public class AddSheetFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+
     private boolean checkInputText() {
         String str = et_sheet.getText().toString();
         if (str.equals("")) {
@@ -105,7 +117,7 @@ public class AddSheetFragment extends Fragment {
             ToastUtil.showShort(getActivity(), "歌单名不能超过12个字");
             return false;
         } else {
-            for (SongList list : SongManager.getInstance().getSheetList()) {
+            for (SongList list : sheetList) {
                 if (str.equals(list.getTitle())) {
                     ToastUtil.showShort(getActivity(), "不能重复创建歌单");
                     return false;

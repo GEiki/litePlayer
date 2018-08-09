@@ -9,7 +9,6 @@ import com.dedaodemo.MyApplication;
 import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.model.SearchModel;
 
 import java.util.ArrayList;
 
@@ -20,13 +19,13 @@ import java.util.ArrayList;
 public class SongManager {
 
     public interface OnPlayListener {
-        public void onPlay();
+        void onPlay();
 
-        public void onError();
+        void onError();
     }
 
     public interface IProgressCallback {
-        public void onResponse(int position, long duration);
+        void onResponse(int position, long duration);
     }
 
     private static SongManager instance;
@@ -129,14 +128,6 @@ public class SongManager {
     }
 
     public void savePlayState() {
-        if (currentSongList.getTitle().equals(Constant.SEARCH_SONG_LIST)) {
-            saveSearchListSongList(currentSongList);
-        }
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constant.SP_KEY, Context.MODE_PRIVATE);
-        sharedPreferences.edit()
-                .putString(Constant.CURRENT_SONGLIST, currentSongList.getTitle())
-                .putString(Constant.CURRENT_SONG, currentSong.getTitle())
-                .commit();
     }
 
     public void onPlay() {
@@ -287,7 +278,6 @@ public class SongManager {
      * 用于存储当前播放的搜索列表
      */
     public void saveSearchListSongList(SongList songList) {
-        new SearchModel(null).saveStateFromSearch(songList);
     }
 
     /**
@@ -296,8 +286,7 @@ public class SongManager {
 
     public void getSearchSongListFromLocal() {
 
-        currentSongList = new SearchModel(null).loadStateFromSearch();
-        curSongListLiveData.postValue(currentSongList);
+
     }
 
     public MutableLiveData<SongList> getCurSongListLiveData() {

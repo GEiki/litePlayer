@@ -26,13 +26,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.dedaodemo.R;
-import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.SheetListViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.adapter.SongListAdapter;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
@@ -68,7 +66,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        viewModel = ViewModelProviders.of(this).get(SheetListViewModel.class);
+        viewModel = ViewModelProviders.of(getActivity()).get(SheetListViewModel.class);
         getActivity().getLifecycle().addObserver((SheetListViewModel) viewModel);
         super.onCreate(savedInstanceState);
 
@@ -93,16 +91,19 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         sheetListObserve = new Observer<ArrayList<SongList>>() {
             @Override
             public void onChanged(@Nullable ArrayList<SongList> songLists) {
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+                if (songLists == null)
+                    return;
                 songListAdapter.setOnMenuItemClickListener(SheetListFragment.this);
                 songListAdapter.setmData(songLists);
                 recyclerView.setAdapter(songListAdapter);
                 sheetList = songLists;
-                if (dialog != null && dialog.isShowing()) {
-                    dialog.dismiss();
-                }
+
             }
         };
-        viewModel.observeSongLists(this, sheetListObserve);
+        viewModel.observeSongLists(getActivity(), sheetListObserve);
         viewModel.loadData();
 
 
@@ -112,6 +113,11 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         initNavigationView(mView);
         toolbar.setNavigationIcon(R.drawable.ic_action_navgation);
         return mView;
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
     }
 
     @Override
@@ -139,10 +145,6 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
 
 
 
-    @Override
-    protected BaseViewModel getViewModel() {
-        return (BaseViewModel) viewModel;
-    }
 
     @Override
     public void onAttach(Context context) {
@@ -190,7 +192,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
                 break;
             }
             case R.id.item_remove: {
-                viewModel.removeSongList(SongManager.getInstance().getSheetList().get(position));
+                viewModel.removeSongList(sheetList.get(position));
                 break;
             }
         }
@@ -208,10 +210,6 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         super.onDestroyView();
     }
 
-    @Override
-    protected void play(int pos) {
-
-    }
 
     private void showDialog() {
         if (dialog == null) {

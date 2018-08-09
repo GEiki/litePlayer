@@ -25,7 +25,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.dedaodemo.R;
-import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
 import com.dedaodemo.ViewModel.SearchViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
@@ -87,7 +86,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         searchObserve = new Observer<ArrayList<Item>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Item> items) {
-                if (mListAdapter != null) {
+                if (mListAdapter != null && items != null) {
                     mListAdapter.setmData(items);
                     recyclerView.setAdapter(mListAdapter);
                     searchList = items;
@@ -190,20 +189,12 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
             searchSongList.setSongList(searchList);
 
         }
-        ((BaseViewModel) viewModel).playSong(searchSongList, searchList.get(position));
+        play(searchSongList, searchList.get(position));
     }
 
 
-    @Override
-    protected void play(int pos) {
-
-    }
 
 
-    @Override
-    protected BaseViewModel getViewModel() {
-        return (BaseViewModel) viewModel;
-    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

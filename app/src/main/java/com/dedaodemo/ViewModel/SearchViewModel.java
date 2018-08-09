@@ -3,52 +3,40 @@ package com.dedaodemo.ViewModel;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.os.Handler;
-import android.os.Looper;
+import android.arch.lifecycle.ViewModel;
 
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
-import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
-import com.dedaodemo.common.SongManager;
-import com.dedaodemo.model.SearchModel;
-import com.dedaodemo.model.SongModel;
+import com.dedaodemo.model.ISearchModel;
+import com.dedaodemo.model.ISongModel;
+import com.dedaodemo.model.impl.SearchModelImpl;
+import com.dedaodemo.model.impl.SongModelImpl;
 import com.dedaodemo.util.ToastUtil;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Guoss on 2018/6/28.
  */
 
-public class SearchViewModel extends BaseViewModel implements SearchContract.ViewModel, SearchContract.Presenter, SongListContract.ViewModel {
+public class SearchViewModel extends ViewModel implements SearchContract.Presenter {
 
-    private SearchContract.Model model = new SearchModel(this);
-    private SongModel songModel = new SongModel(this);
+    private ISearchModel model = new SearchModelImpl();
+    private ISongModel songModel = new SongModelImpl();
     private MutableLiveData<ArrayList<Item>> searchSongList = new MutableLiveData<>();
 
 
-    @Override
-    public void seekTo(int progress) {
-        SongManager.getInstance().seekTo(progress);
-    }
 
-    @Override
-    public void requestProgress(SongManager.IProgressCallback callback) {
-        SongManager.getInstance().requestProgress(callback);
-    }
 
-    @Override
-    public void onSearchSuccess(ArrayList<Item> resultList) {
-        searchSongList.postValue(resultList);
-    }
-
-    @Override
-    public void onSearchFail(String msg) {
-
-    }
 
     @Override
     public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer) {
@@ -62,29 +50,59 @@ public class SearchViewModel extends BaseViewModel implements SearchContract.Vie
 
     @Override
     public void searchSong(SearchBean bean) {
-        model.searchSongOnline(bean);
+        model.searchSongOnline(bean)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new io.reactivex.Observer<List<Item>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(@NonNull List<Item> o) {
+                        searchSongList.setValue((ArrayList<Item>) o);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     @Override
     public void addSong(SongList songList, Item item) {
-        ArrayList<Item> items = new ArrayList<>();
-        items.add(item);
-        songModel.addSongToSongList(songList, items);
-    }
+        songModel.addSong(songList, item)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(new io.reactivex.Observer<Boolean>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
+                    }
 
-    @Override
-    public void onAddSongSuccess(SongList songList) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
-            public void run() {
+            public void onNext(@NonNull Boolean o) {
                 ToastUtil.showShort(MyApplication.getMyApplicationContext(), "添加成功");
             }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
         });
     }
 
-    @Override
-    public void onRemoveSongSuccess(SongList songList) {
 
-    }
 }

@@ -1,29 +1,18 @@
 package com.dedaodemo.ui;
 
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Explode;
 
-import com.dedaodemo.MyApplication;
-import com.dedaodemo.MyDatabaseHelper;
 import com.dedaodemo.R;
-import com.dedaodemo.bean.Item;
-import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.service.MusicService;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -49,25 +38,7 @@ public class MainActivity extends AppCompatActivity
 
         //初次启动初始化数据库
         if (launch_flags == FIRST_LAUNCH_FLAG) {
-            MyDatabaseHelper helper = new MyDatabaseHelper(MyApplication.getMyApplicationContext(), MyDatabaseHelper.SONG_DATABASE_NAME, null, 1);
-            SQLiteDatabase db = helper.getWritableDatabase();
-            SongList songList = new SongList();
-            songList.setTitle("全部歌曲");
-            songList.setSongList(new ArrayList<Item>());
-            String string = "create table if not exists " + songList.getTableName() + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
-            String string2 = "create table if not exists " + Constant.SEARCH_SONG_LIST + "(id int,title varchar(20),author varchar(10),time varchar(20),path varchar(50),size int,type int,PRIMARY KEY(id))";
-            db.execSQL(string);
-            db.execSQL(string2);
-            ContentValues cv = new ContentValues();
-            cv.put("id", 0);
-            cv.put("title", songList.getTitle());
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年mm月dd日");
-            Date date = new Date(System.currentTimeMillis());
-            songList.setCreateDate(simpleDateFormat.format(date).toString());
-            cv.put("time", simpleDateFormat.format(date).toString());
-            cv.put("size", 0);
-            db.insert("song_lists", null, cv);
-            db.close();
+
         }
 
 
@@ -112,7 +83,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onDestroy() {
-        SongManager.getInstance().savePlayState();
         MusicServiceManager.getInstance().unBindMusicService();
         super.onDestroy();
     }

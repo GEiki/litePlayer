@@ -85,13 +85,11 @@ public class SheetModelImpl implements ISheetModel {
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Boolean> emitter) throws Exception {
-                SongList songList = new SongList();
-                songList.setTitle(Constant.STATE_TABLE_NAME);
                 SharedPreferences sharedPreferences = MyApplication.getMyApplicationContext().getSharedPreferences(Constant.SP_KEY, Context.MODE_PRIVATE);
                 String json = GsonUtil.bean2json(currentPlayStateBean, CurrentPlayStateBean.class);
                 sharedPreferences.edit()
                         .putString(Constant.CurrentPlayState.KEY_PLAY_LIST, json)
-                        .apply();
+                        .commit();
                 emitter.onNext(true);
                 emitter.onComplete();
             }

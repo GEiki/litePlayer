@@ -21,7 +21,6 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.model.ISheetModel;
 import com.dedaodemo.model.impl.SheetModelImpl;
 import com.dedaodemo.util.ToastUtil;
@@ -39,7 +38,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by guoss on 2018/6/29.
  */
 
-public class BaseViewModel extends ViewModel implements BaseContract.Presenter, LifecycleObserver, BaseContract.ViewModel {
+public class BaseViewModel extends ViewModel implements BaseContract.Presenter, LifecycleObserver {
 
     public class MusicReceiver extends BroadcastReceiver {
         @Override
@@ -74,10 +73,15 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
     public void playSong(final SongList songList, final Item item) {
         //保存播放状态
         CurrentPlayStateBean bean = new CurrentPlayStateBean();
-        bean.setIndex(songList.getSongList().indexOf(item));
-        bean.setMode(SongManager.getInstance().getPlayMode());
+        int index = songList.getSongList().indexOf(item);
+        String mode = Constant.MODE_RANDOM;
+        bean.setIndex(index);
+        bean.setMode(mode);
         bean.setPlayList(songList.getSongList());
-        bottomBarModel.saveState(bean).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new io.reactivex.Observer() {
+        bottomBarModel.saveState(bean)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new io.reactivex.Observer() {
             @Override
             public void onSubscribe(@NonNull Disposable d) {
 
@@ -153,34 +157,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         intentFilter.addAction(Constant.ACTION_N_POSITION);
         mContext.registerReceiver(receiver, intentFilter);
 
-        bottomBarModel.loadPlayList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new io.reactivex.Observer<CurrentPlayStateBean>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
-                    }
-
-                    @Override
-                    public void onNext(CurrentPlayStateBean o) {
-                        curPlaySong.setValue(o.getPlayList().get(o.getIndex()));
-                        SongList songList = new SongList();
-                        songList.setSongList((ArrayList<Item>) (o.getPlayList()));
-                        songList.setTitle("播放列表");
-                        curPlayList.setValue(songList);
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -198,20 +175,36 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         mContext.unregisterReceiver(receiver);
     }
 
+    @Override
+    public void init(final boolean startFlags) {
+        Intent intent = new Intent();
+        intent.setAction(Constant.ACTION_N_ACTIVITY_START);
+        mContext.sendBroadcast(intent);
+    }
 
     @Override
     public void initBottomBar() {
         for (String k : liveDataMap.keySet()) {
-            liveDataMap.get(k).setValue(liveDataMap.get(k).getValue());
+            if (k != POSTION) {
+                liveDataMap.get(k).setValue(liveDataMap.get(k).getValue());
+            }
+
         }
     }
+
 
     private void handleIntent(Intent intent) {
         switch (intent.getAction()) {
             case Constant.ACTION_N_PLAYING: {
-                Bundle bundle = intent.getExtras();
-                int pos = bundle.getInt(Constant.CURRENT_SONG);
-                curPlaySong.setValue(curPlayList.getValue().getSongList().get(pos));
+                boolean p = intent.getBooleanExtra(Constant.IS_PLAYING, false);
+                isPlaying.setValue(p);
+                int index = intent.getIntExtra(Constant.CURRENT_SONG, 0);
+                ArrayList<Item> list = (ArrayList<Item>) (intent.getSerializableExtra(Constant.CURRENT_SONGLIST));
+                curPlaySong.setValue(list.get(index));
+                SongList songList = new SongList();
+                songList.setTitle("播放列表");
+                songList.setSongList(list);
+                curPlayList.setValue(songList);
                 break;
             }
             case Constant.ACTION_N_POSITION: {
@@ -222,6 +215,11 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
             default:
                 break;
         }
+    }
+
+    @Override
+    public MutableLiveData<Item> getCurPlaySong() {
+        return curPlaySong;
     }
 
     @Override
@@ -266,15 +264,6 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         mContext.sendBroadcast(intent);
     }
 
-    @Override
-    public void onLoadBottomBarStateSuccess(SongList songList, Item item) {
-        curPlayList.postValue(songList);
-        curPlaySong.postValue(item);
-    }
-
-    @Override
-    public void onSaveBottomBarStateSuccess() {
-    }
 
     @Override
     public void pause() {
@@ -292,6 +281,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
             songList.setSongList(curPlayList.getValue().getSongList());
             songList.setTitle("播放列表");
             playSong(songList, curPlaySong.getValue());
+            first_flags = false;
         } else {
             Intent intent = new Intent();
             intent.setAction(Constant.ACTION_N_RE_PLAY);

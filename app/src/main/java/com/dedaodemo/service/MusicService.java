@@ -23,6 +23,8 @@ import com.dedaodemo.common.Constant;
 import com.dedaodemo.ui.MainActivity;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MusicService extends Service implements MediaPlayer.OnCompletionListener,
@@ -39,7 +41,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private ArrayList<Item> playlist;
     private int index;
     private String playMode = Constant.MODE_ORDER;
-    private boolean initFlag = false;
+    private boolean initFlag = true;
+    private Timer timer = new Timer();
 
     public MusicService() {
     }
@@ -67,6 +70,13 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     @Override
     public void pause() {
         mp.pause();
+        timer.cancel();
+        Intent intent = new Intent();
+        intent.setAction(Constant.ACTION_N_PLAYING);
+        intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+        intent.putExtra(Constant.CURRENT_SONG, index);
+        intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
+        sendBroadcast(intent);
     }
 
     @Override
@@ -86,12 +96,30 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             buildNotification();
             Intent intent = new Intent();
             intent.setAction(Constant.ACTION_N_PLAYING);
-            Bundle bundle = new Bundle();
-            bundle.putInt(Constant.CURRENT_SONG, index);
-            intent.putExtras(bundle);
+            intent.putExtra(Constant.CURRENT_SONG, index);
+            intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
             sendBroadcast(intent);
             initFlag = false;
+            startSendProgress();
+        } else {
+            buildNotification();
         }
+
+    }
+
+    private void startSendProgress() {
+        timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                Intent intent = new Intent();
+                intent.setAction(Constant.ACTION_N_POSITION);
+                intent.putExtra(Constant.POSITION, mp.getCurrentPosition());
+                sendBroadcast(intent);
+            }
+        };
+        timer.schedule(timerTask, 0, 1000);
 
     }
 
@@ -129,6 +157,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         intentFilter.addAction(Constant.ACTION_N_PLAY);
         intentFilter.addAction(Constant.ACTION_N_CLOSE);
         intentFilter.addAction(Constant.ACTION_N_RE_PLAY);
+        intentFilter.addAction(Constant.ACTION_N_SEEK_TO);
+        intentFilter.addAction(Constant.ACTION_N_INIT);
+        intentFilter.addAction(Constant.ACTION_N_ACTIVITY_START);
         notificationReceiver = new NotificationReceiver();
         registerReceiver(notificationReceiver, intentFilter);
         return super.onStartCommand(intent, flags, startId);
@@ -137,6 +168,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private void handleReceiveIntent(Intent intent) {
         switch (intent.getAction()) {
             case Constant.ACTION_N_PLAY: {
+                initFlag = false;
                 Bundle bundle = intent.getExtras();
                 playlist = (ArrayList<Item>) bundle.getSerializable(Constant.CURRENT_SONGLIST);
                 index = bundle.getInt(Constant.CURRENT_SONG);
@@ -144,10 +176,12 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 break;
             }
             case Constant.ACTION_N_NEXT: {
+                initFlag = false;
                 next();
                 break;
             }
             case Constant.ACTION_N_PRE: {
+                initFlag = false;
                 previous();
                 break;
             }
@@ -167,11 +201,25 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 break;
             }
             case Constant.ACTION_N_INIT: {
-                initFlag = true;
                 Bundle bundle = intent.getExtras();
                 playlist = (ArrayList<Item>) bundle.getSerializable(Constant.CURRENT_SONGLIST);
                 index = bundle.getInt(Constant.CURRENT_SONG);
                 play(index);
+                break;
+            }
+            case Constant.ACTION_N_SEEK_TO: {
+                Bundle data = intent.getExtras();
+                int x = data.getInt(Constant.POSITION);
+                mp.seekTo(x);
+                break;
+            }
+            case Constant.ACTION_N_ACTIVITY_START: {
+                Intent back = new Intent();
+                back.setAction(Constant.ACTION_N_PLAYING);
+                back.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+                back.putExtra(Constant.CURRENT_SONG, index);
+                back.putExtra(Constant.CURRENT_SONGLIST, playlist);
+                sendBroadcast(back);
                 break;
             }
             default:
@@ -187,6 +235,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public void play(int index) {
         if (playlist != null && playlist.size() > 0) {
             if (index > 0 && index < playlist.size() && mp != null) {
+                timer.cancel();
                 mp.play(playlist, playlist.get(index));
                 this.index = index;
             }
@@ -200,6 +249,13 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public void replay() {
         if (mp != null && !mp.isPlaying()) {
             mp.rePlay();
+            startSendProgress();
+            Intent intent = new Intent();
+            intent.setAction(Constant.ACTION_N_PLAYING);
+            intent.putExtra(Constant.CURRENT_SONG, index);
+            intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
+            sendBroadcast(intent);
         }
 
     }
@@ -210,6 +266,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public void next() {
         if (index < playlist.size() - 1) {
             play(index + 1);
+
         }
     }
     /**
@@ -254,6 +311,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             author = "未知歌手";
         }
         Intent intent = new Intent(this, MainActivity.class);
+        intent.setAction(Constant.ACTION_N_FROM_SERVICE);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(intent);
@@ -271,7 +329,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             PendingIntent pppIntent = PendingIntent.getBroadcast(this, 0, ppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             ppAction = new Notification.Action(R.drawable.ic_action_pause, "暂停", pppIntent);
         } else {
-            ppIntent.setAction(Constant.ACTION_N_PLAY);
+            ppIntent.setAction(Constant.ACTION_N_RE_PLAY);
             PendingIntent pppIntent = PendingIntent.getBroadcast(this, 0, ppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             ppAction = new Notification.Action(R.drawable.ic_action_play, "播放", pppIntent);
         }

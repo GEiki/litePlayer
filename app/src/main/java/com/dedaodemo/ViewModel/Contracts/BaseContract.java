@@ -1,6 +1,7 @@
 package com.dedaodemo.ViewModel.Contracts;
 
 import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 
 import com.dedaodemo.bean.Item;
@@ -14,6 +15,8 @@ public class BaseContract {
 
     public interface Presenter {
         void initBottomBar();
+
+        void init(boolean startFlags);
 
         void playSong(SongList songList, Item item);
 
@@ -33,17 +36,9 @@ public class BaseContract {
 
         void removeObserves(LifecycleOwner owner);
 
+        MutableLiveData<Item> getCurPlaySong();
+
     }
 
-    public interface ViewModel {
-        void onLoadBottomBarStateSuccess(SongList songList, Item item);
 
-        void onSaveBottomBarStateSuccess();
-    }
-
-    public interface Model {
-        void loadBottomBarState();
-
-        void saveBottomBarState(SongList songList, Item item);
-    }
 }

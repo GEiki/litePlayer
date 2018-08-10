@@ -12,7 +12,6 @@ import android.transition.Explode;
 import com.dedaodemo.R;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
-import com.dedaodemo.service.MusicService;
 
 public class MainActivity extends AppCompatActivity
 {
@@ -28,9 +27,6 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.container_layout);
 
-        //绑定音乐服务
-        Intent intent = new Intent(this, MusicService.class);
-        MusicServiceManager.getInstance().bindService(intent);
 
         SharedPreferences sharedPreferences = getSharedPreferences(Constant.SP_KEY_LANUCH, MODE_PRIVATE);
         launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
@@ -49,6 +45,16 @@ public class MainActivity extends AppCompatActivity
         SheetListFragment sheetListFragment = (SheetListFragment) fm.findFragmentById(R.id.fragment_container);
         if (sheetListFragment == null) {
             sheetListFragment = SheetListFragment.newInstance();
+            //activity是否从service启动
+            Intent intent = getIntent();
+            if (intent != null) {
+                String action = intent.getAction();
+                if (Constant.ACTION_N_FROM_SERVICE.equals(action)) {
+                    Bundle b = new Bundle();
+                    b.putBoolean(Constant.ACTION_N_FROM_SERVICE, true);
+                    sheetListFragment.setArguments(b);
+                }
+            }
             Explode explode = new Explode();
             explode.setDuration(800);
             sheetListFragment.setEnterTransition(explode);
@@ -65,6 +71,11 @@ public class MainActivity extends AppCompatActivity
 
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override

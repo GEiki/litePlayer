@@ -26,11 +26,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.dedaodemo.R;
+import com.dedaodemo.ViewModel.BaseViewModel;
+import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.SheetListViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.adapter.SongListAdapter;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.common.Constant;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
@@ -44,9 +47,14 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     private RecyclerView recyclerView;
     private SongListAdapter songListAdapter;
     private SheetListContract.Presenter viewModel;
+    private BaseContract.Presenter baseViewModel;
     private ArrayList<SongList> sheetList;
     private AlertDialog dialog;
     private Observer<ArrayList<SongList>> sheetListObserve;
+    /**
+     * 从服务启动的标志
+     */
+    public boolean startFlags = false;
 
 
     private Toolbar toolbar;
@@ -59,15 +67,19 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
 
     public static SheetListFragment newInstance() {
         SheetListFragment fragment = new SheetListFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         viewModel = ViewModelProviders.of(getActivity()).get(SheetListViewModel.class);
+        baseViewModel = ViewModelProviders.of(getActivity()).get(BaseViewModel.class);
         getActivity().getLifecycle().addObserver((SheetListViewModel) viewModel);
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+            startFlags = bundle.getBoolean(Constant.ACTION_N_FROM_SERVICE, false);
+        }
+        baseViewModel.init(startFlags);
         super.onCreate(savedInstanceState);
 
     }

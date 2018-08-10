@@ -4,7 +4,6 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.Observer;
 import android.support.annotation.NonNull;
 
-import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 
 import java.util.ArrayList;
@@ -30,14 +29,5 @@ public class SheetListContract {
     }
 
 
-    public interface Model {
-        public void addSongs(SongList songList, ArrayList<Item> items);
-
-        public void createSongList(SongList songList, int size);
-
-        public void removeSongList(SongList songList);
-
-        public void loadData();
-    }
 
 }

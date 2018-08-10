@@ -77,6 +77,9 @@ public class Constant {
     //播放错误
     public static final String PLAY_ERROR = "play_error";
 
+    //正在播放
+    public static final String IS_PLAYING = "is_playing";
+
     /**
      * 通知栏广播action
      */
@@ -90,6 +93,8 @@ public class Constant {
     public static final String ACTION_N_POSITION = "com.dedaodemo.action.position";
     public static final String ACTION_N_SEEK_TO = "com.dedaodemo.action.seekto";
     public static final String ACTION_N_INIT = "com.dedaodemo.action.init";
+    public static final String ACTION_N_FROM_SERVICE = "com.dedaodemo.action.fromService";
+    public static final String ACTION_N_ACTIVITY_START = "com.dedaodemo.action.activityStart";
 
     /**
      * 表名

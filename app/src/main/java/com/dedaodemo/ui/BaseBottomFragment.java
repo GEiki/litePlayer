@@ -38,6 +38,7 @@ import java.util.Timer;
 public abstract class BaseBottomFragment extends Fragment {
 
     public static final String BASE_BACK_STACK = "base_back_stack";
+    public static final int MAX_PROGRESS = 1000;
 
     //    private RecyclerView recyclerView;
     private BottomSheetDialog bottomSheetDialog;
@@ -154,19 +155,20 @@ public abstract class BaseBottomFragment extends Fragment {
         tv_duration = view.findViewById(R.id.tv_duration);
         tv_progress = view.findViewById(R.id.tv_progress);
         seekBar = view.findViewById(R.id.seekBar);
-        seekBar.setMax(100);
+        seekBar.setMax(MAX_PROGRESS);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
-                    baseViewModel.seekTo(progress);
+                    String dur = baseViewModel.getCurPlaySong().getValue().getTime();
+                    int pos = Util.progressToposition(progress, Long.valueOf(dur), MAX_PROGRESS);
+                    baseViewModel.seekTo(pos);
+                    tv_progress.setText(Util.durationToformat(pos));
                 }
-
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
@@ -235,6 +237,8 @@ public abstract class BaseBottomFragment extends Fragment {
                 tv_title_expand.setText(item.getTitle());
                 tv_aritist.setText(item.getAuthor());
                 tv_artist_expand.setText(item.getAuthor());
+                long duration = Long.valueOf(baseViewModel.getCurPlaySong().getValue().getTime());
+                tv_duration.setText(Util.durationToformat(duration));
             }
         });
         baseViewModel.observeData(BaseViewModel.CURRENT_LIST_DATA, this, new Observer<SongList>() {
@@ -277,6 +281,16 @@ public abstract class BaseBottomFragment extends Fragment {
                 if (errorFlags) {
                     ToastUtil.showShort(getActivity(), "出了点错误，请重试或换一首歌曲");
                 }
+            }
+        });
+
+        baseViewModel.observeData(BaseViewModel.POSTION, this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer progress) {
+                String dur = baseViewModel.getCurPlaySong().getValue().getTime();
+                int pos = Util.calculateProgress(progress, Long.valueOf(dur), MAX_PROGRESS);
+                seekBar.setProgress(pos);
+                tv_progress.setText(Util.durationToformat(progress));
             }
         });
     }

@@ -2,15 +2,8 @@ package com.dedaodemo.util;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.transition.Explode;
 import android.util.Log;
 import android.util.TypedValue;
-
-import com.dedaodemo.R;
-import com.dedaodemo.common.Constant;
-import com.dedaodemo.ui.SearchFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -67,20 +60,18 @@ public class Util {
     }
 
     /**
-     * fragment跳转
-     */
-    public static void jumpToFragment(Fragment fromFragment, Fragment targetFragment, FragmentManager manager) {
-        Explode explode = new Explode();
-        explode.setDuration(500);
-        targetFragment.setEnterTransition(explode);
-        targetFragment.setAllowEnterTransitionOverlap(true);
-        targetFragment.setAllowReturnTransitionOverlap(true);
-        manager.beginTransaction()
-                .add(R.id.fragment_container, targetFragment, SearchFragment.TAG)
-                .addToBackStack(Constant.BASE_BACK_STACK)
-                .show(targetFragment)
-                .hide(fromFragment)
-                .commit();
+     * 根据时长计算进度
+     * */
+    public static int calculateProgress(int position, long duration, int max) {
+        double t = (double) position / (double) duration;
+        return (int) (max * t);
+    }
 
+    /**
+     * 进度转换
+     */
+    public static int progressToposition(int progress, long duration, int max) {
+        double t = (double) progress / (double) max;
+        return (int) (duration * t);
     }
 }

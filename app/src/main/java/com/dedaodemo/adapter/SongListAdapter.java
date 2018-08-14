@@ -82,6 +82,28 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
                 getOnItemClickListener().onItemClick(v, position);
             }
         });
+        //設置歌單封面圖片
+//        ArrayList<Item> songList = getmData().get(position).getSongList();
+//        String url = null;
+//        if (songList.size() > 0) {
+//             url = songList.get(0).getPic();
+//        }
+//        if (!TextUtils.isEmpty(url)) {
+//            RequestOptions requestOptions = new RequestOptions();
+//            requestOptions.transform(new BlurTransformation(25,3));
+//            Glide.with(getmContext())
+//                    .load(url)
+//                    .apply(requestOptions)
+//                    .into(holder.iv_background);
+//        } else if (url == null) {
+//            RequestOptions requestOptions = new RequestOptions();
+//            requestOptions.transform(new BlurTransformation(25,3));
+//            Glide.with(getmContext())
+//                    .load(R.drawable.default_songlist_background)
+//                    .apply(requestOptions)
+//                    .into(holder.iv_background);
+//        }
+
 
     }
 
@@ -96,11 +118,13 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
         TextView tv_title;
         ImageView btn_more;
         View layout;
+        ImageView iv_background;
 
         public MViewHolder(View itemView) {
             super(itemView);
             tv_title = itemView.findViewById(R.id.list_card_title);
             btn_more = itemView.findViewById(R.id.btn_more);
+            iv_background = itemView.findViewById(R.id.iv_background);
             layout = itemView;
 
         }

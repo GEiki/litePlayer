@@ -34,11 +34,11 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
-import com.dedaodemo.common.SongManager;
 import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class SearchFragment extends BaseBottomFragment implements BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
@@ -94,7 +94,6 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
 
             }
         };
-        viewModel.observeSearchSongList(this, searchObserve);
 
 
         toolbar = mView.findViewById(R.id.toolbar);
@@ -142,7 +141,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
                 SearchBean bean = new SearchBean();
                 bean.setKey(query);
                 bean.setSearchType(searchSource);
-                viewModel.searchSong(bean);
+                viewModel.searchSong(bean, SearchFragment.this, searchObserve);
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 // 隐藏软键盘
                 imm.hideSoftInputFromWindow(getActivity().getWindow().getDecorView().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
@@ -256,10 +255,18 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
             return;
         }
         bottomSheetDialog = new BottomSheetDialog(getContext());
-        RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
+        final RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
         view.setLayoutManager(new LinearLayoutManager(getContext()));
         final ChooseSheetAdapter adapter = new ChooseSheetAdapter(getContext());
-        adapter.setmData(SongManager.getInstance().getSheetList());
+        viewModel.getSheetList(this, new Observer<List<SongList>>() {
+            @Override
+            public void onChanged(@Nullable List<SongList> songLists) {
+                if (songLists != null) {
+                    adapter.setmData(songLists);
+                    view.setAdapter(adapter);
+                }
+            }
+        });
         adapter.setOnItemClickListener(new BaseAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {

@@ -26,8 +26,10 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
@@ -41,6 +43,8 @@ import com.dedaodemo.common.Constant;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jp.wasabeef.glide.transformations.BlurTransformation;
 
 
 public class SongListFragment extends BaseBottomFragment implements View.OnClickListener, BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
@@ -164,19 +168,24 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         if (mSongList.getSongList() != null && !mSongList.getSongList().isEmpty()) {
             item = mSongList.getSongList().get(0);
         }
-
+        final RequestOptions requestOptions = new RequestOptions();
+        requestOptions.transform(new BlurTransformation(25, 5));
+        requestOptions.diskCacheStrategy(DiskCacheStrategy.RESOURCE);
         if (item == null || item.getType() == Constant.LOCAL_MUSIC) {
             Glide.with(getContext())
                     .load(R.drawable.default_songlist_background)
+                    .apply(requestOptions)
                     .into(iv_head);
         } else {
             Glide.with(getContext())
                     .asDrawable()
+                    .apply(requestOptions)
                     .load(item.getPic()).listener(new RequestListener<Drawable>() {
                 @Override
                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     Glide.with(getContext())
                             .load(R.drawable.default_songlist_background)
+                            .apply(requestOptions)
                             .into(iv_head);
                     return true;
                 }

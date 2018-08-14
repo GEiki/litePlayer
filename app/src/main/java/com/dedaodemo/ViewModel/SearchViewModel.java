@@ -11,8 +11,10 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.model.ISearchModel;
+import com.dedaodemo.model.ISheetModel;
 import com.dedaodemo.model.ISongModel;
 import com.dedaodemo.model.impl.SearchModelImpl;
+import com.dedaodemo.model.impl.SheetModelImpl;
 import com.dedaodemo.model.impl.SongModelImpl;
 import com.dedaodemo.util.ToastUtil;
 
@@ -32,16 +34,12 @@ public class SearchViewModel extends ViewModel implements SearchContract.Present
 
     private ISearchModel model = new SearchModelImpl();
     private ISongModel songModel = new SongModelImpl();
+    private ISheetModel sheetModel = new SheetModelImpl();
     private MutableLiveData<ArrayList<Item>> searchSongList = new MutableLiveData<>();
+    private MutableLiveData<List<SongList>> sheetList = new MutableLiveData<>();
 
 
 
-
-
-    @Override
-    public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer) {
-        searchSongList.observe(owner, observer);
-    }
 
     @Override
     public void removeObserveSearchSongList(Observer<ArrayList<Item>> observer) {
@@ -49,7 +47,8 @@ public class SearchViewModel extends ViewModel implements SearchContract.Present
     }
 
     @Override
-    public void searchSong(SearchBean bean) {
+    public void searchSong(SearchBean bean, LifecycleOwner owner, Observer<ArrayList<Item>> observer) {
+        searchSongList.observe(owner, observer);
         model.searchSongOnline(bean)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -87,10 +86,10 @@ public class SearchViewModel extends ViewModel implements SearchContract.Present
 
                     }
 
-            @Override
-            public void onNext(@NonNull Boolean o) {
-                ToastUtil.showShort(MyApplication.getMyApplicationContext(), "添加成功");
-            }
+                    @Override
+                    public void onNext(@NonNull Boolean o) {
+                        ToastUtil.showShort(MyApplication.getMyApplicationContext(), "添加成功");
+                    }
 
                     @Override
                     public void onError(@NonNull Throwable e) {
@@ -104,5 +103,32 @@ public class SearchViewModel extends ViewModel implements SearchContract.Present
         });
     }
 
+    @Override
+    public void getSheetList(LifecycleOwner owner, Observer<List<SongList>> observer) {
+        sheetList.observe(owner, observer);
+        sheetModel.loadData()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new io.reactivex.Observer<List<SongList>>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
+                    }
+
+                    @Override
+                    public void onNext(List<SongList> o) {
+                        sheetList.setValue(o);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
 }

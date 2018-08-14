@@ -23,6 +23,7 @@ import com.dedaodemo.common.Constant;
 import com.dedaodemo.ui.MainActivity;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -40,7 +41,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private NotificationReceiver notificationReceiver;
     private ArrayList<Item> playlist;
     private int index;
-    private String playMode = Constant.MODE_ORDER;
+    private String playMode = Constant.MODE_LIST_RECYCLE;
     private boolean initFlag = true;
     private Timer timer = new Timer();
 
@@ -82,7 +83,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     @Override
     public void onCompletion(MediaPlayer mp) {
         try {
-
+            int mIndex = getIndexByMode(playMode);
+            if (mIndex != -1) {
+                play(mIndex);
+            }
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -160,6 +164,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         intentFilter.addAction(Constant.ACTION_N_SEEK_TO);
         intentFilter.addAction(Constant.ACTION_N_INIT);
         intentFilter.addAction(Constant.ACTION_N_ACTIVITY_START);
+        intentFilter.addAction(Constant.ACTION_N_CHANGE_MOED);
         notificationReceiver = new NotificationReceiver();
         registerReceiver(notificationReceiver, intentFilter);
         return super.onStartCommand(intent, flags, startId);
@@ -222,6 +227,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 sendBroadcast(back);
                 break;
             }
+            case Constant.ACTION_N_CHANGE_MOED: {
+                playMode = intent.getStringExtra(Constant.CURRENT_MODE);
+                break;
+            }
             default:
                 break;
         }
@@ -234,7 +243,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     @Override
     public void play(int index) {
         if (playlist != null && playlist.size() > 0) {
-            if (index > 0 && index < playlist.size() && mp != null) {
+            if (index >= 0 && index < playlist.size() && mp != null) {
                 timer.cancel();
                 mp.play(playlist, playlist.get(index));
                 this.index = index;
@@ -279,11 +288,38 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
     }
     /**
-     * 切换播放模式
+     * 根据播放模式获取下一首的index
      * */
     @Override
-    public void changMode(String mode) {
-        playMode = mode;
+    public int getIndexByMode(String mode) {
+        int mIndex = index;
+        switch (mode) {
+            case Constant.MODE_ORDER: {
+                if (mIndex < playlist.size() - 1) {
+                    return mIndex + 1;
+                } else {
+                    return -1;
+                }
+            }
+            case Constant.MODE_LIST_RECYCLE: {
+                if (mIndex < playlist.size() - 1) {
+                    return mIndex + 1;
+                } else {
+                    return 0;
+                }
+            }
+            case Constant.MODE_RANDOM: {
+                Random random = new Random();
+                random.setSeed(System.currentTimeMillis());
+                return random.nextInt(playlist.size());
+            }
+            case Constant.MOED_SINGLE_RECYCLE: {
+                return mIndex;
+            }
+            default:
+                break;
+        }
+        return 0;
     }
 
 
@@ -316,34 +352,15 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(intent);
         PendingIntent pendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Intent preIntent = new Intent();
-        preIntent.setAction(Constant.ACTION_N_PRE);
-        PendingIntent prePIntent = PendingIntent.getBroadcast(this, 1, preIntent, 0);
-        Notification.Action preAction = new Notification.Action(R.drawable.ic_action_pre, "上一首", prePIntent);
-
-        Intent ppIntent = new Intent();
+        Notification.Action preAction = getNotificationAction(Constant.ACTION_N_PRE, "上一首", R.drawable.ic_action_pre);
         Notification.Action ppAction;
         if (mp.isPlaying()) {
-            ppIntent.setAction(Constant.ACTION_N_PAUSE);
-            PendingIntent pppIntent = PendingIntent.getBroadcast(this, 0, ppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            ppAction = new Notification.Action(R.drawable.ic_action_pause, "暂停", pppIntent);
+            ppAction = getNotificationAction(Constant.ACTION_N_PAUSE, "暂停", R.drawable.ic_action_pause);
         } else {
-            ppIntent.setAction(Constant.ACTION_N_RE_PLAY);
-            PendingIntent pppIntent = PendingIntent.getBroadcast(this, 0, ppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            ppAction = new Notification.Action(R.drawable.ic_action_play, "播放", pppIntent);
+            ppAction = getNotificationAction(Constant.ACTION_N_RE_PLAY, "播放", R.drawable.ic_action_play);
         }
-
-        Intent nextIntent = new Intent();
-        nextIntent.setAction(Constant.ACTION_N_NEXT);
-        PendingIntent nextPendingIntent = PendingIntent.getBroadcast(this, 2, nextIntent, 0);
-        Notification.Action nextAction = new Notification.Action(R.drawable.ic_action_next, "下一首", nextPendingIntent);
-
-        Intent closeIntent = new Intent();
-        closeIntent.setAction(Constant.ACTION_N_CLOSE);
-        PendingIntent closePIntent = PendingIntent.getBroadcast(this, 2, closeIntent, 0);
-        Notification.Action closeAction = new Notification.Action(R.drawable.ic_action_close, "关闭", closePIntent);
-
+        Notification.Action nextAction = getNotificationAction(Constant.ACTION_N_NEXT, "下一首", R.drawable.ic_action_next);
+        Notification.Action closeAction = getNotificationAction(Constant.ACTION_N_CLOSE, "关闭", R.drawable.ic_action_close);
 
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
         mediaStyle.setShowActionsInCompactView(1, 2);
@@ -363,6 +380,14 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         NotificationManager notificationManagerCompat = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManagerCompat.notify(CHANNEL_ID, notification);
+    }
+
+    private Notification.Action getNotificationAction(String action, String title, int icon) {
+        Intent closeIntent = new Intent();
+        closeIntent.setAction(action);
+        PendingIntent closePIntent = PendingIntent.getBroadcast(this, 2, closeIntent, 0);
+        Notification.Action closeAction = new Notification.Action(icon, title, closePIntent);
+        return closeAction;
     }
 
     @Override

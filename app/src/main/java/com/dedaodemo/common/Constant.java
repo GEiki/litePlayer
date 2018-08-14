@@ -95,6 +95,7 @@ public class Constant {
     public static final String ACTION_N_INIT = "com.dedaodemo.action.init";
     public static final String ACTION_N_FROM_SERVICE = "com.dedaodemo.action.fromService";
     public static final String ACTION_N_ACTIVITY_START = "com.dedaodemo.action.activityStart";
+    public static final String ACTION_N_CHANGE_MOED = "com.dedaodemo.action.change_mode";
 
     /**
      * 表名

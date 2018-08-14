@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by 01377578 on 2018/7/12.
@@ -19,7 +20,7 @@ public abstract class BaseAdapter<T extends RecyclerView.ViewHolder, D> extends 
 
     private Context mContext;
     private OnItemClickListener onItemClickListener;
-    private ArrayList<D> mData = new ArrayList<>();
+    private List<D> mData = new ArrayList<>();
 
     public Context getmContext() {
         return mContext;
@@ -29,11 +30,11 @@ public abstract class BaseAdapter<T extends RecyclerView.ViewHolder, D> extends 
         this.mContext = mContext;
     }
 
-    public ArrayList<D> getmData() {
+    public List<D> getmData() {
         return mData;
     }
 
-    public void setmData(ArrayList<D> mData) {
+    public void setmData(List<D> mData) {
         this.mData = mData;
     }
 

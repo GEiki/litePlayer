@@ -7,8 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.dedaodemo.MyApplication;
 import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
+import com.dedaodemo.common.Constant;
+import com.dedaodemo.util.Util;
+import com.tubb.smrv.SwipeHorizontalMenuLayout;
 
 /**
  * Created by asus on 2017/11/3.
@@ -55,6 +59,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
 
     @Override
     public void onBindViewHolder(MViewHolder holder, final int position) {
+        Item item = getmData().get(position);
         holder.tv_title.setText(getmData().get(position).getTitle());
         holder.tv_artist.setText(getmData().get(position).getAuthor());
         holder.layout.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +86,16 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
                 }
             }
         });
+
+        SwipeHorizontalMenuLayout swipeLayout = (SwipeHorizontalMenuLayout) holder.layout;
+        swipeLayout.smoothCloseMenu(500);
+
+        if (!Util.NetWorkState() && item.getType() == Constant.INTERNET_MUSIC && !MyApplication.getProxyServer().isCached(item.getPath())) {
+            holder.tv_title.setTextColor(getmContext().getResources().getColor(android.R.color.darker_gray, null));
+            holder.tv_artist.setTextColor(getmContext().getResources().getColor(android.R.color.darker_gray, null));
+            holder.layout.setEnabled(false);
+        }
+
 
     }
 

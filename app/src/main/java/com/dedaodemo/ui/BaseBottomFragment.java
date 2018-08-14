@@ -237,7 +237,14 @@ public abstract class BaseBottomFragment extends Fragment {
                 tv_title_expand.setText(item.getTitle());
                 tv_aritist.setText(item.getAuthor());
                 tv_artist_expand.setText(item.getAuthor());
-                long duration = Long.valueOf(baseViewModel.getCurPlaySong().getValue().getTime());
+                String time = baseViewModel.getCurPlaySong().getValue().getTime();
+                long duration;
+                if (time != null) {
+                    duration = Long.valueOf(baseViewModel.getCurPlaySong().getValue().getTime());
+                } else {
+                    duration = 0;
+                }
+
                 tv_duration.setText(Util.durationToformat(duration));
             }
         });
@@ -288,6 +295,8 @@ public abstract class BaseBottomFragment extends Fragment {
             @Override
             public void onChanged(@Nullable Integer progress) {
                 String dur = baseViewModel.getCurPlaySong().getValue().getTime();
+                if (dur == null)
+                    return;
                 int pos = Util.calculateProgress(progress, Long.valueOf(dur), MAX_PROGRESS);
                 seekBar.setProgress(pos);
                 tv_progress.setText(Util.durationToformat(progress));

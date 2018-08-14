@@ -162,7 +162,6 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     public void onResume() {
-
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
@@ -293,11 +292,10 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void setPlayMode(String mode) {
-        Bundle bundle = new Bundle();
-        bundle.putString(Constant.CURRENT_MODE, mode);
         Intent intent = new Intent();
-        intent.setAction(Constant.ACTION_N_NEXT);
+        intent.setAction(Constant.ACTION_N_CHANGE_MOED);
         intent.putExtras(intent);
+        intent.putExtra(Constant.CURRENT_MODE, mode);
         mContext.sendBroadcast(intent);
 
     }

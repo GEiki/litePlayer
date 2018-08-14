@@ -1,9 +1,16 @@
 package com.dedaodemo.ViewModel;
 
+import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModel;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.util.Log;
 
 import com.dedaodemo.MyApplication;
@@ -34,6 +41,23 @@ public class SongListViewModel extends ViewModel implements SongListContract.Pre
     private MutableLiveData<List<SongList>> sheetList = new MutableLiveData<>();
     private ISongModel model = new SongModelImpl();
     private ISheetModel sheetModel = new SheetModelImpl();
+    private BroadcastReceiver connectReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            songListLiveData.setValue(songListLiveData.getValue());
+        }
+    };
+
+    public SongListViewModel() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        MyApplication.getMyApplicationContext().registerReceiver(connectReceiver, intentFilter);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    public void onDestroy() {
+        MyApplication.getMyApplicationContext().unregisterReceiver(connectReceiver);
+    }
 
 
 

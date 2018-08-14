@@ -6,6 +6,7 @@ import com.dedaodemo.model.ISongModel;
 import com.dedaodemo.util.DatabaseUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -65,6 +66,7 @@ public class SongModelImpl implements ISongModel {
             @Override
             public void subscribe(@NonNull ObservableEmitter<List<Item>> emitter) throws Exception {
                 List<Item> list = DatabaseUtil.queryBySheet(songList.getTitle());
+                Collections.reverse(list);
                 emitter.onNext(list);
                 emitter.onComplete();
             }

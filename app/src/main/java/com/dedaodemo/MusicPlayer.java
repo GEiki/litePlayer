@@ -61,7 +61,8 @@ public class MusicPlayer {
             this.list = list;
             if (mPlayer != null) {
                     mPlayer.release();
-                }
+
+            }
             initPlayer(list, item, completionListener, preparedListener);
 
         } catch (Exception e) {
@@ -93,6 +94,7 @@ public class MusicPlayer {
             isPrepared = false;
             mPlayer.prepareAsync();
             mPlayer.setOnPreparedListener(preparedListener);
+
 
             mPlayer.setOnCompletionListener(completionListener);
         } catch (Exception e) {

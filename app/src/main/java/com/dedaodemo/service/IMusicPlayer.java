@@ -15,6 +15,6 @@ public interface IMusicPlayer {
 
     void previous();
 
-    void changMode(String mode);
+    int getIndexByMode(String mode);
 
 }

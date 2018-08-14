@@ -2,8 +2,13 @@ package com.dedaodemo.util;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
 import android.util.Log;
 import android.util.TypedValue;
+
+import com.dedaodemo.MyApplication;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,5 +78,32 @@ public class Util {
     public static int progressToposition(int progress, long duration, int max) {
         double t = (double) progress / (double) max;
         return (int) (duration * t);
+    }
+
+    /**
+     * 判断网络状态
+     */
+    public static boolean NetWorkState() {
+        boolean isConnected = false;
+        Context context = MyApplication.getMyApplicationContext();
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            NetworkInfo[] networkInfos = connectivityManager.getAllNetworkInfo();
+            for (NetworkInfo network : networkInfos) {
+                if (network.getState() == NetworkInfo.State.CONNECTED) {
+                    isConnected = true;
+                }
+            }
+        } else {
+            Network[] networks = connectivityManager.getAllNetworks();
+            for (Network network : networks) {
+                NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+                if (networkInfo.getState() == NetworkInfo.State.CONNECTED) {
+                    isConnected = true;
+                }
+            }
+        }
+
+        return isConnected;
     }
 }

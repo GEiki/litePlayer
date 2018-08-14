@@ -8,6 +8,7 @@ import com.dedaodemo.bean.SearchBean;
 import com.dedaodemo.bean.SongList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Guoss on 2018/6/28.
@@ -17,21 +18,15 @@ public class SearchContract {
 
 
     public interface Presenter {
-        public void searchSong(SearchBean bean);
+        void searchSong(SearchBean bean, LifecycleOwner owner, Observer<ArrayList<Item>> observer);
 
-        public void addSong(SongList songList, Item item);
-        public void observeSearchSongList(LifecycleOwner owner, Observer<ArrayList<Item>> observer);
+        void addSong(SongList songList, Item item);
 
-        public void removeObserveSearchSongList(Observer<ArrayList<Item>> observer);
+        void removeObserveSearchSongList(Observer<ArrayList<Item>> observer);
+
+        void getSheetList(LifecycleOwner owner, Observer<List<SongList>> observer);
+
     }
 
 
-
-    public interface Model {
-        public void searchSongOnline(SearchBean bean);
-
-        public void saveStateFromSearch(SongList songList);
-
-        public SongList loadStateFromSearch();
-    }
 }

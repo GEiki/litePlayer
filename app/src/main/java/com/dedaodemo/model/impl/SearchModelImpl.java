@@ -68,6 +68,9 @@ public class SearchModelImpl implements ISearchModel {
                                             item.setLrc(song.getString("lrc"));
                                             item.setPic(song.getString("pic"));
                                             item.setType(Constant.INTERNET_MUSIC);
+                                            long time = song.getInt("time");
+                                            time *= 1000;
+                                            item.setTime(String.valueOf(time));
                                             itemList.add(item);
                                         }
                                         emitter.onNext(itemList);

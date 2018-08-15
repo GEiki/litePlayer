@@ -13,6 +13,8 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.util.Util;
 import com.tubb.smrv.SwipeHorizontalMenuLayout;
+import com.tubb.smrv.SwipeMenuLayout;
+import com.tubb.smrv.listener.SwipeSwitchListener;
 
 /**
  * Created by asus on 2017/11/3.
@@ -27,6 +29,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
 
     private OnMenuItemOnClickListener onMenuItemOnClickListener;
     private int menuId;
+    private SwipeHorizontalMenuLayout openSwipeLayout;
 
     public MListAdapter(Context mContext) {
         setmContext(mContext);
@@ -87,8 +90,30 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
             }
         });
 
-        SwipeHorizontalMenuLayout swipeLayout = (SwipeHorizontalMenuLayout) holder.layout;
-        swipeLayout.smoothCloseMenu(500);
+        final SwipeHorizontalMenuLayout swipeLayout = (SwipeHorizontalMenuLayout) holder.layout;
+        swipeLayout.setSwipeListener(new SwipeSwitchListener() {
+            @Override
+            public void beginMenuClosed(SwipeMenuLayout swipeMenuLayout) {
+
+            }
+
+            @Override
+            public void beginMenuOpened(SwipeMenuLayout swipeMenuLayout) {
+
+            }
+
+            @Override
+            public void endMenuClosed(SwipeMenuLayout swipeMenuLayout) {
+                openSwipeLayout = null;
+            }
+
+            @Override
+            public void endMenuOpened(SwipeMenuLayout swipeMenuLayout) {
+                closeSwipeLayout();
+                openSwipeLayout = swipeLayout;
+            }
+        });
+
 
         if (!Util.NetWorkState() && item.getType() == Constant.INTERNET_MUSIC && !MyApplication.getProxyServer().isCached(item.getPath())) {
             holder.tv_title.setTextColor(getmContext().getResources().getColor(android.R.color.darker_gray, null));
@@ -109,6 +134,12 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
     @Override
     public long getItemId(int pos){
         return pos;
+    }
+
+    public void closeSwipeLayout() {
+        if (openSwipeLayout != null) {
+            openSwipeLayout.smoothCloseMenu(500);
+        }
     }
 
 

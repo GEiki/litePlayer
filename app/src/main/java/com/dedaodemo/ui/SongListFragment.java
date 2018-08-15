@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -154,6 +155,19 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(this);
         adapter.setOnItemAddClickListener(this);
+        recyclerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_MOVE: {
+                        adapter.closeSwipeLayout();
+                        break;
+                    }
+                }
+
+                return false;
+            }
+        });
     }
 
     @Override
@@ -260,6 +274,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     public void onMenuItemClick(View view, int position) {
         switch (view.getId()) {
             case R.id.tv_move: {
+                adapter.closeSwipeLayout();
                 Item song = adapter.getmData().get(position);
                 showChooseSongListDialog(song);
                 break;
@@ -274,6 +289,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
             default:
                 break;
         }
+
     }
 
     private void showChooseSongListDialog(final Item item) {

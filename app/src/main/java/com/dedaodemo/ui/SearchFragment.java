@@ -10,6 +10,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -48,6 +49,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     private SearchView searchView;
     private MListAdapter mListAdapter;
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private Observer<ArrayList<Item>> searchObserve;
     private View mView;
 
@@ -81,6 +83,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         super.onCreateView(inflater, container, null);
 
         initRecyclerView((ViewGroup) mView);
+        initSwipeRefreshLayout(mView);
 
         //注册观察搜索列表
         searchObserve = new Observer<ArrayList<Item>>() {
@@ -129,6 +132,12 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         mListAdapter.setOnItemClickListener(this);
         recyclerView.setAdapter(mListAdapter);
     }
+
+    private void initSwipeRefreshLayout(View view) {
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_ll);
+    }
+
+
 
     private void addSearchView(final View view) {
         searchView = new SearchView(getContext());

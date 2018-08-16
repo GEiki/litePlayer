@@ -13,6 +13,8 @@ import com.dedaodemo.R;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
 
+import cn.bmob.v3.Bmob;
+
 public class MainActivity extends AppCompatActivity
 {
     private static final int FIRST_LAUNCH_FLAG = 0;
@@ -32,10 +34,8 @@ public class MainActivity extends AppCompatActivity
         launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
         sharedPreferences.edit().putInt(LAUNCH_FLAG, launch_flags + 1).commit();
 
-        //初次启动初始化数据库
-        if (launch_flags == FIRST_LAUNCH_FLAG) {
-
-        }
+        //初始化bmob
+        Bmob.initialize(this,Constant.APP_KEY);
 
 
         /**

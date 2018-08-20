@@ -1,6 +1,9 @@
 package com.dedaodemo.ui;
 
 
+import android.app.Activity;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -13,13 +16,15 @@ import com.dedaodemo.R;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
 
-import cn.bmob.v3.Bmob;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements ActivityCallBack
 {
     private static final int FIRST_LAUNCH_FLAG = 0;
     private static final String LAUNCH_FLAG = "launch";
+    private static final String BASE_FRAGMENT = "base_fragment";
     private int launch_flags;
+    private IBackHandle backHandle;
+    private BaseBottomFragment baseBottomFragment;
 
 
 
@@ -34,8 +39,7 @@ public class MainActivity extends AppCompatActivity
         launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
         sharedPreferences.edit().putInt(LAUNCH_FLAG, launch_flags + 1).commit();
 
-        //初始化bmob
-        Bmob.initialize(this,Constant.APP_KEY);
+
 
 
         /**
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity
                     sheetListFragment.setArguments(b);
                 }
             }
+
             Explode explode = new Explode();
             explode.setDuration(800);
             sheetListFragment.setEnterTransition(explode);
@@ -74,6 +79,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void setBackHandler(IBackHandle backHandler) {
+        this.backHandle = backHandler;
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
     }
@@ -88,7 +98,13 @@ public class MainActivity extends AppCompatActivity
 //            Log.i("Fragment","remove");
 //            return;
 //        }
-        super.onBackPressed();
+        if (backHandle != null && !backHandle.isBottomBarHide()) {
+            backHandle.hideBottomBarHide();
+            return;
+        } else {
+            super.onBackPressed();
+        }
+
     }
 
 

@@ -3,6 +3,7 @@ package com.dedaodemo.behavior;
 import android.animation.Animator;
 import android.content.Context;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
@@ -14,7 +15,7 @@ import android.view.animation.Interpolator;
  * Created by 01377578 on 2018/7/26.
  */
 
-public class FooterBehavior extends CoordinatorLayout.Behavior<View> {
+public class FooterBehavior extends BottomSheetBehavior {
     private static final Interpolator INTERPOLATOR = new FastOutSlowInInterpolator();
     private static final String TAG = "FooterBehavior";
 
@@ -37,7 +38,6 @@ public class FooterBehavior extends CoordinatorLayout.Behavior<View> {
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
-
         int top = Math.abs(dependency.getTop());
         if (isShow && child.getVisibility() == View.VISIBLE && !isAnimationOn && preTop - top < 0) {
             hide(child);

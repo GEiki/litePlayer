@@ -2,11 +2,14 @@ package com.dedaodemo.ui;
 
 
 import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
@@ -24,8 +27,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ProgressBar;
 
 import com.dedaodemo.R;
+import com.dedaodemo.ViewModel.BaseViewModel;
+import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.ViewModel.Contracts.SearchContract;
 import com.dedaodemo.ViewModel.SearchViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
@@ -45,12 +51,13 @@ import java.util.List;
 public class SearchFragment extends BaseBottomFragment implements BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
 
     private SearchContract.Presenter viewModel;
+    private BaseContract.Presenter baseViewModel;
     private Toolbar toolbar;
     private SearchView searchView;
     private MListAdapter mListAdapter;
     private RecyclerView recyclerView;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private Observer<ArrayList<Item>> searchObserve;
+    private ProgressBar progressBar;
     private View mView;
 
 
@@ -70,6 +77,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         viewModel = ViewModelProviders.of(this).get(SearchViewModel.class);
+        baseViewModel = ViewModelProviders.of(getActivity()).get(BaseViewModel.class);
 
         super.onCreate(savedInstanceState);
 
@@ -83,12 +91,12 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         super.onCreateView(inflater, container, null);
 
         initRecyclerView((ViewGroup) mView);
-        initSwipeRefreshLayout(mView);
 
         //注册观察搜索列表
         searchObserve = new Observer<ArrayList<Item>>() {
             @Override
             public void onChanged(@Nullable ArrayList<Item> items) {
+                dismissSearching();
                 if (mListAdapter != null && items != null) {
                     mListAdapter.setmData(items);
                     recyclerView.setAdapter(mListAdapter);
@@ -100,7 +108,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
 
 
         toolbar = mView.findViewById(R.id.toolbar);
-        toolbar.setTitle("搜索");
+        toolbar.setTitle("");
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
 
@@ -111,6 +119,8 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
         addSearchView(mView);
+        setPeekHeight(Util.dip2px(getContext(),60));
+        initBottomSheetCallback();
         return mView;
     }
 
@@ -133,9 +143,35 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         recyclerView.setAdapter(mListAdapter);
     }
 
-    private void initSwipeRefreshLayout(View view) {
-        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_ll);
+    private void initBottomSheetCallback() {
+        setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    setBottomBarHide(true);
+                    toolbar.addView(searchView);
+                    toolbar.setTitle("");
+                    toolbar.setSubtitle("");
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    setBottomBarHide(false);
+                    Item song = baseViewModel.getCurPlaySong().getValue();
+                    toolbar.removeView(searchView);
+                    if (song != null) {
+                        toolbar.setTitle(song.getTitle());
+                        toolbar.setSubtitle(song.getAuthor());
+                    }
+
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
     }
+
+
 
 
 
@@ -150,6 +186,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
                 SearchBean bean = new SearchBean();
                 bean.setKey(query);
                 bean.setSearchType(searchSource);
+                showSearching();
                 viewModel.searchSong(bean, SearchFragment.this, searchObserve);
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 // 隐藏软键盘
@@ -165,8 +202,10 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
             }
         });
         Toolbar.LayoutParams layoutParams = new Toolbar.LayoutParams(Util.dip2px(getContext(), 250), ViewGroup.LayoutParams.MATCH_PARENT);
+        layoutParams.setMarginStart(0);
         searchView.setLayoutParams(layoutParams);
         toolbar.addView(searchView);
+
         view.invalidate();
     }
 
@@ -188,6 +227,24 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         return fragment;
     }
 
+    private void showSearching() {
+        ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(getActivity()).inflate(R.layout.dialog_loading,null);
+        progressBar =  viewGroup.findViewById(R.id.progressBar2);
+        viewGroup.removeView(progressBar);
+        toolbar.removeView(searchView);
+        toolbar.setTitle("搜索中");
+        toolbar.setTitleMarginStart(Util.dip2px(getContext(),85));
+        toolbar.addView(progressBar);
+        toolbar.invalidate();
+    }
+
+    private void dismissSearching() {
+        toolbar.removeView(progressBar);
+        toolbar.setTitle("");
+        toolbar.addView(searchView);
+        toolbar.invalidate();
+    }
+
 
     @Override
     public void onItemClick(View view, int position) {
@@ -195,9 +252,8 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
             searchSongList = new SongList();
             searchSongList.setTitle(Constant.SEARCH_SONG_LIST);
             searchSongList.setSongList(searchList);
-
         }
-        play(searchSongList, searchList.get(position));
+        baseViewModel.playSong(searchSongList, searchList.get(position));
     }
 
 

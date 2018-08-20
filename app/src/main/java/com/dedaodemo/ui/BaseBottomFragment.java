@@ -1,24 +1,34 @@
 package com.dedaodemo.ui;
 
 
+import android.support.v7.app.ActionBar;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.persistence.room.util.StringUtil;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.transition.Explode;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toolbar;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
@@ -35,7 +45,7 @@ import java.util.Timer;
 /**
  * 包含bottomPlaybar的fragment
  */
-public abstract class BaseBottomFragment extends Fragment {
+public abstract class BaseBottomFragment extends Fragment implements IBackHandle {
 
     public static final String BASE_BACK_STACK = "base_back_stack";
     public static final int MAX_PROGRESS = 1000;
@@ -45,6 +55,8 @@ public abstract class BaseBottomFragment extends Fragment {
 //    private BaseAdapter adapter;
 
     private RelativeLayout bottom_play_bar;
+    private LinearLayout bottom_play;
+    private LinearLayout ll_control_group;
     private TextView iv_circle;
     private ImageView iv_play;
     private ImageView iv_pause;
@@ -53,8 +65,6 @@ public abstract class BaseBottomFragment extends Fragment {
     private ImageView iv_random;
     private TextView tv_duration;
     private TextView tv_progress;
-    private TextView tv_title;
-    private TextView tv_aritist;
 
     private TextView tv_title_expand;
     private TextView tv_artist_expand;
@@ -65,9 +75,12 @@ public abstract class BaseBottomFragment extends Fragment {
     private SeekBar seekBar;
     private View.OnClickListener onClickListener;
     private BaseContract.Presenter baseViewModel;
-    private Handler handler = new Handler();
-    private Timer timer = new Timer(true);
-
+    private FooterBehavior behavior;
+    private boolean isBottomBarHide = true;
+    private String title;
+    private ActionBar actionBar;
+    private ActivityCallBack activityCallBack;
+    private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
 
 
     public BaseBottomFragment() {
@@ -79,6 +92,7 @@ public abstract class BaseBottomFragment extends Fragment {
         super.onStart();
 
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -96,6 +110,9 @@ public abstract class BaseBottomFragment extends Fragment {
         View view = getParentView();
 //        recyclerView = view.findViewById(R.id.recycler_view);
 //        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        activityCallBack = (ActivityCallBack) getActivity();
+        activityCallBack.setBackHandler(this);
         initBottomPlayBar((ViewGroup) view);
         initPlayDialog();
         observeLiveData();
@@ -104,9 +121,13 @@ public abstract class BaseBottomFragment extends Fragment {
         return view;
     }
 
-
-
-
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (!hidden && activityCallBack != null) {
+            activityCallBack.setBackHandler(this);
+        }
+    }
 
     /**
      * fragment跳转
@@ -136,25 +157,22 @@ public abstract class BaseBottomFragment extends Fragment {
      * 初始化播放窗口
      * **/
     private void initPlayDialog() {
-        bottomSheetDialog = new BottomSheetDialog(getContext());
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_play, null);
-        view.findViewById(R.id.iv_next).setOnClickListener(onClickListener);
-        view.findViewById(R.id.iv_pre).setOnClickListener(onClickListener);
-        iv_loop = view.findViewById(R.id.iv_loop);
+        bottom_play = bottom_play_bar.findViewById(R.id.bottom_play);
+        bottom_play.findViewById(R.id.iv_next).setOnClickListener(onClickListener);
+        bottom_play.findViewById(R.id.iv_pre).setOnClickListener(onClickListener);
+        iv_loop = bottom_play.findViewById(R.id.iv_loop);
         iv_loop.setOnClickListener(onClickListener);
-        iv_single = view.findViewById(R.id.iv_single);
+        iv_single = bottom_play.findViewById(R.id.iv_single);
         iv_single.setOnClickListener(onClickListener);
-        iv_random = view.findViewById(R.id.iv_random);
+        iv_random = bottom_play.findViewById(R.id.iv_random);
         iv_random.setOnClickListener(onClickListener);
-        iv_pause = view.findViewById(R.id.iv_pause);
+        iv_pause = bottom_play.findViewById(R.id.iv_pause);
         iv_pause.setOnClickListener(onClickListener);
-        iv_play = view.findViewById(R.id.iv_play);
+        iv_play = bottom_play.findViewById(R.id.iv_play);
         iv_play.setOnClickListener(onClickListener);
-        tv_title = view.findViewById(R.id.tv_title);
-        tv_aritist = view.findViewById(R.id.tv_artist);
-        tv_duration = view.findViewById(R.id.tv_duration);
-        tv_progress = view.findViewById(R.id.tv_progress);
-        seekBar = view.findViewById(R.id.seekBar);
+        tv_duration = bottom_play.findViewById(R.id.tv_duration);
+        tv_progress = bottom_play.findViewById(R.id.tv_progress);
+        seekBar = bottom_play.findViewById(R.id.seekBar);
         seekBar.setMax(MAX_PROGRESS);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -176,9 +194,19 @@ public abstract class BaseBottomFragment extends Fragment {
 
             }
         });
-        bottomSheetDialog.setContentView(view);
 
 
+    }
+
+
+    @Override
+    public boolean isBottomBarHide() {
+        return isBottomBarHide;
+    }
+
+    @Override
+    public void hideBottomBarHide() {
+        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
     }
 
     /**
@@ -187,14 +215,46 @@ public abstract class BaseBottomFragment extends Fragment {
     private void initBottomPlayBar(ViewGroup v) {
 
         initOnClickListener();
-        bottom_play_bar = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.bottom_play_bar, null, false);
+        bottom_play_bar = (RelativeLayout) LayoutInflater.from(getContext()).inflate(R.layout.bottom_play_bar,null);
         bottom_play_bar.setVisibility(View.VISIBLE);
 
         //设置behavior响应滑动
-        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 65f));
-        layoutParams.gravity = Gravity.BOTTOM;
-        bottom_play_bar.setBackground(getResources().getDrawable(R.color.transparent, null));
-        layoutParams.setBehavior(new FooterBehavior());
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        behavior = new FooterBehavior();
+        bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    if (!TextUtils.isEmpty(title)) {
+
+                        actionBar.setTitle(title);
+                        actionBar.setSubtitle("");
+                    }
+                    isBottomBarHide = true;
+                    iv_circle.setVisibility(View.VISIBLE);
+                    ll_control_group.setVisibility(View.VISIBLE);
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    title =(String)actionBar.getTitle();
+                    Item song = baseViewModel.getCurPlaySong().getValue();
+                    if (song != null) {
+                        actionBar.setTitle(song.getTitle());
+                        actionBar.setSubtitle(song.getAuthor());
+                    }
+
+                    isBottomBarHide = false;
+                    iv_circle.setVisibility(View.GONE);
+                    ll_control_group.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        };
+        behavior.setBottomSheetCallback(bottomSheetCallback);
+        behavior.setPeekHeight(Util.dip2px(getContext(),85f));
+        layoutParams.setBehavior(behavior);
         bottom_play_bar.setLayoutParams(layoutParams);
 
         iv_circle = bottom_play_bar.findViewById(R.id.iv_circle);
@@ -206,11 +266,11 @@ public abstract class BaseBottomFragment extends Fragment {
         btn_play_expand.setOnClickListener(onClickListener);
         btn_next_expand = bottom_play_bar.findViewById(R.id.btn_next_expand);
         btn_next_expand.setOnClickListener(onClickListener);
-
+        ll_control_group = bottom_play_bar.findViewById(R.id.ll_control_group);
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bottomSheetDialog.show();
+                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
 
@@ -220,8 +280,21 @@ public abstract class BaseBottomFragment extends Fragment {
 
     }
 
+   public void setPeekHeight(int height) {
+        behavior.setPeekHeight(height);
+   }
 
+   public View getBottomBar() {
+        return bottom_play_bar;
+   }
 
+    public void setBottomSheetCallback(BottomSheetBehavior.BottomSheetCallback bottomSheetCallback) {
+       behavior.setBottomSheetCallback(bottomSheetCallback);
+    }
+
+    public void setBottomBarHide(boolean bottomBarHide) {
+        isBottomBarHide = bottomBarHide;
+    }
 
     /**
      * 添加观察者
@@ -233,9 +306,7 @@ public abstract class BaseBottomFragment extends Fragment {
                 if (item == null) {
                     return;
                 }
-                tv_title.setText(item.getTitle());
                 tv_title_expand.setText(item.getTitle());
-                tv_aritist.setText(item.getAuthor());
                 tv_artist_expand.setText(item.getAuthor());
                 String time = baseViewModel.getCurPlaySong().getValue().getTime();
                 long duration;
@@ -404,7 +475,6 @@ public abstract class BaseBottomFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        timer.cancel();
         baseViewModel.removeObserves(this);
         super.onDestroyView();
     }

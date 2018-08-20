@@ -199,6 +199,8 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
                 isPlaying.setValue(p);
                 int index = intent.getIntExtra(Constant.CURRENT_SONG, 0);
                 ArrayList<Item> list = (ArrayList<Item>) (intent.getSerializableExtra(Constant.CURRENT_SONGLIST));
+                if (list == null)
+                    return;
                 curPlaySong.setValue(list.get(index));
                 SongList songList = new SongList();
                 songList.setTitle("播放列表");

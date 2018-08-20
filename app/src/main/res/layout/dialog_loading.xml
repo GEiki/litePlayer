@@ -12,6 +12,6 @@
         style="@style/MProgressBar"
         android:alpha="1"
         android:layout_gravity="center"
-        android:layout_width="155dp"
-        android:layout_height="wrap_content" />
+        android:layout_width="25dp"
+        android:layout_height="25dp" />
 </LinearLayout>

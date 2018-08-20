@@ -1,5 +1,6 @@
 package com.dedaodemo.ui;
 
+import android.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -33,6 +36,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.R;
+import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.ViewModel.SongListViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
@@ -41,6 +45,7 @@ import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
+import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,8 +66,10 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     BottomSheetDialog bottomSheetDialog;
     private ImageView iv_head;
     private RecyclerView recyclerView;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
     private MListAdapter adapter;
     private SongListContract.Presenter viewModel;
+    private BaseContract.Presenter baseViewModel;
     private int preSize = 0;
     private Observer<SongList> songListObserver;
 
@@ -120,6 +127,12 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         loadingDialog=ab.setView(dialogView).create();
 
         initRecyclerView((ViewGroup) mView);
+        setPeekHeight(Util.dip2px(getContext(),65));
+        RelativeLayout bottomBar = (RelativeLayout)getBottomBar();
+        if (bottomBar != null) {
+            ((CoordinatorLayout.LayoutParams)(bottomBar.getLayoutParams())).topMargin = Util.dip2px(getContext(),12f);
+            bottomBar.invalidate();
+        }
 
         /**
          * 注册观察歌单
@@ -172,7 +185,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
     @Override
     public void onItemClick(View v, int position) {
-        play(mSongList, mSongList.getSongList().get(position));
+        baseViewModel.playSong(mSongList, mSongList.getSongList().get(position));
     }
 
     private void addHeaderImgView(View view, LayoutInflater inflater) {

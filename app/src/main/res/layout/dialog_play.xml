@@ -3,52 +3,26 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:weightSum="3">
+    android:layout_height="match_parent"
+    android:weightSum="6">
 
-    <LinearLayout
-        android:id="@+id/ll_title"
+    <ImageView
+        android:layout_marginTop="80dp"
         android:layout_width="match_parent"
-        android:layout_margin="8dp"
-        android:layout_height="65dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:orientation="vertical"
-        android:text="tv_title">
+        android:layout_marginHorizontal="22dp"
+        android:layout_height="0dp"
+        android:src="@drawable/default_songlist_background"
+        android:layout_weight="4"/>
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="match_parent"
-            android:layout_height="35dp"
-            android:textSize="25sp"
-            android:singleLine="true"
-            android:ellipsize="marquee"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:gravity="center"
-            android:text="歌曲名称" />
 
-        <TextView
-            android:id="@+id/tv_artist"
-            android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:gravity="center"
-            android:text="歌手" />
-    </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_height="1dp"
-        android:background="@color/light_gray" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginTop="100dp"
         android:layout_marginBottom="15dp"
         android:gravity="center_horizontal"
+        android:layout_weight="1"
         android:orientation="horizontal">
 
         <TextView
@@ -74,64 +48,71 @@
     </LinearLayout>
 
 
-    <ImageView
-        android:id="@+id/iv_loop"
-        android:background="@drawable/ic_action_loop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="42dp"
-        android:layout_marginTop="22dp" />
 
-    <ImageView
-        android:id="@+id/iv_single"
-        android:background="@drawable/ic_action_single_loop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginLeft="42dp"
-        android:layout_marginTop="22dp" />
-
-    <ImageView
-        android:id="@+id/iv_random"
-        android:background="@drawable/ic_action_random"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginLeft="42dp"
-        android:layout_marginTop="22dp" />
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:orientation="horizontal"
+        android:layout_weight="1"
         android:layout_gravity="center_horizontal">
-
         <ImageView
-            android:id="@+id/iv_pre"
+            android:id="@+id/iv_loop"
+            android:background="@drawable/ic_action_loop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_action_pre" />
+            android:layout_marginStart="42dp" />
+
         <ImageView
-            android:id="@+id/iv_pause"
+            android:id="@+id/iv_single"
+            android:background="@drawable/ic_action_single_loop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            app:srcCompat="@drawable/ic_action_pause" />
+            android:layout_marginStart="42dp" />
 
         <ImageView
-            android:id="@+id/iv_play"
+            android:id="@+id/iv_random"
+            android:background="@drawable/ic_action_random"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            app:srcCompat="@drawable/ic_action_play" />
+            android:visibility="gone"
+            android:layout_marginStart="42dp"
+            />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="50dp"
+            android:orientation="horizontal">
+            <ImageView
+                android:id="@+id/iv_pre"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_action_pre" />
+            <ImageView
+                android:id="@+id/iv_pause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                app:srcCompat="@drawable/ic_action_pause" />
 
-        <ImageView
-            android:id="@+id/iv_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_action_next" />
+            <ImageView
+                android:id="@+id/iv_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                app:srcCompat="@drawable/ic_action_play" />
+
+            <ImageView
+                android:id="@+id/iv_next"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_action_next" />
+        </LinearLayout>
+
+
     </LinearLayout>
 
     <View

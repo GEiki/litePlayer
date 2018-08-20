@@ -24,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
@@ -50,6 +51,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     private BaseContract.Presenter baseViewModel;
     private ArrayList<SongList> sheetList;
     private AlertDialog dialog;
+    private ProgressBar progressBar;
     private Observer<ArrayList<SongList>> sheetListObserve;
     /**
      * 从服务启动的标志
@@ -88,7 +90,6 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_sheet_list, container, false);
-        super.onCreateView(inflater, container, savedInstanceState);
         toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle("Lite");
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
@@ -97,14 +98,14 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         AppBarLayout.LayoutParams layoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         layoutParams.setMargins(0, Util.dip2px(getContext(), 20), 0, 0);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
+        super.onCreateView(inflater, container, savedInstanceState);
         initRecyclerView();
 
         sheetListObserve = new Observer<ArrayList<SongList>>() {
             @Override
             public void onChanged(@Nullable ArrayList<SongList> songLists) {
-                if (dialog != null && dialog.isShowing()) {
-                    dialog.dismiss();
+                if (progressBar != null) {
+                    dismissSearching();
                 }
                 if (songLists == null)
                     return;
@@ -238,7 +239,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         switch (id) {
             case R.id.nav_scan: {
                 viewModel.scanMusic();
-                showDialog();
+                showSearching();
                 break;
             }
         }
@@ -248,6 +249,18 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         return true;
 
     }
+    private void showSearching() {
+        ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(getActivity()).inflate(R.layout.dialog_loading,null);
+        progressBar =  viewGroup.findViewById(R.id.progressBar2);
+        viewGroup.removeView(progressBar);
+        toolbar.addView(progressBar);
+        toolbar.invalidate();
+    }
+
+    private void dismissSearching() {
+        toolbar.removeView(progressBar);
+    }
+
 
 
 }

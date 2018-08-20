@@ -2,37 +2,18 @@
 
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ll_bottom_play_bar"
     android:layout_width="match_parent"
-    android:layout_height="60dp"
-    android:background="#0000"
-    android:layout_gravity="bottom"
-    tools:layout_editor_absoluteY="25dp">
-
-
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:fitsSystemWindows="true"
+    android:layout_gravity="bottom">
 
         <RelativeLayout
-            android:id="@+id/bottom_layout_expand"
+            android:id="@+id/rl_title_collapse"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:background="@android:color/white"
-            android:layout_marginTop="8dp">
-
-
-
-
-            <ImageButton
-                android:id="@+id/btn_next_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="88dp"
-                android:layout_marginTop="10dp"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="15dp"
-                android:background="@drawable/ic_action_next" />
-
-
+            android:background="@android:color/white">
             <TextView
                 android:id="@+id/tv_title_expand"
                 android:layout_width="215dp"
@@ -58,26 +39,39 @@
 
 
 
-
-        <ImageButton
-            android:id="@+id/btn_pause_expand"
+        <LinearLayout
+            android:id="@+id/ll_control_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="50dp"
-            android:background="@drawable/ic_action_pause"
-            android:layout_alignParentRight="true" />
-
-        <ImageButton
-            android:id="@+id/btn_play_expand"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/ic_action_play"
-            android:visibility="visible"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="50dp" />
+            android:layout_marginBottom="88dp"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btn_pause_expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginRight="50dp"
+                android:background="@drawable/ic_action_pause"
+                android:layout_alignParentRight="true" />
+
+            <ImageButton
+                android:id="@+id/btn_play_expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_action_play"
+                android:visibility="visible"
+                android:layout_marginEnd="15dp" />
+            <ImageButton
+                android:id="@+id/btn_next_expand"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="15dp"
+                android:background="@drawable/ic_action_next" />
+        </LinearLayout>
+
 
         </RelativeLayout>
 
@@ -91,6 +85,15 @@
             android:layout_height="57dp"
             android:background="@drawable/circle_background"
             android:layout_marginLeft="10dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginRight="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_height="1dp"
+        android:background="@color/light_gray" />
+    <include layout="@layout/dialog_play"
+        android:id="@+id/bottom_play"/>
 
 </RelativeLayout>
 

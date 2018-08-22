@@ -1,6 +1,9 @@
 package com.dedaodemo.model;
 
+import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SearchBean;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 
@@ -9,6 +12,6 @@ import io.reactivex.Observable;
  */
 
 public interface ISearchModel {
-    Observable searchSongOnline(SearchBean bean);
+    Observable<List<Item>> searchSongOnline(SearchBean bean);
 
 }

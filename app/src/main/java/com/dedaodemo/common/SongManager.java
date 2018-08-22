@@ -11,6 +11,7 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by guoss on 2018/6/28.
@@ -179,7 +180,7 @@ public class SongManager {
     }
 
     public boolean next() {
-        ArrayList<Item> items = currentSongList.getSongList();
+        List<Item> items = currentSongList.getSongList();
         if (items.size() == 0) {
             return false;
         }
@@ -217,7 +218,7 @@ public class SongManager {
     }
 
     public boolean pre() {
-        ArrayList<Item> items = currentSongList.getSongList();
+        List<Item> items = currentSongList.getSongList();
         if (items.size() == 0)
             return false;
         int index = items.indexOf(currentSong);

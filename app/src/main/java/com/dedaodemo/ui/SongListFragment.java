@@ -188,36 +188,19 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         Item item = null;
         if (mSongList.getSongList() != null && !mSongList.getSongList().isEmpty()) {
             item = mSongList.getSongList().get(0);
-        }
-        final RequestOptions requestOptions = new RequestOptions();
-        requestOptions.transform(new BlurTransformation(25, 5));
-        requestOptions.diskCacheStrategy(DiskCacheStrategy.RESOURCE);
-        requestOptions.skipMemoryCache(true);
-        if (item == null || item.getType() == Constant.LOCAL_MUSIC) {
+            viewModel.setPic(item,iv_head);
+        } else {
+            final RequestOptions requestOptions = new RequestOptions()
+                    .transform(new BlurTransformation(25, 5))
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .skipMemoryCache(true);
             Glide.with(getContext())
                     .load(R.drawable.default_songlist_background)
                     .apply(requestOptions)
                     .into(iv_head);
-        } else {
-            Glide.with(getContext())
-                    .asDrawable()
-                    .apply(requestOptions)
-                    .load(item.getPic()).listener(new RequestListener<Drawable>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                    Glide.with(getContext())
-                            .load(R.drawable.default_songlist_background)
-                            .apply(requestOptions)
-                            .into(iv_head);
-                    return true;
-                }
-
-                @Override
-                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                    return false;
-                }
-            }).into(iv_head);
         }
+
+
     }
 
 

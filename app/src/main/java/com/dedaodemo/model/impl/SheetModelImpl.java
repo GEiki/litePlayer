@@ -13,9 +13,11 @@ import com.dedaodemo.database.AppDatabaseHelper;
 import com.dedaodemo.database.dao.ItemSongListDao;
 import com.dedaodemo.entity.ItemSongList;
 import com.dedaodemo.model.ISheetModel;
+import com.dedaodemo.util.DatabaseUtil;
 import com.dedaodemo.util.GsonUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -74,6 +76,11 @@ public class SheetModelImpl implements ISheetModel {
                 AppDatabaseHelper helper = new AppDatabaseHelper();
                 AppDatabase db = helper.getDatabase();
                 List<SongList> songLists = db.songListDao().queryAll();
+               for (SongList songList : songLists) {
+                   List<Item> list = DatabaseUtil.queryBySheet(songList.getTitle());
+                   Collections.reverse(list);
+                   songList.setSongList(list);
+               }
                 emitter.onNext(songLists);
                 emitter.onComplete();
             }

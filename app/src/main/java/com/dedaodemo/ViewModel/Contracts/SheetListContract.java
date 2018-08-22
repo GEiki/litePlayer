@@ -15,15 +15,15 @@ import java.util.ArrayList;
 public class SheetListContract {
 
     public interface Presenter {
-        public void removeSongList(@NonNull SongList target);
+         void removeSongList(@NonNull SongList target);
 
-        public void addSongList(@NonNull final SongList songList);
+         void addSongList(@NonNull final SongList songList);
 
-        public void loadData();
+         void loadData();
 
-        public void scanMusic();
+         void scanMusic();
 
-        public void observeSongLists(LifecycleOwner owner, Observer<ArrayList<SongList>> observer);
+         void observeSongLists(LifecycleOwner owner, Observer<ArrayList<SongList>> observer);
 
         void removeObserveSongLists(Observer<ArrayList<SongList>> observer);
     }

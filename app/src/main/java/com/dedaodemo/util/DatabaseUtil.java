@@ -21,6 +21,20 @@ import java.util.List;
 public class DatabaseUtil {
     private static final String TAG = "DatabaseUtil";
 
+    public static void updateItem(final Item item) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                AppDatabaseHelper helper = new AppDatabaseHelper();
+                AppDatabase db = helper.getDatabase();
+
+                ItemDao dao = db.itemDao();
+                dao.updateItem(item);
+            }
+        }).start();
+
+    }
+
     public static void deleteSongFromSongList(SongList songList, Item item) {
         AppDatabaseHelper helper = new AppDatabaseHelper();
         AppDatabase db = helper.getDatabase();

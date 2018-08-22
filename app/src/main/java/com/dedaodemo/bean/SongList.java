@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by guoss on 2018/4/15.
@@ -33,7 +34,7 @@ public class SongList implements Serializable {
     private int color;
 
     @Ignore
-    private ArrayList<Item> items = new ArrayList<>();
+    private List<Item> items = new ArrayList<>();
 
     public SongList(){
     }
@@ -103,12 +104,12 @@ public class SongList implements Serializable {
     }
 
     @Ignore
-    public ArrayList<Item> getSongList() {
+    public List<Item> getSongList() {
         return items;
     }
 
     @Ignore
-    public void setSongList(ArrayList<Item> songList) {
+    public void setSongList(List<Item> songList) {
         this.items = songList;
     }
 

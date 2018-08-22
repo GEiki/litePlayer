@@ -35,7 +35,7 @@ public class SearchModelImpl implements ISearchModel {
     public static final String SERVICE_ERRO = "service_erro";
 
     @Override
-    public Observable searchSongOnline(final SearchBean bean) {
+    public Observable<List<Item>> searchSongOnline(final SearchBean bean) {
         return Observable.create(new ObservableOnSubscribe<List<Item>>() {
             @Override
             public void subscribe(@NonNull final ObservableEmitter<List<Item>> emitter) throws Exception {

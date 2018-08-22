@@ -27,6 +27,7 @@ import com.dedaodemo.util.ToastUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -107,7 +108,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         curPlayList.setValue(songList);
         curPlaySong.setValue(item);
         Bundle bundle = new Bundle();
-        bundle.putSerializable(Constant.CURRENT_SONGLIST, curPlayList.getValue().getSongList());
+        bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)curPlayList.getValue().getSongList());
         bundle.putInt(Constant.CURRENT_SONG, curPlayList.getValue().getSongList().indexOf(item));
         Intent intent = new Intent();
         intent.putExtras(bundle);
@@ -236,7 +237,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
     @Override
     public void nextSong() {
         isPlaying.setValue(true);
-        ArrayList<Item> items = curPlayList.getValue().getSongList();
+        List<Item> items = curPlayList.getValue().getSongList();
         Item song = curPlaySong.getValue();
         int index = items.indexOf(song);
         if (index < items.size() - 1) {
@@ -252,7 +253,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
     @Override
     public void preSong() {
         isPlaying.setValue(true);
-        ArrayList<Item> items = curPlayList.getValue().getSongList();
+        List<Item> items = curPlayList.getValue().getSongList();
         Item song = curPlaySong.getValue();
         int index = items.indexOf(song);
         if (index > 0) {

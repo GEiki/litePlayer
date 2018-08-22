@@ -56,7 +56,7 @@ public class MyApplication extends Application {
                         Intent intent = new Intent();
                         Bundle bundle = new Bundle();
                         int index = o.getIndex();
-                        bundle.putSerializable(Constant.CURRENT_SONGLIST, songList.getSongList());
+                        bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)songList.getSongList());
                         bundle.putInt(Constant.CURRENT_SONG, index);
                         intent.putExtras(bundle);
                         intent.setAction(Constant.ACTION_N_INIT);

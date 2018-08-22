@@ -3,6 +3,7 @@ package com.dedaodemo.ViewModel.Contracts;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
+import android.widget.ImageView;
 
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
@@ -22,6 +23,8 @@ public class SongListContract {
         void loadSongData(SongList songList);
 
         void loadSheetList();
+
+        void setPic(Item item,ImageView imageView);
 
         MutableLiveData getSheetListLiveData();
 

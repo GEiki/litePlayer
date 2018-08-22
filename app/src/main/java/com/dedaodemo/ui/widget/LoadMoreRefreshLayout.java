@@ -1,4 +1,4 @@
-package com.dedaodemo.ui;
+package com.dedaodemo.ui.widget;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;

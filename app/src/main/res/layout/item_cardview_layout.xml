@@ -2,87 +2,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/item_cardview_linear"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="65dp"
     android:clickable="true"
     android:transitionName="songList_card_view">
+    <TextView
+        android:id="@+id/tv_pic"
+        android:layout_width="65dp"
+        android:layout_height="match_parent"
+        android:text="歌"
+        android:textSize="25dp"
+        android:textColor="@android:color/primary_text_light"
+        android:gravity="center"/>
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/card_view"
-        android:layout_width="match_parent"
-        android:layout_height="155dp"
-        android:layout_margin="8dp"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="10dp">
-
-
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/list_card_item"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:focusable="false"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/iv_background"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="8dp" />
-
-        <LinearLayout
-            android:id="@+id/linearLayout3"
-            android:layout_width="wrap_content"
-            android:layout_height="80dp"
-            android:layout_marginTop="16dp"
-            android:focusable="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginLeft="43dp"
-            app:layout_constraintLeft_toLeftOf="parent">
-
-
-            <TextView
-                android:id="@+id/list_card_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:text="是标题"
-                android:focusable="false"
-                android:textColor="@android:color/black"
-                android:textSize="40sp" />
-
-
-        </LinearLayout>
-
-
-
-        <ImageView
-            android:id="@+id/btn_more"
+        android:layout_marginRight="40dp"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/tv_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:focusable="false"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_action_more"
-            android:layout_marginLeft="8dp"
-            app:layout_constraintLeft_toLeftOf="@+id/iv_background"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginBottom="8dp"
-            android:layout_marginRight="8dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintHorizontal_bias="0.974"
-            app:layout_constraintVertical_bias="0.074" />
+            android:text="歌单名称" />
+        <TextView
+            android:id="@+id/tv_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0首"/>
 
-
-    </android.support.constraint.ConstraintLayout>
-    </android.support.v7.widget.CardView>
-
+    </LinearLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_action_right"
+        android:layout_gravity="end"
+        />
 </LinearLayout>

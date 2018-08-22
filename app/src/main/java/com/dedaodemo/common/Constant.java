@@ -117,6 +117,9 @@ public class Constant {
 
     public static final String BASE_BACK_STACK = "base_back_stack";
     public static final String FRAGMENT_FLAGS = "fragment_flags";
+    public static final String SONG_LIST_FRAGMENT = "song_list_fragment";
+    public static final String SEARCH_FRAGMENT = "search_fragment";
+    public static final String ADD_SHEET_FRAGMENT = "add_sheet_fragment";
 
 
 

@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_bar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:behavior_peekHeight = "80dp"
+    app:layout_behavior="@string/bottom_sheet_behavior"
+    >
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout
     android:id="@+id/ll_bottom_play_bar"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:fitsSystemWindows="true"
-    android:layout_gravity="bottom">
-
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    >
         <RelativeLayout
             android:id="@+id/rl_title_collapse"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:background="@android:color/white">
+            android:layout_height="60dp"
+            android:background="@color/colorPrimary">
             <TextView
                 android:id="@+id/tv_title_expand"
-                android:layout_width="215dp"
+                android:layout_width="185dp"
                 android:layout_height="wrap_content"
                 android:text="未知歌曲"
+                android:textColor="@android:color/white"
                 android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
                 android:focusable="true"
                 android:singleLine="true"
                 android:focusableInTouchMode="true"
@@ -33,6 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
+                android:textColor="@android:color/white"
                 android:layout_marginLeft="80dp"
                 android:layout_marginTop="32dp"
                 android:text="未知歌手" />
@@ -53,9 +64,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:layout_marginRight="50dp"
+                android:layout_marginEnd="15dp"
                 android:background="@drawable/ic_action_pause"
-                android:layout_alignParentRight="true" />
+                 />
 
             <ImageButton
                 android:id="@+id/btn_play_expand"
@@ -86,14 +97,10 @@
             android:background="@drawable/circle_background"
             android:layout_marginLeft="10dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_height="1dp"
-        android:background="@color/light_gray" />
+
     <include layout="@layout/dialog_play"
         android:id="@+id/bottom_play"/>
 
 </RelativeLayout>
 
+</FrameLayout>

@@ -1,14 +1,21 @@
 package com.dedaodemo.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.dedaodemo.MyApplication;
+import com.dedaodemo.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,6 +61,54 @@ public class Util {
         }
         return null;
     }
+
+    /**
+     * 沉浸式状态栏
+     * */
+    public static void setTranslucentStatus(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(activity.getResources().getColor(R.color.transparent,null));
+        }
+    }
+
+    /**
+     * 设置状态栏颜色
+     * */
+    public static void setStatusBarColor(Activity activity, int color) {
+        // 5.0 以上
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().setStatusBarColor(color);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+
+            View view = new View(activity);
+            ViewGroup.LayoutParams params = new ViewGroup
+                    .LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, getStatusBarHeight(activity));
+            view.setLayoutParams(params);
+            view.setBackgroundColor(color);
+
+            ViewGroup decorView = (ViewGroup) activity.getWindow().getDecorView();
+            decorView.addView(view);
+
+            ViewGroup contentView = (ViewGroup) activity.findViewById(android.R.id.content);
+            contentView.setPadding(0, getStatusBarHeight(activity), 0, 0);
+        }
+    }
+
+    /**
+     * 获取状态栏的高度
+     */
+    public static int getStatusBarHeight(Activity activity) {
+        Resources resources = activity.getResources();
+        int statusBarHeightId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        return resources.getDimensionPixelOffset(statusBarHeightId);
+    }
+
+
 
     /**
      * 获取当前时间

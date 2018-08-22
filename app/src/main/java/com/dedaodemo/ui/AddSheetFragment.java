@@ -21,6 +21,7 @@ import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.SheetListViewModel;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.util.ToastUtil;
+import com.dedaodemo.util.Util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,7 +54,9 @@ public class AddSheetFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View v = inflater.inflate(R.layout.fragment_add_sheet, container, false);
+        Util.setTranslucentStatus(getActivity());
         et_sheet = v.findViewById(R.id.et_sheet);
         et_sheet.setSingleLine();
 

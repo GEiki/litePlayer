@@ -1,8 +1,11 @@
 package com.dedaodemo.ui;
 
+import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,12 +21,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.transition.Explode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 
 import com.dedaodemo.R;
@@ -39,8 +45,10 @@ import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
 
+import static com.dedaodemo.common.Constant.BASE_BACK_STACK;
 
-public class SheetListFragment extends BaseBottomFragment implements NavigationView.OnNavigationItemSelectedListener, SongListAdapter.onMenuSongItemClickListener, BaseAdapter.OnItemClickListener {
+
+public class SheetListFragment extends Fragment  implements NavigationView.OnNavigationItemSelectedListener, SongListAdapter.onMenuSongItemClickListener, BaseAdapter.OnItemClickListener {
 
     public static String SHEET_LIST_FRAGMENT = "SheetListFragment";
     public static String SHEET_BACK_STACK = "sheetBackStack";
@@ -53,6 +61,7 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     private AlertDialog dialog;
     private ProgressBar progressBar;
     private Observer<ArrayList<SongList>> sheetListObserve;
+    private SongListFragment songListFragment;
     /**
      * 从服务启动的标志
      */
@@ -90,14 +99,10 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_sheet_list, container, false);
+        Util.setTranslucentStatus(getActivity());
         toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle("Lite");
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
-        toolbar.setTitleMarginStart(30);
-        toolbar.setTitleMarginEnd(30);
-        AppBarLayout.LayoutParams layoutParams = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-        layoutParams.setMargins(0, Util.dip2px(getContext(), 20), 0, 0);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         super.onCreateView(inflater, container, savedInstanceState);
         initRecyclerView();
 
@@ -133,10 +138,8 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         super.onHiddenChanged(hidden);
     }
 
-    @Override
-    public View getParentView() {
-        return ((ViewGroup) mView).getChildAt(0);
-    }
+
+
 
     private void initRecyclerView() {
         recyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
@@ -152,8 +155,8 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
 
     @Override
     public void onItemClick(View v, int position) {
-        SongListFragment songListFragment = SongListFragment.newInstance(sheetList.get(position));
-        showFragment(songListFragment, SheetListFragment.this);
+       songListFragment = SongListFragment.newInstance(sheetList.get(position));
+       showFragment(songListFragment,this,Constant.SONG_LIST_FRAGMENT);
     }
 
 
@@ -185,17 +188,34 @@ public class SheetListFragment extends BaseBottomFragment implements NavigationV
         switch (id) {
             case R.id.action_search: {
                 Fragment searchFragment = SearchFragment.newInstance();
-                showFragment(searchFragment, SheetListFragment.this);
+                showFragment(searchFragment, SheetListFragment.this,Constant.SEARCH_FRAGMENT);
                 break;
             }
             case R.id.action_add_song_list: {
                 Fragment addSheetFragment = AddSheetFragment.newInstance(new Bundle());
-                showFragment(addSheetFragment, SheetListFragment.this);
+                showFragment(addSheetFragment, SheetListFragment.this,Constant.ADD_SHEET_FRAGMENT);
             }
             default:
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * fragment跳转
+     */
+    public void showFragment(Fragment showFragment, Fragment hideFragment,String TAG) {
+        Explode explode = new Explode();
+        explode.setDuration(500);
+        showFragment.setEnterTransition(explode);
+        showFragment.setAllowEnterTransitionOverlap(true);
+        showFragment.setAllowReturnTransitionOverlap(true);
+        getFragmentManager().beginTransaction()
+                .add(R.id.fragment_container, showFragment, TAG)
+                .addToBackStack(BASE_BACK_STACK)
+                .show(showFragment)
+                .hide(hideFragment)
+                .commit();
     }
 
     @Override

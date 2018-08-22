@@ -2,7 +2,9 @@ package com.dedaodemo.ui;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,36 +13,26 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Explode;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.dedaodemo.R;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
+import com.dedaodemo.util.Util;
 
 
-public class MainActivity extends AppCompatActivity implements ActivityCallBack
+public class MainActivity extends BaseActivity
 {
-    private static final int FIRST_LAUNCH_FLAG = 0;
-    private static final String LAUNCH_FLAG = "launch";
-    private static final String BASE_FRAGMENT = "base_fragment";
-    private int launch_flags;
-    private IBackHandle backHandle;
-    private BaseBottomFragment baseBottomFragment;
+
 
 
 
     @Override
-    protected void onCreate(final Bundle savedInstanceState)
+    public void onCreate(final Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.container_layout);
-
-
-        SharedPreferences sharedPreferences = getSharedPreferences(Constant.SP_KEY_LANUCH, MODE_PRIVATE);
-        launch_flags = sharedPreferences.getInt(LAUNCH_FLAG, FIRST_LAUNCH_FLAG);
-        sharedPreferences.edit().putInt(LAUNCH_FLAG, launch_flags + 1).commit();
-
-
-
 
         /**
          * 添加fragment
@@ -78,10 +70,7 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack
 
     }
 
-    @Override
-    public void setBackHandler(IBackHandle backHandler) {
-        this.backHandle = backHandler;
-    }
+
 
     @Override
     protected void onResume() {
@@ -90,20 +79,9 @@ public class MainActivity extends AppCompatActivity implements ActivityCallBack
 
     @Override
     public void onBackPressed() {
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        Fragment songFragment = fragmentManager.findFragmentByTag(SongFragment.SONG_FRAGMENT);
-//        if(songFragment != null){
-//            Fragment songListFragment = fragmentManager.findFragmentByTag(SongListFragment.TAG_SONG_LIST_FRAGMENT);
-//            fragmentManager.beginTransaction().show(songListFragment).remove(songFragment).commit();
-//            Log.i("Fragment","remove");
-//            return;
-//        }
-        if (backHandle != null && !backHandle.isBottomBarHide()) {
-            backHandle.hideBottomBarHide();
-            return;
-        } else {
+
             super.onBackPressed();
-        }
+
 
     }
 

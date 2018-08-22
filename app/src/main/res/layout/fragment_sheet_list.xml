@@ -4,9 +4,11 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:id="@+id/drawer_layout">
 
-    <android.support.design.widget.CoordinatorLayout android:layout_width="match_parent"
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/white"
         xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -22,13 +24,9 @@
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                app:elevation="0dp"
-                android:layout_marginTop="20dp"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_scrollFlags="scroll|enterAlways"
                 android:popupTheme="@style/ToolbarPopupTheme"
-                android:theme="@style/AppTheme.AppBarOverlay"
-                app:layout_collapseMode="pin" />
+                android:theme="@style/AppTheme.AppBarOverlay" />
 
 
         </android.support.design.widget.AppBarLayout>
@@ -43,7 +41,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 

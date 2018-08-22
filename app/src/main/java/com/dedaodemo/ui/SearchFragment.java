@@ -48,7 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class SearchFragment extends BaseBottomFragment implements BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
+public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
 
     private SearchContract.Presenter viewModel;
     private BaseContract.Presenter baseViewModel;
@@ -88,6 +88,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
                              Bundle savedInstanceState) {
 
         mView = inflater.inflate(R.layout.fragment_search, null, false);
+        Util.setTranslucentStatus(getActivity());
         super.onCreateView(inflater, container, null);
 
         initRecyclerView((ViewGroup) mView);
@@ -119,15 +120,9 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setHasOptionsMenu(true);
         addSearchView(mView);
-        setPeekHeight(Util.dip2px(getContext(),60));
-        initBottomSheetCallback();
         return mView;
     }
 
-    @Override
-    public View getParentView() {
-        return mView;
-    }
 
     private void initRecyclerView(ViewGroup viewGroup) {
         recyclerView = viewGroup.findViewById(R.id.recycler_view);
@@ -143,33 +138,7 @@ public class SearchFragment extends BaseBottomFragment implements BaseAdapter.On
         recyclerView.setAdapter(mListAdapter);
     }
 
-    private void initBottomSheetCallback() {
-        setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
-            @Override
-            public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    setBottomBarHide(true);
-                    toolbar.addView(searchView);
-                    toolbar.setTitle("");
-                    toolbar.setSubtitle("");
-                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    setBottomBarHide(false);
-                    Item song = baseViewModel.getCurPlaySong().getValue();
-                    toolbar.removeView(searchView);
-                    if (song != null) {
-                        toolbar.setTitle(song.getTitle());
-                        toolbar.setSubtitle(song.getAuthor());
-                    }
 
-                }
-            }
-
-            @Override
-            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-
-            }
-        });
-    }
 
 
 

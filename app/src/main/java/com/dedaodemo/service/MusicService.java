@@ -72,12 +72,12 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public void pause() {
         mp.pause();
         timer.cancel();
-        Intent intent = new Intent();
-        intent.setAction(Constant.ACTION_N_PLAYING);
-        intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-        intent.putExtra(Constant.CURRENT_SONG, index);
-        intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
-        sendBroadcast(intent);
+//        Intent intent = new Intent();
+//        intent.setAction(Constant.ACTION_N_PLAYING);
+//        intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+//        intent.putExtra(Constant.CURRENT_SONG, index);
+//        intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
+//        sendBroadcast(intent);
     }
 
     @Override
@@ -259,12 +259,12 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         if (mp != null && !mp.isPlaying()) {
             mp.rePlay();
             startSendProgress();
-            Intent intent = new Intent();
-            intent.setAction(Constant.ACTION_N_PLAYING);
-            intent.putExtra(Constant.CURRENT_SONG, index);
-            intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
-            sendBroadcast(intent);
+//            Intent intent = new Intent();
+//            intent.setAction(Constant.ACTION_N_PLAYING);
+//            intent.putExtra(Constant.CURRENT_SONG, index);
+//            intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+//            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
+//            sendBroadcast(intent);
         }
 
     }
@@ -405,12 +405,5 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         super.onTaskRemoved(rootIntent);
     }
 
-    private void update(CurrentPlayStateBean currentPlayStateBean) {
-        try {
 
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-
-    }
 }

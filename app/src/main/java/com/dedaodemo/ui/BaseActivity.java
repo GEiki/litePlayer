@@ -1,17 +1,9 @@
 package com.dedaodemo.ui;
 
-
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.graphics.drawable.Drawable;
-import android.support.v7.app.ActionBar;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.arch.persistence.room.util.StringUtil;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -19,10 +11,7 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.transition.Explode;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,15 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toolbar;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.BaseContract;
@@ -52,21 +33,8 @@ import com.dedaodemo.common.Constant;
 import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
-import java.util.Timer;
-
-import jp.wasabeef.glide.transformations.BlurTransformation;
-
-/**
- * 包含bottomPlaybar的fragment
- */
-public abstract class BaseBottomFragment extends Fragment implements IBackHandle {
-
-    public static final String BASE_BACK_STACK = "base_back_stack";
+public class BaseActivity extends AppCompatActivity {
     public static final int MAX_PROGRESS = 1000;
-
-    //    private RecyclerView recyclerView;
-    private BottomSheetDialog bottomSheetDialog;
-//    private BaseAdapter adapter;
 
     private FrameLayout bottom_play_bar;
     private RelativeLayout rl_play_title;
@@ -80,25 +48,21 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
     private ImageView iv_random;
     private TextView tv_duration;
     private TextView tv_progress;
-
     private TextView tv_title_expand;
     private TextView tv_artist_expand;
-
     public ImageButton btn_play_expand;
     public ImageButton btn_pause_expand;
     private ImageButton btn_next_expand;
     private SeekBar seekBar;
+
     private View.OnClickListener onClickListener;
     private BaseContract.Presenter baseViewModel;
     private FooterBehavior behavior;
-    private boolean isBottomBarHide = true;
-
-    private ActivityCallBack activityCallBack;
     private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
+    private boolean isBottomBarExpand;
 
 
-    public BaseBottomFragment() {
-    }
+
 
 
     @Override
@@ -111,61 +75,13 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        baseViewModel = ViewModelProviders.of(getActivity()).get(BaseViewModel.class);
-        if (getArguments() != null) {
-        }
-    }
-
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = getParentView();
-//        recyclerView = view.findViewById(R.id.recycler_view);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        activityCallBack = (ActivityCallBack) getActivity();
-        activityCallBack.setBackHandler(this);
-        initBottomPlayBar((ViewGroup) view);
+        setContentView(R.layout.activity_main);
+        baseViewModel = ViewModelProviders.of(this).get(BaseViewModel.class);
+        initBottomPlayBar();
         initPlayDialog();
         observeLiveData();
         baseViewModel.initBottomBar();
-
-        return view;
     }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        if (!hidden && activityCallBack != null) {
-            activityCallBack.setBackHandler(this);
-        }
-    }
-
-
-    /**
-     * fragment跳转
-     */
-    public void showFragment(Fragment showFragment, Fragment hideFragment,String TAG) {
-        Explode explode = new Explode();
-        explode.setDuration(500);
-        showFragment.setEnterTransition(explode);
-        showFragment.setAllowEnterTransitionOverlap(true);
-        showFragment.setAllowReturnTransitionOverlap(true);
-        getFragmentManager().beginTransaction()
-                .add(R.id.fragment_container, showFragment, TAG)
-                .addToBackStack(BASE_BACK_STACK)
-                .show(showFragment)
-                .hide(hideFragment)
-                .commit();
-    }
-
-
-
-    /**
-     * 该方法应该返回父布局，用于添加底层播放栏
-     * */
-    public abstract View getParentView();
 
     /**
      * 初始化播放窗口
@@ -208,29 +124,31 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
 
             }
         });
-
-
-    }
-
-
-    @Override
-    public boolean isBottomBarHide() {
-        return isBottomBarHide;
     }
 
     @Override
-    public void hideBottomBarHide() {
-        behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+    public void onBackPressed() {
+        if (isBottomBarExpand) {
+            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    private double getStatusBarHeight(Context context){
+        double statusBarHeight = Math.ceil(25 * context.getResources().getDisplayMetrics().density);
+        return statusBarHeight;
     }
 
     /**
      * 初始化底层播放栏
      */
-    private void initBottomPlayBar(ViewGroup v) {
-
+    private void initBottomPlayBar() {
         initOnClickListener();
-        bottom_play_bar = (FrameLayout) LayoutInflater.from(getContext()).inflate(R.layout.bottom_play_bar,null);
-        bottom_play_bar.setVisibility(View.VISIBLE);
+        double statusHeight = getStatusBarHeight(this);
+        bottom_play_bar = findViewById(R.id.bottom_bar);
+        bottom_play_bar.setPadding(0,(int) statusHeight,0,0);
+        bottom_play_bar.invalidate();
 
         //设置behavior响应滑动
         CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -239,17 +157,15 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    isBottomBarHide = true;
                     iv_circle.setVisibility(View.VISIBLE);
                     ll_control_group.setVisibility(View.VISIBLE);
+                    tv_title_expand.requestFocus();
+                    isBottomBarExpand = false;
                 } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    isBottomBarExpand = true;
                     Item song = baseViewModel.getCurPlaySong().getValue();
-                    tv_title_expand.setTextColor(getResources().getColor(android.R.color.primary_text_dark,null));
-                    isBottomBarHide = false;
                     iv_circle.setVisibility(View.GONE);
                     ll_control_group.setVisibility(View.GONE);
-                } else {
-                    tv_title_expand.setTextColor(getResources().getColor(android.R.color.primary_text_light,null));
                 }
             }
 
@@ -259,7 +175,7 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
             }
         };
         behavior.setBottomSheetCallback(bottomSheetCallback);
-        behavior.setPeekHeight(Util.dip2px(getContext(),85f));
+        behavior.setPeekHeight(Util.dip2px(this,85f));
         layoutParams.setBehavior(behavior);
         bottom_play_bar.setLayoutParams(layoutParams);
 
@@ -280,32 +196,12 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                 behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
             }
         });
-//        v.addView(bottom_play_bar);
 
     }
 
 
 
 
-
-
-
-
-   public void setPeekHeight(int height) {
-        behavior.setPeekHeight(height);
-   }
-
-   public View getBottomBar() {
-        return bottom_play_bar;
-   }
-
-    public void setBottomSheetCallback(BottomSheetBehavior.BottomSheetCallback bottomSheetCallback) {
-       behavior.setBottomSheetCallback(bottomSheetCallback);
-    }
-
-    public void setBottomBarHide(boolean bottomBarHide) {
-        isBottomBarHide = bottomBarHide;
-    }
 
     /**
      * 添加观察者
@@ -370,7 +266,7 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                 if (errorFlags == null)
                     return;
                 if (errorFlags) {
-                    ToastUtil.showShort(getActivity(), "出了点错误，请重试或换一首歌曲");
+                    ToastUtil.showShort(BaseActivity.this, "出了点错误，请重试或换一首歌曲");
                 }
             }
         });
@@ -414,7 +310,7 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                     }
                     case R.id.btn_play_expand:{
                         btn_play_expand.setVisibility(View.GONE);
-                            btn_pause_expand.setVisibility(View.VISIBLE);
+                        btn_pause_expand.setVisibility(View.VISIBLE);
                         baseViewModel.rePlay();
                         break;
                     }
@@ -425,8 +321,8 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                         break;
                     }
                     case R.id.btn_next_expand:{
-                       next();
-                       seekBar.setProgress(0);
+                        next();
+                        seekBar.setProgress(0);
 
                         break;
                     }
@@ -438,7 +334,7 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                     case R.id.iv_loop: {
                         iv_loop.setVisibility(View.GONE);
                         iv_single.setVisibility(View.VISIBLE);
-                        ToastUtil.showShort(getActivity(), "已切换到单曲循环");
+                        ToastUtil.showShort(getApplicationContext(), "已切换到单曲循环");
                         changeMode(Constant.MOED_SINGLE_RECYCLE);
                         break;
                     }
@@ -446,14 +342,14 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                         iv_single.setVisibility(View.GONE);
                         iv_random.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_RANDOM);
-                        ToastUtil.showShort(getActivity(), "已切换到随机播放");
+                        ToastUtil.showShort(getApplicationContext(), "已切换到随机播放");
                         break;
                     }
                     case R.id.iv_random: {
                         iv_random.setVisibility(View.GONE);
                         iv_loop.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_LIST_RECYCLE);
-                        ToastUtil.showShort(getActivity(), "已切换到列表循环");
+                        ToastUtil.showShort(getApplicationContext(), "已切换到列表循环");
                         break;
                     }
                     default:break;
@@ -461,9 +357,6 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                 }
             }
         };
-    }
-    protected void setBottomBarVisibility(int visibility){
-        bottom_play_bar.setVisibility(visibility);
     }
 
     public void play(SongList songList, Item item) {
@@ -486,10 +379,10 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
         baseViewModel.setPlayMode(mode);
     }
 
-    @Override
-    public void onDestroyView() {
-        baseViewModel.removeObserves(this);
-        super.onDestroyView();
-    }
 
+    @Override
+    protected void onDestroy() {
+        baseViewModel.removeObserves(this);
+        super.onDestroy();
+    }
 }

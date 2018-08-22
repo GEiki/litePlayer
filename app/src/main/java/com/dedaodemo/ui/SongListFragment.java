@@ -1,6 +1,5 @@
 package com.dedaodemo.ui;
 
-import android.app.Fragment;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -11,6 +10,7 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,6 +36,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.R;
+import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.BaseContract;
 import com.dedaodemo.ViewModel.Contracts.SongListContract;
 import com.dedaodemo.ViewModel.SongListViewModel;
@@ -53,7 +54,7 @@ import java.util.List;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 
 
-public class SongListFragment extends BaseBottomFragment implements View.OnClickListener, BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
+public class SongListFragment extends Fragment implements View.OnClickListener, BaseAdapter.OnItemClickListener, MListAdapter.OnMenuItemOnClickListener {
 
     public static String TAG_SONG_LIST_FRAGMENT = "SongListFragment";
     public static final String ARG_SONG_LIST = "songList";
@@ -72,6 +73,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     private BaseContract.Presenter baseViewModel;
     private int preSize = 0;
     private Observer<SongList> songListObserver;
+    private static SongListFragment songListFragment;
 
 
     public SongListFragment() {
@@ -79,17 +81,21 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
 
     public static SongListFragment newInstance(SongList songList) {
-        SongListFragment fragment = new SongListFragment();
+        if (songListFragment == null) {
+            songListFragment = new SongListFragment();
+        }
+
         Bundle args = new Bundle();
         args.putSerializable(ARG_SONG_LIST, songList);
-        fragment.setArguments(args);
-        return fragment;
+        songListFragment.setArguments(args);
+        return songListFragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         setSharedElementEnterTransition(TransitionInflater.from(getContext()).inflateTransition(android.R.transition.move));
         viewModel = ViewModelProviders.of(this).get(SongListViewModel.class);
+        baseViewModel = ViewModelProviders.of(getActivity()).get(BaseViewModel.class);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
             mSongList = (SongList) bundle.getSerializable(ARG_SONG_LIST);
@@ -102,21 +108,18 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         mView = inflater.inflate(R.layout.fragment_song_list, null, false);
+        Util.setTranslucentStatus(getActivity());
         //添加底层播放栏
         super.onCreateView(inflater, container, savedInstanceState);
         addHeaderImgView(mView, inflater);
         toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle(mSongList.getTitle());
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         /**
          * 初始化UI
          * */
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setHasOptionsMenu(true);
+
 
 
         /**
@@ -127,12 +130,6 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         loadingDialog=ab.setView(dialogView).create();
 
         initRecyclerView((ViewGroup) mView);
-        setPeekHeight(Util.dip2px(getContext(),65));
-        RelativeLayout bottomBar = (RelativeLayout)getBottomBar();
-        if (bottomBar != null) {
-            ((CoordinatorLayout.LayoutParams)(bottomBar.getLayoutParams())).topMargin = Util.dip2px(getContext(),12f);
-            bottomBar.invalidate();
-        }
 
         /**
          * 注册观察歌单
@@ -144,16 +141,13 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
                     return;
                 adapter.setmData(mSongList.getSongList());
                 recyclerView.setAdapter(adapter);
+                SongListFragment.this.mSongList = mSongList;
             }
         };
         viewModel.observeSongList(getActivity(), songListObserver);
         return mView;
     }
 
-    @Override
-    public View getParentView() {
-        return mView;
-    }
 
     private void initRecyclerView(ViewGroup viewGroup) {
         recyclerView = mView.findViewById(R.id.recycler_view);
@@ -198,6 +192,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
         final RequestOptions requestOptions = new RequestOptions();
         requestOptions.transform(new BlurTransformation(25, 5));
         requestOptions.diskCacheStrategy(DiskCacheStrategy.RESOURCE);
+        requestOptions.skipMemoryCache(true);
         if (item == null || item.getType() == Constant.LOCAL_MUSIC) {
             Glide.with(getContext())
                     .load(R.drawable.default_songlist_background)
@@ -227,10 +222,7 @@ public class SongListFragment extends BaseBottomFragment implements View.OnClick
 
 
 
-    @Override
-    protected void setBottomBarVisibility(int visibility) {
-        super.setBottomBarVisibility(visibility);
-    }
+
 
 
 

@@ -115,7 +115,7 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         addHeaderImgView(mView, inflater);
         toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle(mSongList.getTitle());
-
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         /**
          * 初始化UI
          * */
@@ -281,10 +281,6 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
     }
 
     private void showChooseSongListDialog(final Item item) {
-        if (bottomSheetDialog != null) {
-            bottomSheetDialog.show();
-            return;
-        }
         bottomSheetDialog = new BottomSheetDialog(getContext());
         RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
         view.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -293,6 +289,9 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
             @Override
             public void onChanged(@Nullable List<SongList> o) {
                 adapter.setmData((ArrayList<SongList>) o);
+                if (bottomSheetDialog != null && !bottomSheetDialog.isShowing()) {
+                    bottomSheetDialog.show();
+                }
             }
         });
         adapter.setOnItemClickListener(new BaseAdapter.OnItemClickListener() {
@@ -311,7 +310,6 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         });
         view.setAdapter(adapter);
         bottomSheetDialog.setContentView(view);
-        bottomSheetDialog.show();
         viewModel.loadSheetList();
     }
 

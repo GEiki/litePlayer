@@ -39,6 +39,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public static final int CHANNEL_ID = 2314;
     private Notification.Builder notificationBuilder;
     private NotificationReceiver notificationReceiver;
+    private Notification notification;
     private ArrayList<Item> playlist;
     private int index;
     private String playMode = Constant.MODE_LIST_RECYCLE;
@@ -167,6 +168,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         intentFilter.addAction(Constant.ACTION_N_CHANGE_MOED);
         notificationReceiver = new NotificationReceiver();
         registerReceiver(notificationReceiver, intentFilter);
+        startForeground(CHANNEL_ID,notification);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -376,7 +378,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.drawable.ic_action_play)
                 .setContentIntent(pendingIntent);
-        Notification notification = notificationBuilder.build();
+        notification = notificationBuilder.build();
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         NotificationManager notificationManagerCompat = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManagerCompat.notify(CHANNEL_ID, notification);

@@ -50,6 +50,7 @@ public class BaseActivity extends AppCompatActivity {
     private TextView tv_progress;
     private TextView tv_title_expand;
     private TextView tv_artist_expand;
+    private TextView tv_left;
     public ImageButton btn_play_expand;
     public ImageButton btn_pause_expand;
     private ImageButton btn_next_expand;
@@ -156,15 +157,17 @@ public class BaseActivity extends AppCompatActivity {
         bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
-                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                if (newState == BottomSheetBehavior.STATE_COLLAPSED) {//收起
                     iv_circle.setVisibility(View.VISIBLE);
                     ll_control_group.setVisibility(View.VISIBLE);
+                    tv_left.setVisibility(View.GONE);
                     tv_title_expand.requestFocus();
                     isBottomBarExpand = false;
-                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {//展现
                     isBottomBarExpand = true;
                     Item song = baseViewModel.getCurPlaySong().getValue();
                     iv_circle.setVisibility(View.GONE);
+                    tv_left.setVisibility(View.VISIBLE);
                     ll_control_group.setVisibility(View.GONE);
                 }
             }
@@ -190,6 +193,8 @@ public class BaseActivity extends AppCompatActivity {
         btn_next_expand.setOnClickListener(onClickListener);
         ll_control_group = bottom_play_bar.findViewById(R.id.ll_control_group);
         rl_play_title = bottom_play_bar.findViewById(R.id.rl_title_collapse);
+        tv_left = bottom_play_bar.findViewById(R.id.tv_left);
+        tv_left.setOnClickListener(onClickListener);
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -350,6 +355,10 @@ public class BaseActivity extends AppCompatActivity {
                         iv_loop.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_LIST_RECYCLE);
                         ToastUtil.showShort(getApplicationContext(), "已切换到列表循环");
+                        break;
+                    }
+                    case R.id.tv_left: {
+                        onBackPressed();
                         break;
                     }
                     default:break;

@@ -144,15 +144,16 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .skipMemoryCache(true);
         Glide.with(getmContext())
+                .load(R.drawable.default_songlist_background)
+                .apply(requestOptions)
+                .into(imageView);
+        Glide.with(getmContext())
                 .asDrawable()
                 .apply(requestOptions)
                 .load(url).listener(new RequestListener<Drawable>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                Glide.with(getmContext())
-                        .load(R.drawable.default_songlist_background)
-                        .apply(requestOptions)
-                        .into(imageView);
+
                 return true;
             }
 

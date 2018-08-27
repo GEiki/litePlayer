@@ -130,7 +130,8 @@ public class SongListViewModel extends ViewModel implements SongListContract.Pre
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
+                        Log.e(TAG,e.getMessage());
+                        ToastUtil.showShort(MyApplication.getMyApplicationContext(), "出了点问题");
                     }
 
                     @Override
@@ -162,7 +163,8 @@ public class SongListViewModel extends ViewModel implements SongListContract.Pre
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
+                        Log.e(TAG,e.getMessage());
+                        ToastUtil.showShort(MyApplication.getMyApplicationContext(), "出了点问题");
                     }
 
                     @Override
@@ -214,7 +216,7 @@ public class SongListViewModel extends ViewModel implements SongListContract.Pre
 
                     @Override
                     public void onError(Throwable e) {
-
+                        Log.e(TAG,e.getMessage());
                     }
 
                     @Override
@@ -236,15 +238,15 @@ public class SongListViewModel extends ViewModel implements SongListContract.Pre
             String url = item.getPic();
             if (!TextUtils.isEmpty(url)) {
                 Glide.with(MyApplication.getMyApplicationContext())
+                        .load(R.drawable.default_songlist_background)
+                        .apply(requestOptions)
+                        .into(imageView);
+                Glide.with(MyApplication.getMyApplicationContext())
                         .asDrawable()
                         .apply(requestOptions)
                         .load(item.getPic()).listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        Glide.with(MyApplication.getMyApplicationContext())
-                                .load(R.drawable.default_songlist_background)
-                                .apply(requestOptions)
-                                .into(imageView);
                         return true;
                     }
 

@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -103,9 +104,9 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
         toolbar = mView.findViewById(R.id.toolbar);
         toolbar.setTitle("Lite");
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         super.onCreateView(inflater, container, savedInstanceState);
         initRecyclerView();
-
         sheetListObserve = new Observer<ArrayList<SongList>>() {
             @Override
             public void onChanged(@Nullable ArrayList<SongList> songLists) {
@@ -121,8 +122,9 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
 
             }
         };
-        viewModel.observeSongLists(getActivity(), sheetListObserve);
         viewModel.loadData();
+        viewModel.observeSongLists(getActivity(), sheetListObserve);
+
 
 
         //设置返回键
@@ -136,6 +138,9 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
+        if (!hidden) {
+            viewModel.loadData();
+        }
     }
 
 
@@ -167,6 +172,8 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
         super.onAttach(context);
 
     }
+
+
 
     /**
      * 初始化Navigation
@@ -200,6 +207,8 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
         }
         return super.onOptionsItemSelected(item);
     }
+
+
 
     /**
      * fragment跳转

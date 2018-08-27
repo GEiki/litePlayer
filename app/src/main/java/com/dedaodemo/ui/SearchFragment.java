@@ -102,6 +102,9 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
                     mListAdapter.setmData(items);
                     recyclerView.setAdapter(mListAdapter);
                     searchList = items;
+                } else if (items == null) {
+                    dismissSearching();
+                    ToastUtil.showShort(getContext(),"网络出错啦");
                 }
 
             }
@@ -200,7 +203,7 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
         ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(getActivity()).inflate(R.layout.dialog_loading,null);
         progressBar =  viewGroup.findViewById(R.id.progressBar2);
         viewGroup.removeView(progressBar);
-        toolbar.removeView(searchView);
+        searchView.setVisibility(View.GONE);
         toolbar.setTitle("搜索中");
         toolbar.setTitleMarginStart(Util.dip2px(getContext(),85));
         toolbar.addView(progressBar);
@@ -210,7 +213,7 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
     private void dismissSearching() {
         toolbar.removeView(progressBar);
         toolbar.setTitle("");
-        toolbar.addView(searchView);
+        searchView.setVisibility(View.VISIBLE);
         toolbar.invalidate();
     }
 

@@ -45,7 +45,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_action_left"
+                    android:src="@drawable/ic_action_left_light"
                     android:layout_marginRight="16dp"/>
             </android.support.v7.widget.Toolbar>
 

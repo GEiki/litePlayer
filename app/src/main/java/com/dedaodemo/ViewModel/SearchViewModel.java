@@ -65,7 +65,7 @@ public class SearchViewModel extends ViewModel implements SearchContract.Present
 
                     @Override
                     public void onError(@NonNull Throwable e) {
-
+                        searchSongList.setValue(null);
                     }
 
                     @Override

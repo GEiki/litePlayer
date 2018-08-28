@@ -399,11 +399,10 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.cancel(CHANNEL_ID);
         if (mp != null) {
             mp.release();
         }
+        stopForeground(true);
         super.onTaskRemoved(rootIntent);
     }
 

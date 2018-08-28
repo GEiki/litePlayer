@@ -164,6 +164,7 @@ public class MusicPlayer {
     public void release(){
         if(mPlayer != null)
             mPlayer.release();
+            mPlayer = null;
     }
     public boolean isPrepared(){
         return isPrepared;

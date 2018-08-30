@@ -59,6 +59,7 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 /**
  * 包含bottomPlaybar的fragment
  */
+@Deprecated
 public abstract class BaseBottomFragment extends Fragment implements IBackHandle {
 
     public static final String BASE_BACK_STACK = "base_back_stack";

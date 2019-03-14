@@ -12,6 +12,7 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Explode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,10 +38,10 @@ public class BaseActivity extends AppCompatActivity {
     public static final int MAX_PROGRESS = 1000;
 
     private FrameLayout bottom_play_bar;
-    private RelativeLayout rl_play_title;
+    private RelativeLayout ll_bottom_play_bar;
     private LinearLayout bottom_play;
     private LinearLayout ll_control_group;
-    private TextView iv_circle;
+    private ImageView iv_circle;
     private ImageView iv_play;
     private ImageView iv_pause;
     private ImageView iv_loop;
@@ -50,7 +51,6 @@ public class BaseActivity extends AppCompatActivity {
     private TextView tv_progress;
     private TextView tv_title_expand;
     private TextView tv_artist_expand;
-    private TextView tv_left;
     public ImageButton btn_play_expand;
     public ImageButton btn_pause_expand;
     private ImageButton btn_next_expand;
@@ -61,6 +61,7 @@ public class BaseActivity extends AppCompatActivity {
     private FooterBehavior behavior;
     private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
     private boolean isBottomBarExpand;
+    private int oldState = 4;
 
 
 
@@ -88,6 +89,7 @@ public class BaseActivity extends AppCompatActivity {
      * 初始化播放窗口
      * **/
     private void initPlayDialog() {
+        ll_bottom_play_bar = bottom_play_bar.findViewById(R.id.ll_bottom_play_bar);
         bottom_play = bottom_play_bar.findViewById(R.id.bottom_play);
         bottom_play.findViewById(R.id.iv_next).setOnClickListener(onClickListener);
         bottom_play.findViewById(R.id.iv_pre).setOnClickListener(onClickListener);
@@ -157,18 +159,28 @@ public class BaseActivity extends AppCompatActivity {
         bottomSheetCallback = new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {//收起
-                    iv_circle.setVisibility(View.VISIBLE);
+                    ll_bottom_play_bar.setBackground(getResources().getDrawable(R.drawable.shape_rectangle_with_radius,null));
                     ll_control_group.setVisibility(View.VISIBLE);
-                    tv_left.setVisibility(View.GONE);
                     tv_title_expand.requestFocus();
                     isBottomBarExpand = false;
+                    oldState = newState;
                 } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {//展现
+                    ll_bottom_play_bar.setBackground(getResources().getDrawable(R.color.white,null));
                     isBottomBarExpand = true;
                     Item song = baseViewModel.getCurPlaySong().getValue();
-                    iv_circle.setVisibility(View.GONE);
-                    tv_left.setVisibility(View.VISIBLE);
                     ll_control_group.setVisibility(View.GONE);
+                    oldState = newState;
+                } else if (newState == BottomSheetBehavior.STATE_SETTLING) {
+                    if (oldState == BottomSheetBehavior.STATE_COLLAPSED) {//收起变为展现
+                        ll_bottom_play_bar.setBackground(getResources().getDrawable(R.color.white,null));
+                        ll_control_group.setVisibility(View.GONE);
+                    } else if (oldState == BottomSheetBehavior.STATE_EXPANDED) {//展现变为收起
+                        ll_bottom_play_bar.setBackground(getResources().getDrawable(R.drawable.shape_rectangle_with_radius,null));
+                        ll_control_group.setVisibility(View.VISIBLE);
+
+                    }
                 }
             }
 
@@ -178,7 +190,7 @@ public class BaseActivity extends AppCompatActivity {
             }
         };
         behavior.setBottomSheetCallback(bottomSheetCallback);
-        behavior.setPeekHeight(Util.dip2px(this,85f));
+        behavior.setPeekHeight(Util.dip2px(this,105f));
         layoutParams.setBehavior(behavior);
         bottom_play_bar.setLayoutParams(layoutParams);
 
@@ -192,9 +204,6 @@ public class BaseActivity extends AppCompatActivity {
         btn_next_expand = bottom_play_bar.findViewById(R.id.btn_next_expand);
         btn_next_expand.setOnClickListener(onClickListener);
         ll_control_group = bottom_play_bar.findViewById(R.id.ll_control_group);
-        rl_play_title = bottom_play_bar.findViewById(R.id.rl_title_collapse);
-        tv_left = bottom_play_bar.findViewById(R.id.tv_left);
-        tv_left.setOnClickListener(onClickListener);
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -355,10 +364,6 @@ public class BaseActivity extends AppCompatActivity {
                         iv_loop.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_LIST_RECYCLE);
                         ToastUtil.showShort(getApplicationContext(), "已切换到列表循环");
-                        break;
-                    }
-                    case R.id.tv_left: {
-                        onBackPressed();
                         break;
                     }
                     default:break;

@@ -19,6 +19,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -148,8 +149,8 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
 
     private void initRecyclerView() {
         recyclerView = (RecyclerView) mView.findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 485));
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(),3,RecyclerView.VERTICAL,false));
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Util.dip2px(getContext(), 445));
         layoutParams.setMargins(8, 0, 8, 0);
         layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
         recyclerView.setLayoutParams(layoutParams);

@@ -2,8 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/action_add_song"
-        android:title="添加到其他歌单" />
+        android:title="移动" />
     <item
-        android:title="移除"
+        android:title="删除"
         android:id="@+id/action_remove" />
+    <item
+        android:title="信息"
+        android:id="@+id/action_info"/>
 </menu>

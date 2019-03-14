@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/recycler_view"
     android:layout_width="match_parent"
     android:layout_height="450dp"
     android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    android:id="@+id/recycler_view"></android.support.v7.widget.RecyclerView>
+    android:elevation="4dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"></android.support.v7.widget.RecyclerView>

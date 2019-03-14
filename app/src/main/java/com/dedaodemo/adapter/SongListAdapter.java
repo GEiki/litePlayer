@@ -73,7 +73,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
 
     @Override
     public SongListAdapter.MViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(getmContext()).inflate(R.layout.item_cardview_layout, parent, false);
+        View view = LayoutInflater.from(getmContext()).inflate(R.layout.item_sheet_grid, parent, false);
         MViewHolder mViewHolder = new MViewHolder(view);
         return mViewHolder;
     }
@@ -106,7 +106,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
                     .skipMemoryCache(true);
 
             Glide.with(getmContext())
-                    .load(R.drawable.default_songlist_background)
+                    .load(R.drawable.default_songlist_background2)
                     .apply(requestOptions)
                     .into(holder.iv_background);
         }
@@ -144,7 +144,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .skipMemoryCache(true);
         Glide.with(getmContext())
-                .load(R.drawable.default_songlist_background)
+                .load(R.drawable.default_songlist_background2)
                 .apply(requestOptions)
                 .into(imageView);
         Glide.with(getmContext())

@@ -359,7 +359,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         if (mp.isPlaying()) {
             ppAction = getNotificationAction(Constant.ACTION_N_PAUSE, "暂停", R.drawable.ic_action_pause);
         } else {
-            ppAction = getNotificationAction(Constant.ACTION_N_RE_PLAY, "播放", R.drawable.ic_action_play);
+            ppAction = getNotificationAction(Constant.ACTION_N_RE_PLAY, "播放", R.drawable.ic_action_play_list);
         }
         Notification.Action nextAction = getNotificationAction(Constant.ACTION_N_NEXT, "下一首", R.drawable.ic_action_next);
         Notification.Action closeAction = getNotificationAction(Constant.ACTION_N_CLOSE, "关闭", R.drawable.ic_action_close);
@@ -376,7 +376,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 .setPriority(Notification.PRIORITY_MAX)
                 .setStyle(mediaStyle)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.drawable.ic_action_play)
+                .setSmallIcon(R.drawable.ic_action_play_list)
                 .setContentIntent(pendingIntent);
         notification = notificationBuilder.build();
         notification.flags = Notification.FLAG_ONGOING_EVENT;

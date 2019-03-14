@@ -4,34 +4,48 @@
     android:layout_width="match_parent"
     android:background="@drawable/btn_background"
     android:layout_height="65dp">
+    <ImageView
+        android:id="@+id/iv_pic"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_margin="8dp"
+        android:src="@color/black"/>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="240dp"
+    <LinearLayout
         android:id="@+id/ll_item"
-        android:layout_height="58dp">
+        android:layout_width="240dp"
+        android:layout_height="58dp"
+        android:background="@drawable/ripple_drawable"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="28dp"
-            android:paddingTop="6dp"
-            android:textSize="16dp"
             android:paddingLeft="10dp"
+            android:paddingTop="6dp"
             android:text="歌曲名称"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:textSize="16dp" />
 
         <TextView
             android:id="@+id/tv_artist"
             android:layout_width="match_parent"
             android:layout_height="20dp"
-
             android:paddingLeft="10dp"
             android:text="歌手"
-            android:textSize="13dp"
-            android:textColor="@android:color/darker_gray" />
+            android:textColor="@android:color/darker_gray"
+            android:textSize="13dp" />
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:foreground="@drawable/ripple_drawable"
+        android:src="@drawable/ic_action_menu_more" />
 
 
 </LinearLayout>

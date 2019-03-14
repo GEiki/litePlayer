@@ -10,14 +10,17 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Layout;
 import android.transition.TransitionInflater;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -45,6 +48,7 @@ import com.dedaodemo.adapter.ChooseSheetAdapter;
 import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
+import com.dedaodemo.behavior.FadeBehavior;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.util.Util;
 
@@ -61,6 +65,7 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
     private SongList mSongList;
 
 
+    private FloatingActionButton btn_play_list;
     private Toolbar toolbar;
     private View mView;
     AlertDialog loadingDialog;
@@ -114,13 +119,21 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         super.onCreateView(inflater, container, savedInstanceState);
         addHeaderImgView(mView, inflater);
         toolbar = mView.findViewById(R.id.toolbar);
-        toolbar.setTitle(mSongList.getTitle());
+        toolbar.setTitle("");
+        collapsingToolbarLayout = mView.findViewById(R.id.cop_layout);
+        collapsingToolbarLayout.setTitle(mSongList.getTitle());
+        collapsingToolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.white,null));
+        collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.black,null));
+        collapsingToolbarLayout.setExpandedTitleMarginBottom(20);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         /**
          * 初始化UI
          * */
 
-
+        btn_play_list = mView.findViewById(R.id.btn_play_list);
+//        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) btn_play_list.getLayoutParams();
+////        lp.setBehavior(new FadeBehavior(getContext(),null));
+////        btn_play_list.setLayoutParams(lp);
 
         /**
         * 初始化dialog
@@ -152,7 +165,7 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
     private void initRecyclerView(ViewGroup viewGroup) {
         recyclerView = mView.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        CoordinatorLayout.LayoutParams layoutParams = new CoordinatorLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,Util.dip2px(getContext(),445));
         layoutParams.setMargins(8, 0, 8, 0);
         layoutParams.setBehavior(new AppBarLayout.ScrollingViewBehavior());
         recyclerView.setLayoutParams(layoutParams);
@@ -162,19 +175,6 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(this);
         adapter.setOnItemAddClickListener(this);
-        recyclerView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_MOVE: {
-                        adapter.closeSwipeLayout();
-                        break;
-                    }
-                }
-
-                return false;
-            }
-        });
     }
 
     @Override

@@ -3,8 +3,13 @@ package com.dedaodemo.adapter;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.dedaodemo.MyApplication;
@@ -54,7 +59,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
 
     @Override
     public MViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(getmContext()).inflate(R.layout.item_swipe, parent, false);
+        View view = LayoutInflater.from(getmContext()).inflate(R.layout.misc_item, parent, false);
         MViewHolder mViewHolder = new MViewHolder(view);
         return mViewHolder;
     }
@@ -65,7 +70,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
         Item item = getmData().get(position);
         holder.tv_title.setText(getmData().get(position).getTitle());
         holder.tv_artist.setText(getmData().get(position).getAuthor());
-        holder.layout.setOnClickListener(new View.OnClickListener() {
+        holder.ll_item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (getOnItemClickListener() == null)
@@ -73,52 +78,27 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
                 getOnItemClickListener().onItemClick(v, position);
             }
         });
-        holder.tv_move.setOnClickListener(new View.OnClickListener() {
+        holder.iv_more.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (onMenuItemOnClickListener != null) {
-                    onMenuItemOnClickListener.onMenuItemClick(v, position);
-                }
-            }
-        });
-        holder.tv_delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onMenuItemOnClickListener != null) {
-                    onMenuItemOnClickListener.onMenuItemClick(v, position);
-                }
-            }
-        });
-
-        final SwipeHorizontalMenuLayout swipeLayout = (SwipeHorizontalMenuLayout) holder.layout;
-        swipeLayout.setSwipeListener(new SwipeSwitchListener() {
-            @Override
-            public void beginMenuClosed(SwipeMenuLayout swipeMenuLayout) {
-
-            }
-
-            @Override
-            public void beginMenuOpened(SwipeMenuLayout swipeMenuLayout) {
-
-            }
-
-            @Override
-            public void endMenuClosed(SwipeMenuLayout swipeMenuLayout) {
-                openSwipeLayout = null;
-            }
-
-            @Override
-            public void endMenuOpened(SwipeMenuLayout swipeMenuLayout) {
-                closeSwipeLayout();
-                openSwipeLayout = swipeLayout;
+                //初始化更多菜单
+                PopupMenu popupMenu = new PopupMenu(getmContext(),v);
+                popupMenu.inflate(R.menu.song_menu);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        return false;
+                    }
+                });
+                popupMenu.show();
             }
         });
 
-
+        //若无网络且本地无缓存，item变为不可按
         if (!Util.NetWorkState() && item.getType() == Constant.INTERNET_MUSIC && !MyApplication.getProxyServer().isCached(item.getPath())) {
             holder.tv_title.setTextColor(getmContext().getResources().getColor(android.R.color.darker_gray, null));
             holder.tv_artist.setTextColor(getmContext().getResources().getColor(android.R.color.darker_gray, null));
-            holder.layout.setEnabled(false);
+            holder.ll_item.setEnabled(false);
         }
 
 
@@ -146,17 +126,17 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
     public class MViewHolder extends RecyclerView.ViewHolder {
         TextView tv_title;
         TextView tv_artist;
+        ImageView iv_more;
+        LinearLayout ll_item;
         View layout;
-        TextView tv_delete;
-        TextView tv_move;
 
         public MViewHolder(View itemView) {
             super(itemView);
             tv_artist = itemView.findViewById(R.id.tv_artist);
             tv_title = itemView.findViewById(R.id.tv_title);
+            iv_more = itemView.findViewById(R.id.iv_more);
+            ll_item = itemView.findViewById(R.id.ll_item);
             layout = itemView;
-            tv_delete = itemView.findViewById(R.id.tv_delete);
-            tv_move = itemView.findViewById(R.id.tv_move);
         }
     }
 

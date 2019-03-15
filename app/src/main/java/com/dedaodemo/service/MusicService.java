@@ -1,6 +1,7 @@
 package com.dedaodemo.service;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
@@ -339,6 +341,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
      * 构建通知栏播放器
      */
     private void buildNotification() {
+        createNotificationChannel();
         String title;
         String author;
         if (playlist != null && playlist.size() != 0) {
@@ -366,18 +369,33 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
         Notification.MediaStyle mediaStyle = new Notification.MediaStyle();
         mediaStyle.setShowActionsInCompactView(1, 2);
-        notificationBuilder = new Notification.Builder(this)
-                .setContentTitle(title)
-                .setContentText(author)
-                .addAction(preAction)
-                .addAction(ppAction)
-                .addAction(nextAction)
-                .addAction(closeAction)
-                .setPriority(Notification.PRIORITY_MAX)
-                .setStyle(mediaStyle)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.drawable.ic_action_play_list)
-                .setContentIntent(pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationBuilder = new Notification.Builder(this,String.valueOf(CHANNEL_ID))
+                    .setContentTitle(title)
+                    .setContentText(author)
+                    .addAction(preAction)
+                    .addAction(ppAction)
+                    .addAction(nextAction)
+                    .addAction(closeAction)
+                    .setStyle(mediaStyle)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_action_play_list)
+                    .setContentIntent(pendingIntent);
+        } else {
+            notificationBuilder = new Notification.Builder(this)
+                    .setContentTitle(title)
+                    .setContentText(author)
+                    .addAction(preAction)
+                    .addAction(ppAction)
+                    .addAction(nextAction)
+                    .addAction(closeAction)
+                    .setPriority(Notification.PRIORITY_MAX)
+                    .setStyle(mediaStyle)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_action_play_list)
+                    .setContentIntent(pendingIntent);
+        }
+
         notification = notificationBuilder.build();
         notification.flags = Notification.FLAG_ONGOING_EVENT;
         NotificationManager notificationManagerCompat = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -404,6 +422,19 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         }
         stopForeground(true);
         super.onTaskRemoved(rootIntent);
+    }
+
+    private void createNotificationChannel() {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "音乐播放";
+            String decription = "用于音乐播放";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(String.valueOf(CHANNEL_ID),name,importance);
+            channel.setDescription(decription);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
 

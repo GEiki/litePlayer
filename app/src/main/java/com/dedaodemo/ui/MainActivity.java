@@ -66,7 +66,8 @@ public class MainActivity extends BaseActivity
         String[] permission={android.Manifest.permission.READ_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(MainActivity.this,permission,1);
 
-
+        //初始化服务
+        MusicServiceManager.getInstance().init();
 
     }
 

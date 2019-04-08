@@ -53,7 +53,7 @@
         <LinearLayout
             android:id="@+id/ll_control_group"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:layout_alignParentRight="true"
             android:layout_marginBottom="88dp"
             android:layout_marginTop="10dp"
@@ -61,26 +61,27 @@
 
             <ImageButton
                 android:id="@+id/btn_pause_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/ic_action_pause"
                 android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/btn_play_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
                 android:layout_marginEnd="15dp"
                 android:background="@drawable/ic_action_play_list"
                 android:visibility="visible" />
 
             <ImageButton
-                android:id="@+id/btn_next_expand"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/btn_list"
+                android:layout_width="40dp"
+                android:layout_height="50dp"
                 android:layout_marginEnd="15dp"
-                android:background="@drawable/ic_action_next" />
+                android:layout_marginTop="3dp"
+                android:background="@drawable/ic_action_list" />
         </LinearLayout>
 
 
@@ -88,7 +89,6 @@
 
         <ImageView
             android:id="@+id/iv_circle"
-            android:text="这"
             android:gravity="center"
             android:textSize="25sp"
             android:elevation="8dip"

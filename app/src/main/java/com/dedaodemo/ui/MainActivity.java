@@ -2,6 +2,8 @@ package com.dedaodemo.ui;
 
 
 import android.app.Activity;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
@@ -13,19 +15,32 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.transition.Explode;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.dedaodemo.R;
+import com.dedaodemo.ViewModel.BaseViewModel;
+import com.dedaodemo.bean.CurrentPlayStateBean;
+import com.dedaodemo.bean.Item;
+import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
+import com.dedaodemo.model.ISheetModel;
+import com.dedaodemo.model.impl.SheetModelImpl;
 import com.dedaodemo.util.Util;
+
+import java.util.ArrayList;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class MainActivity extends BaseActivity
 {
-
 
 
 
@@ -68,6 +83,46 @@ public class MainActivity extends BaseActivity
 
         //初始化服务
         MusicServiceManager.getInstance().init();
+
+        //载入播放状态
+        ISheetModel model = new SheetModelImpl();
+        model.loadPlayList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new io.reactivex.Observer<CurrentPlayStateBean>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(CurrentPlayStateBean o) {
+                        SongList songList = new SongList();
+                        songList.setSongList((ArrayList<Item>) (o.getPlayList()));
+                        songList.setTitle("播放列表");
+                        Intent intent = new Intent();
+                        Bundle bundle = new Bundle();
+                        int index = o.getIndex();
+                        int progress = o.getProgress();
+                        bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)songList.getSongList());
+                        bundle.putInt(Constant.CURRENT_SONG, index);
+                        bundle.putInt(Constant.POSITION,progress);
+                        intent.putExtras(bundle);
+                        intent.setAction(Constant.ACTION_N_INIT);
+                        MainActivity.this.sendBroadcast(intent);
+
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
 
     }
 

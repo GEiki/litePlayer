@@ -2,7 +2,7 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
+    android:id="@+id/ly_coordinator"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
@@ -10,9 +10,7 @@
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:fitsSystemWindows="true"
-        android:paddingTop="25dp"
+        android:background="@color/transparent"
         android:theme="@style/AppTheme.AppBarOverlay"
         app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
@@ -57,10 +55,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:popupTheme="@style/ToolbarPopupTheme"
+                android:layout_marginTop="25dp"
                 app:elevation="0dp"
                 app:layout_collapseMode="pin">
 
                 <ImageView
+                    android:id="@+id/iv_back"
                     android:layout_width="26dp"
                     android:layout_height="26dp"
                     android:layout_marginRight="16dp"
@@ -73,6 +73,22 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <include layout="@layout/recycler_view" />
+    <include layout="@layout/recycler_view"
+        android:visibility="gone"/>
+
+
+            <TextView
+                android:id="@+id/tv_default_background"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@color/light_gray"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="350dp"
+                android:paddingTop="48dp"
+                android:text="还没有添加歌曲"
+                android:textSize="20sp" />
+
+
+
 
 </android.support.design.widget.CoordinatorLayout>

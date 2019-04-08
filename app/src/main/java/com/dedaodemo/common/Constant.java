@@ -98,6 +98,7 @@ public class Constant {
     public static final String ACTION_N_FROM_SERVICE = "com.dedaodemo.action.fromService";
     public static final String ACTION_N_ACTIVITY_START = "com.dedaodemo.action.activityStart";
     public static final String ACTION_N_CHANGE_MOED = "com.dedaodemo.action.change_mode";
+    public static final String ACTION_N_RESET_INIT_FLAG = "com.dedaodemo.action.reset_init_flag";
 
     /**
      * 表名
@@ -120,6 +121,15 @@ public class Constant {
     public static final String SONG_LIST_FRAGMENT = "song_list_fragment";
     public static final String SEARCH_FRAGMENT = "search_fragment";
     public static final String ADD_SHEET_FRAGMENT = "add_sheet_fragment";
+
+
+    /**
+     * 搜索字段
+     * */
+    public static final String TRANSCODE = "TransCode";
+    public static final String OPENID = "OpenId";
+    public static final String KEY = "key";
+    public static final String BODY = "Body";
 
 
 

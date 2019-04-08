@@ -22,6 +22,7 @@ import io.reactivex.annotations.NonNull;
 
 public class ScanUtil {
     private static final long TIME_TILTER = 60;
+    private static final String TAG = "Scan";
 
     public interface ScanCallback {
         public void scanFinished(ArrayList<Item> list);
@@ -64,9 +65,10 @@ public class ScanUtil {
                     mmr=new MediaMetadataRetriever();
                     mmr.setDataSource(file.getAbsolutePath());
                     String src = file.getAbsolutePath();//音频路径
-                    String size = String.valueOf(file.getTotalSpace());//音频大小
+                    String size = String.valueOf(file.length());//音频大小
                     String artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST);//作者
                     String duration = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);//时长
+                    String album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM);//专辑名
                     //过虑长度小于60s的音频文件
                     long second = Long.valueOf(duration) / 1000;
                     if(second < 60){
@@ -76,10 +78,11 @@ public class ScanUtil {
                     item.setPath("file://"+src);
                     item.setType(Constant.LOCAL_MUSIC);
                     String[] strings = title.split("\\.");
-                    item.setTitle(strings[0]);
+                    item.setTitle(Util.getPureSongName(strings[0]));
                     item.setSize(Long.valueOf(size));
                     item.setAuthor(artist);
                     item.setTime(duration);
+                    item.setAlbum(album);
                     list.add(item);
                 }catch (Exception e){
                     e.printStackTrace();
@@ -100,5 +103,6 @@ public class ScanUtil {
             }
         }
     }
+
 
 }

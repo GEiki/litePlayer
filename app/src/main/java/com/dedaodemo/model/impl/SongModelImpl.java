@@ -1,5 +1,7 @@
 package com.dedaodemo.model.impl;
 
+import android.util.Log;
+
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.model.ISongModel;
@@ -45,6 +47,8 @@ public class SongModelImpl implements ISongModel {
             }
         });
     }
+
+
 
     @Override
     public Observable removeSong(final SongList songList, final ArrayList<Item> items) {

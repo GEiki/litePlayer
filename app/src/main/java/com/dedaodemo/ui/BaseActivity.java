@@ -4,6 +4,9 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
@@ -11,6 +14,8 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,14 +32,23 @@ import android.widget.TextView;
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
 import com.dedaodemo.ViewModel.Contracts.BaseContract;
+import com.dedaodemo.adapter.BaseAdapter;
+import com.dedaodemo.adapter.MListAdapter;
 import com.dedaodemo.bean.Item;
+import com.dedaodemo.bean.LrcBean;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.behavior.FooterBehavior;
 import com.dedaodemo.common.Constant;
+import com.dedaodemo.ui.widget.LrcView;
+import com.dedaodemo.util.LrcUtil;
 import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
-public class BaseActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class
+BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListener {
     public static final int MAX_PROGRESS = 1000;
 
     private FrameLayout bottom_play_bar;
@@ -53,8 +67,16 @@ public class BaseActivity extends AppCompatActivity {
     private TextView tv_artist_expand;
     public ImageButton btn_play_expand;
     public ImageButton btn_pause_expand;
-    private ImageButton btn_next_expand;
+    private ImageButton btn_list;
     private SeekBar seekBar;
+    private BottomSheetDialog playlistDialog;
+    private ImageView iv_mode;
+    private ImageView iv_list_delete;
+    private TextView tv_mode;
+    private LinearLayout ll_mode;
+    private RecyclerView rlv_playlist;
+    private TextView tv_close;
+    private LrcView lrcView;
 
     private View.OnClickListener onClickListener;
     private BaseContract.Presenter baseViewModel;
@@ -62,6 +84,31 @@ public class BaseActivity extends AppCompatActivity {
     private BottomSheetBehavior.BottomSheetCallback bottomSheetCallback;
     private boolean isBottomBarExpand;
     private int oldState = 4;
+    private ArrayList<LrcBean> lrcBeans;
+    private MListAdapter playlistAdapter;
+    private Handler threadHandler;
+    private HandlerThread handlerThread;
+
+    private static final int SET_TIME = 0;
+    private static final int GET_LRC = 1;
+    private static final int MSG_GET_LRC = 2;
+    private Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+           switch (msg.what) {
+               case SET_TIME: {
+                   lrcView.setCurrentTime(msg.arg1);
+                   break;
+               }
+               case GET_LRC: {
+                   lrcBeans = (ArrayList<LrcBean>)(msg.obj);
+                   break;
+               }
+               default:break;
+           }
+            return true;
+        }
+    });
 
 
 
@@ -79,10 +126,33 @@ public class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         baseViewModel = ViewModelProviders.of(this).get(BaseViewModel.class);
+        initHandlerThread();
         initBottomPlayBar();
         initPlayDialog();
         observeLiveData();
         baseViewModel.initBottomBar();
+        initPlaylistDialog();
+    }
+
+    private void initHandlerThread() {
+        handlerThread = new HandlerThread("handlerThread");
+        handlerThread.start();
+        threadHandler = new Handler(handlerThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_GET_LRC:{
+                        Item item = (Item) msg.obj;
+                        ArrayList<LrcBean> lrc = LrcUtil.getLrc(item);
+                        Message message = new Message();
+                        message.what = GET_LRC;
+                        message.obj = lrc;
+                        handler.sendMessage(message);
+                    }
+                    default:break;
+                }
+            }
+        };
     }
 
     /**
@@ -106,14 +176,17 @@ public class BaseActivity extends AppCompatActivity {
         tv_duration = bottom_play.findViewById(R.id.tv_duration);
         tv_progress = bottom_play.findViewById(R.id.tv_progress);
         seekBar = bottom_play.findViewById(R.id.seekBar);
+
+        lrcView = bottom_play.findViewById(R.id.lrc_view);
         seekBar.setMax(MAX_PROGRESS);
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser) {
+                if (fromUser && baseViewModel.getCurPlaySong().getValue() != null) {
                     String dur = baseViewModel.getCurPlaySong().getValue().getTime();
                     int pos = Util.progressToposition(progress, Long.valueOf(dur), MAX_PROGRESS);
                     baseViewModel.seekTo(pos);
+                    lrcView.setCurrentTime(pos);
                     tv_progress.setText(Util.durationToformat(pos));
                 }
             }
@@ -127,6 +200,7 @@ public class BaseActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     @Override
@@ -172,10 +246,12 @@ public class BaseActivity extends AppCompatActivity {
                     Item song = baseViewModel.getCurPlaySong().getValue();
                     ll_control_group.setVisibility(View.GONE);
                     oldState = newState;
+                    initLrcView();
                 } else if (newState == BottomSheetBehavior.STATE_SETTLING) {
                     if (oldState == BottomSheetBehavior.STATE_COLLAPSED) {//收起变为展现
                         ll_bottom_play_bar.setBackground(getResources().getDrawable(R.color.white,null));
                         ll_control_group.setVisibility(View.GONE);
+                        initLrcView();
                     } else if (oldState == BottomSheetBehavior.STATE_EXPANDED) {//展现变为收起
                         ll_bottom_play_bar.setBackground(getResources().getDrawable(R.drawable.shape_rectangle_with_radius,null));
                         ll_control_group.setVisibility(View.VISIBLE);
@@ -199,10 +275,12 @@ public class BaseActivity extends AppCompatActivity {
         tv_title_expand = bottom_play_bar.findViewById(R.id.tv_title_expand);
         btn_pause_expand = bottom_play_bar.findViewById(R.id.btn_pause_expand);
         btn_pause_expand.setOnClickListener(onClickListener);
+        btn_list = bottom_play_bar.findViewById(R.id.btn_list);
+        btn_list.setOnClickListener(onClickListener);
         btn_play_expand = bottom_play_bar.findViewById(R.id.btn_play_expand);
         btn_play_expand.setOnClickListener(onClickListener);
-        btn_next_expand = bottom_play_bar.findViewById(R.id.btn_next_expand);
-        btn_next_expand.setOnClickListener(onClickListener);
+        btn_list = bottom_play_bar.findViewById(R.id.btn_list);
+        btn_list.setOnClickListener(onClickListener);
         ll_control_group = bottom_play_bar.findViewById(R.id.ll_control_group);
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,8 +291,86 @@ public class BaseActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onItemClick(View v, int position) {
+        switch (v.getId()) {
+            case R.id.ll_item: {
+                SongList songList = baseViewModel.getPlaylist();
+                baseViewModel.playSong(songList,songList.getSongList().get(position));
+                playlistAdapter.setCurSongIndex(position);
+                playlistAdapter.notifyItemChanged(position);
+                playlistAdapter.notifyItemRangeChanged(0,playlistAdapter.getItemCount());
 
+                break;
+            }
+            case R.id.iv_list_delete: {
+                baseViewModel.removeSongFromPlaylist(position);
+                playlistAdapter.notifyItemRemoved(position);
+                //使用notifyItemRemove后必须调用notifyItemRangeChange
+                playlistAdapter.notifyItemRangeChanged(position,playlistAdapter.getItemCount());
+                playlistAdapter.notifyItemChanged(position);
+                Log.i("Test",String.valueOf(playlistAdapter.getItemCount()));
+                break;
+            }
+        }
+    }
 
+    private void updateAdapter() {
+        if (baseViewModel.getPlaylist() != null) {
+            MListAdapter adapter = new MListAdapter(this);
+            adapter.setmData(baseViewModel.getPlaylist().getSongList());
+            adapter.setIsPlayList(true);
+            adapter.setOnItemClickListener(this);
+            Item item = baseViewModel.getCurPlaySong().getValue();
+            if (item == null) {
+                adapter.setCurSongIndex(-1);
+            } else {
+                int index = baseViewModel.getPlaylist().getSongList().indexOf(item);
+                adapter.setCurSongIndex(index);
+            }
+
+            rlv_playlist.setAdapter(adapter);
+            playlistAdapter = adapter;
+        }
+
+    }
+
+    /**
+     * 初始化播放列表窗口
+     * */
+    private void initPlaylistDialog() {
+        playlistDialog = new BottomSheetDialog(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.dialog_playlist,null);
+        iv_mode = view.findViewById(R.id.iv_mode);
+        iv_list_delete = view.findViewById(R.id.iv_delete_all);
+        tv_mode = view.findViewById(R.id.tv_mode);
+        ll_mode = view.findViewById(R.id.ll_mode);
+        tv_close = view.findViewById(R.id.tv_close);
+        rlv_playlist = view.findViewById(R.id.recycler_view);
+        rlv_playlist.setLayoutManager(new LinearLayoutManager(this));
+        ll_mode.setOnClickListener(onClickListener);
+        iv_list_delete.setOnClickListener(onClickListener);
+        tv_close.setOnClickListener(onClickListener);
+        playlistDialog.setContentView(view);
+    }
+
+    /**
+     * 显示播放列表窗口
+     * */
+    private void  showPlaylistDialog() {
+        updateAdapter();
+        if (playlistDialog != null && !playlistDialog.isShowing()) {
+            playlistDialog.show();
+        }
+
+    }
+
+    /**
+     * 初始化歌词视图
+     * */
+    private void initLrcView() {
+        lrcView.setBeans(lrcBeans);
+    }
 
 
     /**
@@ -224,10 +380,20 @@ public class BaseActivity extends AppCompatActivity {
         //當前播放歌曲發生變化
         baseViewModel.observeData(BaseViewModel.CURRENT_SONG_DATA, this, new Observer<Item>() {//注册当前歌曲观察者
             @Override
-            public void onChanged(@Nullable Item item) {
+            public void onChanged(@Nullable final Item item) {
                 if (item == null) {
+                    tv_artist_expand.setText("无");
+                    tv_title_expand.setText("没有歌曲");
                     return;
                 }
+                lrcBeans = null;
+                lrcView.setBeans(null);
+                //获取歌词
+                Message message = new Message();
+                message.what = MSG_GET_LRC;
+                message.obj = item;
+                threadHandler.sendMessage(message);
+
                 tv_title_expand.setText(item.getTitle());
                 tv_artist_expand.setText(item.getAuthor());
                 String time = baseViewModel.getCurPlaySong().getValue().getTime();
@@ -240,12 +406,14 @@ public class BaseActivity extends AppCompatActivity {
                 }
 
                 tv_duration.setText(Util.durationToformat(duration));
+
             }
         });
         baseViewModel.observeData(BaseViewModel.CURRENT_LIST_DATA, this, new Observer<SongList>() {
             @Override
             public void onChanged(@Nullable SongList songList) {
                 //歌单变化
+                updateAdapter();
             }
         });
         baseViewModel.observeData(BaseViewModel.PLAY_MODE_DATA, this, new Observer<String>() {
@@ -285,9 +453,16 @@ public class BaseActivity extends AppCompatActivity {
             }
         });
 
-        baseViewModel.observeData(BaseViewModel.POSTION, this, new Observer<Integer>() {
+        baseViewModel.observeData(BaseViewModel.POSTION, this, new Observer<Integer>() {//播放进度
             @Override
             public void onChanged(@Nullable Integer progress) {
+                if (baseViewModel.getCurPlaySong().getValue() == null) {
+                    return;
+                }
+                Message message = new Message();
+                message.what = SET_TIME;
+                message.arg1 = progress;
+                handler.sendMessage(message);
                 String dur = baseViewModel.getCurPlaySong().getValue().getTime();
                 if (dur == null)
                     return;
@@ -334,10 +509,8 @@ public class BaseActivity extends AppCompatActivity {
 
                         break;
                     }
-                    case R.id.btn_next_expand:{
-                        next();
-                        seekBar.setProgress(0);
-
+                    case R.id.btn_list:{
+                        showPlaylistDialog();
                         break;
                     }
                     case R.id.iv_pre: {
@@ -364,6 +537,10 @@ public class BaseActivity extends AppCompatActivity {
                         iv_loop.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_LIST_RECYCLE);
                         ToastUtil.showShort(getApplicationContext(), "已切换到列表循环");
+                        break;
+                    }
+                    case R.id.iv_delete_all: {
+                        baseViewModel.removeAllSongFromPlaylist();
                         break;
                     }
                     default:break;
@@ -394,9 +571,17 @@ public class BaseActivity extends AppCompatActivity {
     }
 
 
+
+    @Override
+    protected void onStop() {
+        baseViewModel.saveProgress();
+        super.onStop();
+    }
+
     @Override
     protected void onDestroy() {
         baseViewModel.removeObserves(this);
+        handlerThread.quit();
         super.onDestroy();
     }
 }

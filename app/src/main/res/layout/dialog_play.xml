@@ -4,21 +4,21 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:weightSum="6">
+    >
 
-    <ImageView
+    <com.dedaodemo.ui.widget.LrcView
+        android:id="@+id/lrc_view"
         android:layout_marginTop="80dp"
         android:layout_width="match_parent"
         android:layout_marginHorizontal="22dp"
-        android:layout_height="0dp"
-        android:src="@drawable/default_songlist_background"
-        android:layout_weight="4"/>
+        android:background="@color/white"
+        android:layout_height="260dp"/>
 
 
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="100dp"
         android:layout_marginBottom="15dp"
         android:gravity="center_horizontal"
@@ -51,7 +51,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_weight="1"
         android:layout_gravity="center_horizontal">

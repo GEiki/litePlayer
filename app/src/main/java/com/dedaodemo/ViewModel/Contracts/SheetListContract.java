@@ -9,7 +9,7 @@ import com.dedaodemo.bean.SongList;
 import java.util.ArrayList;
 
 /**
- * Created by 01377578 on 2018/6/28.
+ * Created by guoss on 2018/6/28.
  */
 
 public class SheetListContract {
@@ -18,6 +18,8 @@ public class SheetListContract {
          void removeSongList(@NonNull SongList target);
 
          void addSongList(@NonNull final SongList songList);
+
+         void updateSongList(SongList songList);
 
          void loadData();
 

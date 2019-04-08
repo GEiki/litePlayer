@@ -11,6 +11,7 @@ import com.dedaodemo.database.dao.ItemSongListDao;
 import com.dedaodemo.database.dao.SongListDao;
 import com.dedaodemo.entity.ItemSongList;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,14 @@ public class DatabaseUtil {
 
     }
 
+    public static void updateSongList(final SongList songList) {
+       AppDatabaseHelper helper = new AppDatabaseHelper();
+       AppDatabase db = helper.getDatabase();
+
+       SongListDao dao = db.songListDao();
+       dao.update(songList);
+    }
+
     public static void deleteSongFromSongList(SongList songList, Item item) {
         AppDatabaseHelper helper = new AppDatabaseHelper();
         AppDatabase db = helper.getDatabase();
@@ -56,6 +65,7 @@ public class DatabaseUtil {
         itemSongList.setAuthor(item.getAuthor());
         itemSongList.setSheet_name(songList.getTitle());
         itemSongList.setSong_name(item.getTitle());
+        itemSongList.setUid(songList.getUid());
 
         ItemSongListDao dao = db.itemSongListDao();
         dao.insertAll(itemSongList);
@@ -100,5 +110,15 @@ public class DatabaseUtil {
 
         SongListDao dao = db.songListDao();
         dao.delete(songList);
+    }
+    /**
+     * 更新歌单信息
+     * */
+    public static void updateItemSongList(ItemSongList itemSongList) {
+        AppDatabaseHelper helper = new AppDatabaseHelper();
+        AppDatabase db = helper.getDatabase();
+
+        ItemSongListDao dao = db.itemSongListDao();
+        dao.update(itemSongList);
     }
 }

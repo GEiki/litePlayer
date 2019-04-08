@@ -12,6 +12,15 @@ public class CurrentPlayStateBean implements Serializable {
     private int index;
     private String mode;
     private boolean isPlaying;
+    private int progress;
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
 
     public boolean isPlaying() {
         return isPlaying;

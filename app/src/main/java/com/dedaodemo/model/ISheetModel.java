@@ -21,6 +21,8 @@ public interface ISheetModel {
 
     Observable loadData();
 
+    Observable updateSongList(SongList list);
+
     Observable saveState(CurrentPlayStateBean currentPlayStateBean);
 
     Observable loadPlayList();

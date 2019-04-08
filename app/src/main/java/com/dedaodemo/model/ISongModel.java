@@ -21,6 +21,8 @@ public interface ISongModel {
 
     Observable addSongs(SongList songList, ArrayList<Item> list);
 
+
+
     /**
      * 从歌单中移除歌曲
      */

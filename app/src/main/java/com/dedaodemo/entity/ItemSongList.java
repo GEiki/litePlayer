@@ -7,22 +7,22 @@ import android.support.annotation.NonNull;
  * 歌单与歌的关系表
  * Created by 01377578 on 2018/7/27.
  */
-@Entity(primaryKeys = {"song_name", "sheet_name"})
+@Entity(primaryKeys = {"uid","song_name"})
 public class ItemSongList {
 
-
-    private int uid;
+    @NonNull
+    private long uid;
     @NonNull
     private String sheet_name;
     @NonNull
     private String song_name;
     private String author;
 
-    public int getUid() {
+    public long getUid() {
         return uid;
     }
 
-    public void setUid(int uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
 

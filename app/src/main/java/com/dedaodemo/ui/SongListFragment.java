@@ -3,6 +3,7 @@ package com.dedaodemo.ui;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,7 +31,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -70,7 +74,9 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
     private View mView;
     AlertDialog loadingDialog;
     BottomSheetDialog bottomSheetDialog;
+    private TextView tv_default_background;
     private ImageView iv_head;
+    private ImageView iv_back;
     private RecyclerView recyclerView;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private MListAdapter adapter;
@@ -86,9 +92,9 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
 
 
     public static SongListFragment newInstance(SongList songList) {
-        if (songListFragment == null) {
-            songListFragment = new SongListFragment();
-        }
+
+        songListFragment = new SongListFragment();
+
 
         Bundle args = new Bundle();
         args.putSerializable(ARG_SONG_LIST, songList);
@@ -122,10 +128,15 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         toolbar.setTitle("");
         collapsingToolbarLayout = mView.findViewById(R.id.cop_layout);
         collapsingToolbarLayout.setTitle(mSongList.getTitle());
+        collapsingToolbarLayout.setCollapsedTitleGravity(Gravity.CENTER_VERTICAL);
         collapsingToolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.white,null));
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.black,null));
         collapsingToolbarLayout.setExpandedTitleMarginBottom(20);
+        tv_default_background = mView.findViewById(R.id.tv_default_background);
+        iv_back = mView.findViewById(R.id.iv_back);
+        iv_back.setOnClickListener(this);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+
         /**
          * 初始化UI
          * */
@@ -175,6 +186,14 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         recyclerView.setAdapter(adapter);
         adapter.setOnItemClickListener(this);
         adapter.setOnItemAddClickListener(this);
+
+        if (mSongList.getSize() == 0) {
+            recyclerView.setVisibility(View.GONE);
+            tv_default_background.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            tv_default_background.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -184,21 +203,29 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
 
     private void addHeaderImgView(View view, LayoutInflater inflater) {
         iv_head = mView.findViewById(R.id.iv_head);
+        final RequestOptions requestOptions = new RequestOptions()
+                .transform(new BlurTransformation(25, 5))
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .skipMemoryCache(true);
+        Glide.with(getContext())
+                .load(R.drawable.default_songlist_background)
+                .apply(requestOptions)
+                .into(iv_head);
         //尝试加载专辑封面
-        Item item = null;
-        if (mSongList.getSongList() != null && !mSongList.getSongList().isEmpty()) {
-            item = mSongList.getSongList().get(0);
-            viewModel.setPic(item,iv_head);
-        } else {
-            final RequestOptions requestOptions = new RequestOptions()
-                    .transform(new BlurTransformation(25, 5))
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .skipMemoryCache(true);
-            Glide.with(getContext())
-                    .load(R.drawable.default_songlist_background)
-                    .apply(requestOptions)
-                    .into(iv_head);
-        }
+//        Item item = null;
+//        if (mSongList.getSongList() != null && !mSongList.getSongList().isEmpty()) {
+//            item = mSongList.getSongList().get(0);
+//            viewModel.setPic(item,iv_head);
+//        } else {
+//            final RequestOptions requestOptions = new RequestOptions()
+//                    .transform(new BlurTransformation(25, 5))
+//                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+//                    .skipMemoryCache(true);
+//            Glide.with(getContext())
+//                    .load(R.drawable.default_songlist_background)
+//                    .apply(requestOptions)
+//                    .into(iv_head);
+//        }
 
 
     }
@@ -217,6 +244,14 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
 
     @Override
     public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.iv_back: {
+                getActivity().onBackPressed();
+                break;
+            }
+            default:break;
+
+        }
 
     }
 
@@ -259,29 +294,44 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
     }
 
     @Override
-    public void onMenuItemClick(View view, int position) {
-        switch (view.getId()) {
-            case R.id.tv_move: {
-                adapter.closeSwipeLayout();
+    public void onMenuItemClick(MenuItem item, int position) {
+        switch (item.getItemId()) {
+            case R.id.action_add_song: {
                 Item song = adapter.getmData().get(position);
                 showChooseSongListDialog(song);
                 break;
             }
-            case R.id.tv_delete: {
+            case R.id.action_remove: {
                 Item song = adapter.getmData().get(position);
                 ArrayList<Item> items = new ArrayList<>();
                 items.add(song);
                 viewModel.removeSong(items);
                 break;
+            }case R.id.action_info: {
+                showMusicInfoDialog(adapter.getmData().get(position));
+                break;
+            }
+            case R.id.action_add_playlist: {
+                if (mSongList != null) {
+                    ArrayList<Item> items = new ArrayList<>();
+                    items.add(mSongList.getSongList().get(position));
+                    baseViewModel.addSongToPlaylist(items);
+                } else {
+                    Log.e("SongListFragment","songList null error !");
+                }
+
+                break;
             }
             default:
                 break;
         }
-
     }
 
+
     private void showChooseSongListDialog(final Item item) {
-        bottomSheetDialog = new BottomSheetDialog(getContext());
+        if(bottomSheetDialog == null) {
+            bottomSheetDialog = new BottomSheetDialog(getContext());
+        }
         RecyclerView view = (RecyclerView) LayoutInflater.from(getContext()).inflate(R.layout.dialog_choose_sheet, null);
         view.setLayoutManager(new LinearLayoutManager(getContext()));
         final ChooseSheetAdapter adapter = new ChooseSheetAdapter(getContext());
@@ -311,6 +361,31 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         view.setAdapter(adapter);
         bottomSheetDialog.setContentView(view);
         viewModel.loadSheetList();
+    }
+
+    private void showMusicInfoDialog(Item item) {
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.dialog_info,null);
+        TextView tv_song_title = view.findViewById(R.id.tv_song_title);
+        tv_song_title.setText(item.getTitle());
+        TextView tv_artist = view.findViewById(R.id.tv_artist);
+        tv_artist.setText(item.getAuthor());
+        TextView tv_duration = view.findViewById(R.id.tv_duration);
+        tv_duration.setText(Util.durationToformat(Long.valueOf(item.getTime())));
+        TextView tv_album = view.findViewById(R.id.tv_album);
+        tv_album.setText(item.getAlbum());
+        TextView tv_size = view.findViewById(R.id.tv_size);
+        tv_size.setText(String.valueOf(Util.bytes2megaBytes(item.getSize()))+"MB");
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setView(view)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        })
+                .create()
+                .show();
     }
 
     @Override

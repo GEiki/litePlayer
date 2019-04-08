@@ -87,7 +87,6 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
 
     public ImageButton btn_play_expand;
     public ImageButton btn_pause_expand;
-    private ImageButton btn_next_expand;
     private SeekBar seekBar;
     private View.OnClickListener onClickListener;
     private BaseContract.Presenter baseViewModel;
@@ -271,8 +270,6 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
         btn_pause_expand.setOnClickListener(onClickListener);
         btn_play_expand = bottom_play_bar.findViewById(R.id.btn_play_expand);
         btn_play_expand.setOnClickListener(onClickListener);
-        btn_next_expand = bottom_play_bar.findViewById(R.id.btn_next_expand);
-        btn_next_expand.setOnClickListener(onClickListener);
         ll_control_group = bottom_play_bar.findViewById(R.id.ll_control_group);
         rl_play_title = bottom_play_bar.findViewById(R.id.rl_title_collapse);
         bottom_play_bar.setOnClickListener(new View.OnClickListener() {
@@ -422,12 +419,6 @@ public abstract class BaseBottomFragment extends Fragment implements IBackHandle
                     case R.id.iv_next: {
                         next();
                         seekBar.setProgress(0);
-
-                        break;
-                    }
-                    case R.id.btn_next_expand:{
-                       next();
-                       seekBar.setProgress(0);
 
                         break;
                     }

@@ -2,6 +2,7 @@ package com.dedaodemo.model.impl;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.bean.CurrentPlayStateBean;
@@ -69,6 +70,26 @@ public class SheetModelImpl implements ISheetModel {
     }
 
     @Override
+    public Observable updateSongList(final SongList list) {
+        return Observable.create(new ObservableOnSubscribe<Boolean>() {
+            @Override
+            public void subscribe(ObservableEmitter<Boolean> emitter) throws Exception {
+                DatabaseUtil.updateSongList(list);
+                for (Item item:list.getSongList()) {
+                    ItemSongList itemSongList = new ItemSongList();
+                    itemSongList.setAuthor(item.getAuthor());
+                    itemSongList.setSheet_name(list.getTitle());
+                    itemSongList.setSong_name(item.getTitle());
+                    itemSongList.setUid(list.getUid());
+                    DatabaseUtil.updateItemSongList(itemSongList);
+                }
+                emitter.onNext(true);
+                emitter.onComplete();
+            }
+        });
+    }
+
+    @Override
     public Observable loadData() {
         return Observable.create(new ObservableOnSubscribe<List<SongList>>() {
             @Override
@@ -89,6 +110,7 @@ public class SheetModelImpl implements ISheetModel {
 
     @Override
     public Observable saveState(final CurrentPlayStateBean currentPlayStateBean) {
+
         return Observable.create(new ObservableOnSubscribe<Boolean>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<Boolean> emitter) throws Exception {
@@ -96,7 +118,7 @@ public class SheetModelImpl implements ISheetModel {
                 String json = GsonUtil.bean2json(currentPlayStateBean, CurrentPlayStateBean.class);
                 sharedPreferences.edit()
                         .putString(Constant.CurrentPlayState.KEY_PLAY_LIST, json)
-                        .commit();
+                        .apply();
                 emitter.onNext(true);
                 emitter.onComplete();
             }

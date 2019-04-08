@@ -23,6 +23,7 @@ import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
 import com.dedaodemo.model.ISheetModel;
 import com.dedaodemo.model.impl.SheetModelImpl;
+import com.dedaodemo.ui.MainActivity;
 import com.dedaodemo.util.ToastUtil;
 
 import java.util.ArrayList;
@@ -60,6 +61,8 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
     private MusicReceiver receiver = new MusicReceiver();
     private Context mContext = MyApplication.getMyApplicationContext();
     private boolean first_flags = true;
+    private boolean curSongChangeFlags = false;
+    private CurrentPlayStateBean currentPlayStateBean;
 
     public static final String CURRENT_LIST_DATA = "current_list_data";
     public static final String CURRENT_SONG_DATA = "current_song_data";
@@ -69,43 +72,51 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
     public static final String POSTION = "postion";
 
 
-
     @Override
-    public void playSong(final SongList songList, final Item item) {
-        //保存播放状态
-        CurrentPlayStateBean bean = new CurrentPlayStateBean();
-        int index = songList.getSongList().indexOf(item);
-        String mode = Constant.MODE_RANDOM;
-        bean.setIndex(index);
-        bean.setMode(mode);
-        bean.setPlayList(songList.getSongList());
+    public void saveProgress() {
+        if (currentPlayStateBean != null && postion.getValue() != null) {
+           currentPlayStateBean.setProgress(postion.getValue());
+            saveState(currentPlayStateBean);
+        }
+    }
+
+    private void saveState(CurrentPlayStateBean bean) {
         bottomBarModel.saveState(bean)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new io.reactivex.Observer() {
-            @Override
-            public void onSubscribe(@NonNull Disposable d) {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
 
-            }
+                    }
 
-            @Override
-            public void onNext(@NonNull Object o) {
+                    @Override
+                    public void onNext(@NonNull Object o) {
+                        Log.i("SaveState","success");
+                    }
 
-            }
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        Log.e("SaveState", e.getMessage());
+                    }
 
-            @Override
-            public void onError(@NonNull Throwable e) {
-                Log.e("SaveState", e.getMessage());
-            }
+                    @Override
+                    public void onComplete() {
 
-            @Override
-            public void onComplete() {
+                    }
+                });
+    }
 
-            }
-        });
+    @Override
+    public void playSong(final SongList songList, final Item item) {
 
         isPlaying.setValue(true);
-        curPlayList.setValue(songList);
+        if (!songList.getTitle().equals("播放列表")) {
+           SongList curSonglist =new SongList();
+           curSonglist.setSongList(songList.getSongList());
+           curSonglist.setTitle("播放列表");
+           curPlayList.setValue(curSonglist);
+        }
         curPlaySong.setValue(item);
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)curPlayList.getValue().getSongList());
@@ -158,6 +169,39 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
         intentFilter.addAction(Constant.ACTION_N_POSITION);
         mContext.registerReceiver(receiver, intentFilter);
 
+        bottomBarModel.loadPlayList()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new io.reactivex.Observer<CurrentPlayStateBean>() {
+                    @Override
+                    public void onSubscribe(@NonNull Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(CurrentPlayStateBean o) {
+                        SongList songList = new SongList();
+                        songList.setSongList((ArrayList<Item>) (o.getPlayList()));
+                        songList.setTitle("播放列表");
+                        int index = o.getIndex();
+                        if (o.getPlayList() != null) {
+                            curPlayList.setValue(songList);
+                            curPlaySong.setValue(o.getPlayList().get(index));
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Throwable t) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
 
     }
 
@@ -199,14 +243,23 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
                 boolean p = intent.getBooleanExtra(Constant.IS_PLAYING, false);
                 isPlaying.setValue(p);
                 int index = intent.getIntExtra(Constant.CURRENT_SONG, 0);
-                ArrayList<Item> list = (ArrayList<Item>) (intent.getSerializableExtra(Constant.CURRENT_SONGLIST));
-                if (list == null)
-                    return;
-                curPlaySong.setValue(list.get(index));
-                SongList songList = new SongList();
-                songList.setTitle("播放列表");
-                songList.setSongList(list);
-                curPlayList.setValue(songList);
+//                ArrayList<Item> list = (ArrayList<Item>) (intent.getSerializableExtra(Constant.CURRENT_SONGLIST));
+//                if (list == null)
+//                    return;
+//                curPlaySong.setValue(list.get(index));
+//                SongList songList = new SongList();
+//                songList.setTitle("播放列表");
+//                songList.setSongList(list);
+//                curPlayList.setValue(songList);
+                postion.postValue(intent.getIntExtra(Constant.POSITION,0));
+                //保存播放状态
+                if (curPlayList.getValue() != null) {
+                    currentPlayStateBean = new CurrentPlayStateBean();
+                    currentPlayStateBean.setIndex(index);
+                    currentPlayStateBean.setMode(playMode.getValue());
+                    currentPlayStateBean.setPlayList(curPlayList.getValue().getSongList());
+                }
+
                 break;
             }
             case Constant.ACTION_N_POSITION: {
@@ -220,12 +273,62 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
     }
 
     @Override
+    public void addSongToPlaylist(ArrayList<Item> items) {
+        curPlayList.getValue().getSongList().addAll(items);
+    }
+
+    @Override
+    public void removeSongFromPlaylist(int index) {
+      Item item = curPlayList.getValue().getSongList().get(index);
+      int size = curPlayList.getValue().getSongList().size();
+      if (item  == curPlaySong.getValue()) {
+          if (index < size-1) {
+              curPlaySong.setValue(curPlayList.getValue().getSongList().get(index+1));
+              curPlayList.getValue().getSongList().remove(index);
+              if (isPlaying.getValue()) {
+                  playSong(curPlayList.getValue(),curPlaySong.getValue());
+              } else {
+                  curSongChangeFlags = true;
+              }
+          } else if (index > 0){
+              curPlaySong.setValue(curPlayList.getValue().getSongList().get(index-1));
+              curPlayList.getValue().getSongList().remove(index);
+              if (isPlaying.getValue()) {
+                  playSong(curPlayList.getValue(),curPlaySong.getValue());
+              } else {
+                  curSongChangeFlags = true;
+              }
+          } else {
+              curPlayList.getValue().getSongList().remove(index);
+              curPlaySong.setValue(null);
+              pause();
+          }
+      } else {
+          curPlayList.getValue().getSongList().remove(index);
+      }
+    }
+
+    @Override
+    public void removeAllSongFromPlaylist() {
+        curPlayList.getValue().getSongList().clear();
+        curPlaySong.setValue(null);
+    }
+
+    @Override
+    public SongList getPlaylist() {
+        return curPlayList.getValue();
+    }
+
+    @Override
     public MutableLiveData<Item> getCurPlaySong() {
         return curPlaySong;
     }
 
     @Override
     public void seekTo(int progress) {
+        if(curPlaySong.getValue() == null) {
+            return;
+        }
         Bundle bundle = new Bundle();
         bundle.putInt(Constant.POSITION, progress);
         Intent intent = new Intent();
@@ -236,6 +339,10 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void nextSong() {
+        if(curPlaySong.getValue() == null) {
+            ToastUtil.showShort(mContext,"没有歌曲可以播放");
+            return;
+        }
         isPlaying.setValue(true);
         List<Item> items = curPlayList.getValue().getSongList();
         Item song = curPlaySong.getValue();
@@ -252,6 +359,10 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void preSong() {
+        if(curPlaySong.getValue() == null) {
+            ToastUtil.showShort(mContext,"没有歌曲可以播放");
+            return;
+        }
         isPlaying.setValue(true);
         List<Item> items = curPlayList.getValue().getSongList();
         Item song = curPlaySong.getValue();
@@ -277,18 +388,31 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void rePlay() {
-        isPlaying.setValue(true);
-        if (first_flags) {
-            SongList songList = new SongList();
-            songList.setSongList(curPlayList.getValue().getSongList());
-            songList.setTitle("播放列表");
-            playSong(songList, curPlaySong.getValue());
-            first_flags = false;
-        } else {
-            Intent intent = new Intent();
-            intent.setAction(Constant.ACTION_N_RE_PLAY);
-            mContext.sendBroadcast(intent);
+        if(curPlaySong.getValue() == null) {
+            ToastUtil.showShort(mContext,"没有歌曲可以播放");
+            isPlaying.setValue(false);
+            return;
         }
+        if (curSongChangeFlags) {
+            playSong(curPlayList.getValue(),curPlaySong.getValue());
+            curSongChangeFlags = false;
+            return;
+        }
+        isPlaying.setValue(true);
+        Intent intent = new Intent();
+        intent.setAction(Constant.ACTION_N_RE_PLAY);
+        mContext.sendBroadcast(intent);
+//        if (first_flags) {
+//            SongList songList = new SongList();
+//            songList.setSongList(curPlayList.getValue().getSongList());
+//            songList.setTitle("播放列表");
+//            playSong(songList, curPlaySong.getValue());
+//            first_flags = false;
+//        } else {
+//            Intent intent = new Intent();
+//            intent.setAction(Constant.ACTION_N_RE_PLAY);
+//            mContext.sendBroadcast(intent);
+//        }
 
 
     }
@@ -319,5 +443,6 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
             liveDataMap.get(key).removeObservers(owner);
         }
     }
+
 
 }

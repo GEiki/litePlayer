@@ -44,8 +44,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private Notification notification;
     private ArrayList<Item> playlist;
     private int index;
+    private int progress;
     private String playMode = Constant.MODE_LIST_RECYCLE;
-    private boolean initFlag = true;
+    private boolean initFlag = false;
     private Timer timer = new Timer();
 
     public MusicService() {
@@ -84,6 +85,18 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        registerReceiver();
+        mp = MusicPlayer.getInstance(MusicService.this);
+        mp.setCompletionListener(this);
+        mp.setPreparedListener(this);
+        mp.setOnErrorListener(this);
+        buildNotification();
+        startForeground(CHANNEL_ID,notification);
+    }
+
+    @Override
     public void onCompletion(MediaPlayer mp) {
         try {
             int mIndex = getIndexByMode(playMode);
@@ -98,7 +111,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
-        if (!initFlag) {
+        if (!initFlag) {//不是初始化
             mediaPlayer.start();
             buildNotification();
             Intent intent = new Intent();
@@ -109,8 +122,19 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
             sendBroadcast(intent);
             initFlag = false;
             startSendProgress();
-        } else {
+        } else {//初始化
+            Intent intent = new Intent();
+            intent.setAction(Constant.ACTION_N_PLAYING);
+            intent.putExtra(Constant.CURRENT_SONG, index);
+            intent.putExtra(Constant.IS_PLAYING, false);
+            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
+            intent.putExtra(Constant.POSITION, progress);
+            mediaPlayer.start();
+            mediaPlayer.seekTo(progress);
+            mediaPlayer.pause();
+            sendBroadcast(intent);
             buildNotification();
+            initFlag = false;
         }
 
     }
@@ -152,11 +176,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mp = MusicPlayer.getInstance(MusicService.this);
-        mp.setCompletionListener(this);
-        mp.setPreparedListener(this);
-        mp.setOnErrorListener(this);
-        buildNotification();
+        return super.onStartCommand(intent, flags, startId);
+    }
+    private void registerReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constant.ACTION_N_PAUSE);
         intentFilter.addAction(Constant.ACTION_N_PRE);
@@ -170,8 +192,6 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         intentFilter.addAction(Constant.ACTION_N_CHANGE_MOED);
         notificationReceiver = new NotificationReceiver();
         registerReceiver(notificationReceiver, intentFilter);
-        startForeground(CHANNEL_ID,notification);
-        return super.onStartCommand(intent, flags, startId);
     }
 
     private void handleReceiveIntent(Intent intent) {
@@ -200,6 +220,9 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 break;
             }
             case Constant.ACTION_N_RE_PLAY: {
+                if (initFlag) {
+                    return;
+                }
                 replay();
                 buildNotification();
                 break;
@@ -210,10 +233,24 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 break;
             }
             case Constant.ACTION_N_INIT: {
+                Log.i("test","init");
+                initFlag = true;
                 Bundle bundle = intent.getExtras();
                 playlist = (ArrayList<Item>) bundle.getSerializable(Constant.CURRENT_SONGLIST);
                 index = bundle.getInt(Constant.CURRENT_SONG);
-                play(index);
+                if(!mp.isPlaying() || !initFlag) {
+                    play(index);
+                } else {
+                    Intent intent1 = new Intent();
+                    intent1.setAction(Constant.ACTION_N_PLAYING);
+                    intent1.putExtra(Constant.CURRENT_SONG, index);
+                    intent1.putExtra(Constant.IS_PLAYING, mp.isPlaying());
+                    intent1.putExtra(Constant.CURRENT_SONGLIST, playlist);
+                    sendBroadcast(intent1);
+                    initFlag = false;
+                    startSendProgress();
+                }
+                progress = bundle.getInt(Constant.POSITION);
                 break;
             }
             case Constant.ACTION_N_SEEK_TO: {
@@ -228,6 +265,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 back.putExtra(Constant.IS_PLAYING, mp.isPlaying());
                 back.putExtra(Constant.CURRENT_SONG, index);
                 back.putExtra(Constant.CURRENT_SONGLIST, playlist);
+                back.putExtra(Constant.POSITION,progress);
                 sendBroadcast(back);
                 break;
             }
@@ -329,7 +367,6 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onDestroy() {
-        Log.i("Service", "destroy");
         if (mp != null && notificationReceiver != null) {
             mp.release();
             unregisterReceiver(notificationReceiver);
@@ -378,7 +415,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                     .addAction(nextAction)
                     .addAction(closeAction)
                     .setStyle(mediaStyle)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setSmallIcon(R.drawable.ic_action_play_list)
                     .setContentIntent(pendingIntent);
         } else {
@@ -391,7 +428,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                     .addAction(closeAction)
                     .setPriority(Notification.PRIORITY_MAX)
                     .setStyle(mediaStyle)
-                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setSmallIcon(R.drawable.ic_action_play_list)
                     .setContentIntent(pendingIntent);
         }

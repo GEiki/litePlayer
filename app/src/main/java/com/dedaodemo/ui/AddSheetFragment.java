@@ -99,6 +99,7 @@ public class AddSheetFragment extends Fragment {
                     SimpleDateFormat format = new SimpleDateFormat("yyyy年MM月dd日");
                     Date date = new Date(System.currentTimeMillis());
                     songList.setCreateDate(format.format(date));
+                    songList.setUid(date.getTime());
                     viewModel.addSongList(songList);
                     ToastUtil.showShort(getActivity(), "添加歌单成功");
                     getActivity().onBackPressed();

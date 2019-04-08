@@ -14,7 +14,7 @@ import com.dedaodemo.entity.ItemSongList;
  * Created by 01377578 on 2018/7/27.
  */
 
-@Database(entities = {Item.class, SongList.class, ItemSongList.class}, version = 1, exportSchema = false)
+@Database(entities = {Item.class, SongList.class, ItemSongList.class}, version = 2, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
     public abstract ItemDao itemDao();

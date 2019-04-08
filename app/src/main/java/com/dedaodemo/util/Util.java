@@ -16,15 +16,54 @@ import android.view.WindowManager;
 
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.R;
+import com.dedaodemo.bean.Item;
+import com.dedaodemo.bean.LrcBean;
+import com.dedaodemo.model.ISearchModel;
+import com.dedaodemo.model.impl.SearchModelImpl;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Created by 01377578 on 2018/7/12.
+ * Created by guoss on 2018/7/12.
  */
 
 public class Util {
+
+
+
+
+    /**
+     * 歌曲标题去除歌手
+     * */
+    public static String getPureSongName(String title) {
+        if (!title.contains("-")) {
+            return title;
+        }
+        String[] strs = title.split("-");
+        String t2 = strs[1];
+        String[] strs2 = t2.split("\\[");
+        return strs2[0].trim();
+    }
+
+    /**
+     * byte转换为MB
+     * */
+    public static double bytes2megaBytes(double size) {
+
+        double res = size/1024/1024;
+        BigDecimal b = new BigDecimal(res);
+        res = b.setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+
+        return res;
+    }
+
+
     /**
      * dip转换为px
      */

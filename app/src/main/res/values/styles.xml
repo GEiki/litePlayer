@@ -16,6 +16,11 @@
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 
+    <style name="buttonDialog"
+        parent="@style/Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">#000000</item>
+    </style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorPrimary">@color/colorAccent</item>
         <item name="android:textColorHint">@android:color/white</item>

@@ -275,9 +275,9 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
     }
 
     @Override
-    public void onMenuItemClick(View view, int position) {
-        switch (view.getId()) {
-            case R.id.tv_move: {
+    public void onMenuItemClick(MenuItem item, int position) {
+        switch (item.getItemId()) {
+            case R.id.action_add_song: {
                 showChooseSongListDialog(mListAdapter.getmData().get(position));
                 break;
             }

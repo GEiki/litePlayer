@@ -8,6 +8,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.arch.lifecycle.ViewModel;
 import android.content.Context;
+import android.database.DatabaseErrorHandler;
 import android.util.Log;
 
 import com.dedaodemo.MyApplication;
@@ -23,9 +24,12 @@ import com.dedaodemo.util.ScanUtil;
 import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
@@ -115,9 +119,37 @@ public class SheetListViewModel extends ViewModel implements LifecycleObserver, 
         songList.getSongList().addAll(list);
         songList.setTitle(mContext.getString(R.string.sheet_local_music));
         songList.setCreateDate(Util.getCurrentFormatTime());
+        songList.setUid(System.currentTimeMillis());
         addSongList(songList);
         addSongs(songList, list);
 
+    }
+
+    @Override
+    public void updateSongList(SongList songList) {
+        model.updateSongList(songList)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.newThread())
+                .subscribe(new io.reactivex.Observer<Boolean>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(Boolean save) {
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+        });
     }
 
     private void checkAndAddSong(ArrayList<Item> list, SongList songList) {
@@ -125,7 +157,7 @@ public class SheetListViewModel extends ViewModel implements LifecycleObserver, 
         for (Item item : list) {
             if (!songList.containItem(item)) {
                 songList.addSong(item);
-                extraList.add(item);
+                extraList.add(item);//需要添加到数据库的item
             }
         }
         addSongs(songList, extraList);

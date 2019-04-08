@@ -7,6 +7,8 @@ import android.arch.lifecycle.Observer;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 
+import java.util.ArrayList;
+
 /**
  * Created by guoss on 2018/6/29.
  */
@@ -14,6 +16,18 @@ import com.dedaodemo.bean.SongList;
 public class BaseContract {
 
     public interface Presenter {
+
+
+        void addSongToPlaylist(ArrayList<Item> items);
+
+        SongList getPlaylist();
+
+        void removeAllSongFromPlaylist();
+
+        void removeSongFromPlaylist(int index);
+
+        void saveProgress();
+
         void initBottomBar();
 
         void init(boolean startFlags);

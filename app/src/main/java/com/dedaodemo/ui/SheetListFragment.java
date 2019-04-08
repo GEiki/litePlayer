@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +24,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.transition.Explode;
+import android.transition.Slide;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,7 +35,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.dedaodemo.R;
 import com.dedaodemo.ViewModel.BaseViewModel;
@@ -41,11 +46,13 @@ import com.dedaodemo.ViewModel.Contracts.SheetListContract;
 import com.dedaodemo.ViewModel.SheetListViewModel;
 import com.dedaodemo.adapter.BaseAdapter;
 import com.dedaodemo.adapter.SongListAdapter;
+import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.dedaodemo.common.Constant.BASE_BACK_STACK;
 
@@ -64,6 +71,8 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
     private ProgressBar progressBar;
     private Observer<ArrayList<SongList>> sheetListObserve;
     private SongListFragment songListFragment;
+    private EditText et_title;
+    private EditText et_description;
     /**
      * 从服务启动的标志
      */
@@ -215,9 +224,9 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
      * fragment跳转
      */
     public void showFragment(Fragment showFragment, Fragment hideFragment,String TAG) {
-        Explode explode = new Explode();
-        explode.setDuration(500);
-        showFragment.setEnterTransition(explode);
+        Slide slide = new Slide();
+        slide.setDuration(500);
+        showFragment.setEnterTransition(slide);
         showFragment.setAllowEnterTransitionOverlap(true);
         showFragment.setAllowReturnTransitionOverlap(true);
         getFragmentManager().beginTransaction()
@@ -231,14 +240,59 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
     @Override
     public void onMenuItemClick(MenuItem item, int position) {
         switch (item.getItemId()) {
-            case R.id.item_play: {
+            case R.id.action_rename: {
+                showRenameDialog(position);
                 break;
             }
-            case R.id.item_remove: {
+            case R.id.action_delete: {
                 viewModel.removeSongList(sheetList.get(position));
                 break;
             }
+            case R.id.action_playAll: {
+                List<Item> songList = sheetList.get(position).getSongList();
+                if (songList != null) {
+                    Item song = songList.get(0);
+                    baseViewModel.playSong(sheetList.get(position),song);
+                }
+                break;
+            }
+            default:break;
         }
+    }
+
+    private void showRenameDialog(final int position) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(),R.style.buttonDialog);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_rename,null);
+        et_title = view.findViewById(R.id.et_title);
+        et_description = view.findViewById(R.id.et_description);
+        builder.setView(view)
+                .setTitle(sheetList.get(position).getTitle())
+                .setPositiveButton("保存", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SongList songList = sheetList.get(position);
+                        String title = et_title.getText().toString();
+                        String description = et_description.getText().toString();
+                        if (!TextUtils.isEmpty(title)) {
+                            songList.setTitle(title);
+                        }
+                        if (!TextUtils.isEmpty(description)) {
+                            songList.setDescription(description);
+                        }
+                        viewModel.updateSongList(songList);
+                        songListAdapter.notifyDataSetChanged();
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create()
+                .show();
+
     }
 
     @Override

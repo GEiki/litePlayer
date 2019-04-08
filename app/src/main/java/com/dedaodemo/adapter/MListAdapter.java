@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.dedaodemo.MyApplication;
@@ -28,12 +29,14 @@ import com.tubb.smrv.listener.SwipeSwitchListener;
 public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter.MViewHolder, Item>
 {
     public interface OnMenuItemOnClickListener {
-        public void onMenuItemClick(View view, int position);
+        public void onMenuItemClick(MenuItem item, int position);
 
     }
 
+    private boolean isPlayList;
     private OnMenuItemOnClickListener onMenuItemOnClickListener;
     private int menuId;
+    private int curSongIndex;
     private SwipeHorizontalMenuLayout openSwipeLayout;
 
     public MListAdapter(Context mContext) {
@@ -41,8 +44,16 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
 
     }
 
+    public void setIsPlayList(boolean playList) {
+        isPlayList = playList;
+    }
+
     public OnMenuItemOnClickListener getOnItemAddClickListener() {
         return onMenuItemOnClickListener;
+    }
+
+    public void setCurSongIndex(int curSongIndex) {
+        this.curSongIndex = curSongIndex;
     }
 
     public void setOnItemAddClickListener(OnMenuItemOnClickListener onItemAddClickListener) {
@@ -65,8 +76,10 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
     }
 
 
+
+
     @Override
-    public void onBindViewHolder(MViewHolder holder, final int position) {
+    public void onBindViewHolder(final MViewHolder holder, final int position) {
         Item item = getmData().get(position);
         holder.tv_title.setText(getmData().get(position).getTitle());
         holder.tv_artist.setText(getmData().get(position).getAuthor());
@@ -75,7 +88,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
             public void onClick(View v) {
                 if (getOnItemClickListener() == null)
                     return;
-                getOnItemClickListener().onItemClick(v, position);
+                getOnItemClickListener().onItemClick(v, holder.getAdapterPosition());
             }
         });
         holder.iv_more.setOnClickListener(new View.OnClickListener() {
@@ -87,12 +100,34 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        return false;
+                        onMenuItemOnClickListener.onMenuItemClick(item,position);
+                        return true;
                     }
                 });
                 popupMenu.show();
             }
         });
+        holder.iv_list_delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getOnItemClickListener() == null)
+                    return;
+                getOnItemClickListener().onItemClick(v, position);
+            }
+        });
+        if (isPlayList) {
+            holder.iv_more.setVisibility(View.GONE);
+            holder.iv_list_delete.setVisibility(View.VISIBLE);
+            if (curSongIndex == position) {
+                holder.tv_title.setTextColor(getmContext().getColor(android.R.color.holo_green_light));
+            } else {
+                holder.tv_title.setTextColor(getmContext().getColor(android.R.color.black));
+            }
+
+        } else {
+            holder.iv_more.setVisibility(View.VISIBLE);
+            holder.iv_list_delete.setVisibility(View.GONE);
+        }
 
         //若无网络且本地无缓存，item变为不可按
         if (!Util.NetWorkState() && item.getType() == Constant.INTERNET_MUSIC && !MyApplication.getProxyServer().isCached(item.getPath())) {
@@ -127,6 +162,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
         TextView tv_title;
         TextView tv_artist;
         ImageView iv_more;
+        ImageView iv_list_delete;
         LinearLayout ll_item;
         View layout;
 
@@ -136,6 +172,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
             tv_title = itemView.findViewById(R.id.tv_title);
             iv_more = itemView.findViewById(R.id.iv_more);
             ll_item = itemView.findViewById(R.id.ll_item);
+            iv_list_delete = itemView.findViewById(R.id.iv_list_delete);
             layout = itemView;
         }
     }

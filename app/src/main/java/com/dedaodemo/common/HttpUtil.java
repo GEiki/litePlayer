@@ -1,5 +1,7 @@
 package com.dedaodemo.common;
 
+import com.google.gson.JsonObject;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -83,6 +85,9 @@ public class HttpUtil
      * */
     public JSONObject SyncRequestByPOST(final String url, final JSONObject params){
 
+        if (url == null || url.length() == 0) {
+            return null;
+        }
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         RequestBody requestBody = RequestBody.create(JSON,params.toString());
         final Request request=new Request.Builder().url(url).post(requestBody).build();
@@ -98,5 +103,22 @@ public class HttpUtil
         }
 
         return null;
+    }
+
+    public String syncRequestByGet(String url) {
+        if (url == null || url.length() == 0) {
+            return null;
+        }
+        Request request = new Request.Builder().url(url).get().build();
+        Call call = mClient.newCall(request);
+        try {
+            Response response = call.execute();
+            String res = response.body().string();
+            return res;
+        }catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
     }
 }

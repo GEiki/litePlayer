@@ -110,6 +110,22 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
                     .apply(requestOptions)
                     .into(holder.iv_background);
         }
+        holder.iv_more.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //初始化更多菜单
+                PopupMenu popupMenu = new PopupMenu(getmContext(),v);
+                popupMenu.inflate(R.menu.sheet_menu);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        onMenuItemClickListener.onMenuItemClick(item,position);
+                        return true;
+                    }
+                });
+                popupMenu.show();
+            }
+        });
 
 
 
@@ -126,6 +142,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
     public class MViewHolder extends RecyclerView.ViewHolder {
         TextView tv_title;
         TextView tv_count;
+        ImageView iv_more;
         View layout;
         ImageView iv_background;
 
@@ -134,6 +151,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
             tv_title = itemView.findViewById(R.id.tv_title);
             tv_count = itemView.findViewById(R.id.tv_count);
             iv_background = itemView.findViewById(R.id.iv_pic);
+            iv_more = itemView.findViewById(R.id.iv_more);
             layout = itemView;
 
         }

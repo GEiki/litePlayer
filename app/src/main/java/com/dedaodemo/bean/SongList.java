@@ -21,14 +21,16 @@ public class SongList implements Serializable {
 
     @PrimaryKey
     @NonNull
+    private Long uid;
+
+    @NonNull
     @ColumnInfo(name = "sheet_name")
     private String title;
 
     private String description;
 
-    private String createDate;
 
-    private int size;
+    private String createDate;
 
     @Ignore
     private int color;
@@ -39,9 +41,6 @@ public class SongList implements Serializable {
     public SongList(){
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
 
     @Ignore
     public boolean containItem(Item item){
@@ -51,6 +50,14 @@ public class SongList implements Serializable {
                 return true;
         }
         return false;
+    }
+
+    public Long getUid() {
+        return uid;
+    }
+
+    public void setUid(Long uid) {
+        this.uid = uid;
     }
 
     @Ignore
@@ -121,23 +128,20 @@ public class SongList implements Serializable {
         if (items.contains(item))
             return false;
         items.add(0, item);
-        int count = size;
-        size = ++count;
         return true;
 
     }
 
     @Ignore
-    public boolean removeSong(Item item){
-        if(item == null){
+    public boolean removeSong(String title){
+        if(title == null){
             return false;
         }
-        if(!items.contains(item)){
-            return false;
+        for(Item item : items) {
+            if (item.getTitle().equals(title)){
+                items.remove(item);
+            }
         }
-        items.remove(item);
-        int count = Integer.valueOf(size);
-        size = --count;
         return  true;
     }
 

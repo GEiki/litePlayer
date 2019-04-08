@@ -38,42 +38,7 @@ public class MyApplication extends Application {
         //初始化播放服务
 //        MusicServiceManager.getInstance().init();
 
-        ISheetModel model = new SheetModelImpl();
-        model.loadPlayList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new io.reactivex.Observer<CurrentPlayStateBean>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
 
-                    }
-
-                    @Override
-                    public void onNext(CurrentPlayStateBean o) {
-                        SongList songList = new SongList();
-                        songList.setSongList((ArrayList<Item>) (o.getPlayList()));
-                        songList.setTitle("播放列表");
-                        Intent intent = new Intent();
-                        Bundle bundle = new Bundle();
-                        int index = o.getIndex();
-                        bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)songList.getSongList());
-                        bundle.putInt(Constant.CURRENT_SONG, index);
-                        intent.putExtras(bundle);
-                        intent.setAction(Constant.ACTION_N_INIT);
-                        mContext.sendBroadcast(intent);
-
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
 
     }
 

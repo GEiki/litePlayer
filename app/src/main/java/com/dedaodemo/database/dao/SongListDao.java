@@ -5,6 +5,7 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import com.dedaodemo.bean.SongList;
 
@@ -25,5 +26,8 @@ public interface SongListDao {
 
     @Delete
     void delete(SongList songList);
+
+    @Update
+    void update(SongList songList);
 
 }

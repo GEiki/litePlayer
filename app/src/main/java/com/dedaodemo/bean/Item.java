@@ -27,6 +27,7 @@ public class Item implements Serializable
     private long size;
     private String lrc;
     private String pic;
+    private String album;
     private int type;
 
     public int getType() {
@@ -40,6 +41,14 @@ public class Item implements Serializable
             this.type = type;
         }
 
+    }
+
+    public String getAlbum() {
+        return album;
+    }
+
+    public void setAlbum(String album) {
+        this.album = album;
     }
 
     public String getLrc() {

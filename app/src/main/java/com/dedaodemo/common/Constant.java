@@ -5,6 +5,9 @@ package com.dedaodemo.common;
  */
 
 public class Constant {
+
+    public static final String ACTION = "ACTION";
+
     public static final String MUSIC_SEARCH_URL = "https://api.hibai.cn/api/index/index";
 
     public static final String APP_KEY = "3841956b05d90ead4507d863d34df97c";

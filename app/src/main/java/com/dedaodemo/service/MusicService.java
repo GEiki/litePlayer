@@ -13,7 +13,10 @@ import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -36,6 +39,16 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         MediaPlayer.OnErrorListener,
         IMusicPlayer {
 
+    /**
+     * 监听来自客户端的消息
+     * */
+    private  class MessengerHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            handleReceiveMessage(msg);
+        }
+    }
+
     private static final String TAG = "MUSIC_SERVICE";
     private MusicPlayer mp;
     public static final int CHANNEL_ID = 2314;
@@ -48,6 +61,8 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     private String playMode = Constant.MODE_LIST_RECYCLE;
     private boolean initFlag = false;
     private Timer timer = new Timer();
+    private Messenger messenger = new Messenger(new MessengerHandler());
+    private Messenger clientMessenger;
 
     public MusicService() {
     }
@@ -58,14 +73,39 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public class NotificationReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            handleReceiveIntent(intent);
+            switch (intent.getAction()) {
+                case Constant.ACTION_N_RE_PLAY: {
+                    replay();
+                    buildNotification();
+                    break;
+                }
+                case Constant.ACTION_N_PAUSE:{
+                    pause();
+                    buildNotification();
+                    break;
+                }
+                case Constant.ACTION_N_NEXT:{
+                    next();
+                    break;
+                }
+                case Constant.ACTION_N_PRE:{
+                    previous();
+                    break;
+                }
+                case Constant.ACTION_N_CLOSE:{
+                    stopSelf();
+                    break;
+                }
+                default:break;
+            }
         }
     }
 
 
+
     @Override
     public IBinder onBind(final Intent intent) {
-        return null;
+        return messenger.getBinder();
     }
 
 
@@ -74,24 +114,37 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
      */
     @Override
     public void pause() {
-        mp.pause();
-        timer.cancel();
-//        Intent intent = new Intent();
-//        intent.setAction(Constant.ACTION_N_PLAYING);
-//        intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-//        intent.putExtra(Constant.CURRENT_SONG, index);
-//        intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
-//        sendBroadcast(intent);
+        try {
+                mp.pause();
+                if (clientMessenger != null) {
+                    Message message = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(Constant.ACTION,Constant.ACTION_N_PAUSE);
+                    message.setData(bundle);
+                    clientMessenger.send(message);
+                }
+                timer.cancel();
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
+        }
+
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        registerReceiver();
         mp = MusicPlayer.getInstance(MusicService.this);
         mp.setCompletionListener(this);
         mp.setPreparedListener(this);
         mp.setOnErrorListener(this);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Constant.ACTION_N_RE_PLAY);
+        intentFilter.addAction(Constant.ACTION_N_PAUSE);
+        intentFilter.addAction(Constant.ACTION_N_NEXT);
+        intentFilter.addAction(Constant.ACTION_N_PRE);
+        intentFilter.addAction(Constant.ACTION_N_CLOSE);
+        notificationReceiver = new NotificationReceiver();
+        registerReceiver(notificationReceiver,intentFilter);
         buildNotification();
         startForeground(CHANNEL_ID,notification);
     }
@@ -111,31 +164,46 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public void onPrepared(MediaPlayer mediaPlayer) {
-        if (!initFlag) {//不是初始化
-            mediaPlayer.start();
-            buildNotification();
-            Intent intent = new Intent();
-            intent.setAction(Constant.ACTION_N_PLAYING);
-            intent.putExtra(Constant.CURRENT_SONG, index);
-            intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
-            sendBroadcast(intent);
-            initFlag = false;
-            startSendProgress();
-        } else {//初始化
-            Intent intent = new Intent();
-            intent.setAction(Constant.ACTION_N_PLAYING);
-            intent.putExtra(Constant.CURRENT_SONG, index);
-            intent.putExtra(Constant.IS_PLAYING, false);
-            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
-            intent.putExtra(Constant.POSITION, progress);
-            mediaPlayer.start();
-            mediaPlayer.seekTo(progress);
-            mediaPlayer.pause();
-            sendBroadcast(intent);
-            buildNotification();
-            initFlag = false;
+        try {
+                if (!initFlag) {//不是初始化
+                    mediaPlayer.start();
+                    buildNotification();
+                    Message msg = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(Constant.CURRENT_SONG,index);
+                    bundle.putBoolean(Constant.IS_PLAYING,mp.isPlaying());
+                    bundle.putSerializable(Constant.CURRENT_SONGLIST,playlist);
+                    bundle.putString(Constant.ACTION,Constant.ACTION_N_PLAYING);
+                    msg.setData(bundle);
+                    if (clientMessenger != null) {
+                        clientMessenger.send(msg);
+                        startSendProgress();
+                    }
+                    initFlag = false;
+                } else {//初始化
+                    Message msg = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(Constant.CURRENT_SONG,index);
+                    bundle.putBoolean(Constant.IS_PLAYING,false);
+                    bundle.putSerializable(Constant.CURRENT_SONGLIST,playlist);
+                    bundle.putInt(Constant.POSITION,progress);
+                    bundle.putString(Constant.ACTION,Constant.ACTION_N_PLAYING);
+                    msg.setData(bundle);
+                    if (clientMessenger != null) {
+                        clientMessenger.send(msg);
+                    }
+                    mediaPlayer.start();
+                    mediaPlayer.seekTo(progress);
+                    mediaPlayer.pause();
+                    buildNotification();
+                    initFlag = false;
+                }
+
+
+        }catch (Exception e) {
+            Log.e(TAG,e.getMessage());
         }
+
 
     }
 
@@ -144,10 +212,19 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-                Intent intent = new Intent();
-                intent.setAction(Constant.ACTION_N_POSITION);
-                intent.putExtra(Constant.POSITION, mp.getCurrentPosition());
-                sendBroadcast(intent);
+                try {
+                    if (clientMessenger != null) {
+                        Message msg = new Message();
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(Constant.POSITION,mp.getCurrentPosition());
+                        bundle.putString(Constant.ACTION,Constant.ACTION_N_POSITION);
+                        msg.setData(bundle);
+                        clientMessenger.send(msg);
+                    }
+                }catch (Exception e) {
+                    Log.e(TAG,e.getMessage());
+                }
+
             }
         };
         timer.schedule(timerTask, 0, 1000);
@@ -178,28 +255,15 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
     public int onStartCommand(Intent intent, int flags, int startId) {
         return super.onStartCommand(intent, flags, startId);
     }
-    private void registerReceiver() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Constant.ACTION_N_PAUSE);
-        intentFilter.addAction(Constant.ACTION_N_PRE);
-        intentFilter.addAction(Constant.ACTION_N_NEXT);
-        intentFilter.addAction(Constant.ACTION_N_PLAY);
-        intentFilter.addAction(Constant.ACTION_N_CLOSE);
-        intentFilter.addAction(Constant.ACTION_N_RE_PLAY);
-        intentFilter.addAction(Constant.ACTION_N_SEEK_TO);
-        intentFilter.addAction(Constant.ACTION_N_INIT);
-        intentFilter.addAction(Constant.ACTION_N_ACTIVITY_START);
-        intentFilter.addAction(Constant.ACTION_N_CHANGE_MOED);
-        notificationReceiver = new NotificationReceiver();
-        registerReceiver(notificationReceiver, intentFilter);
-    }
 
-    private void handleReceiveIntent(Intent intent) {
-        switch (intent.getAction()) {
+    private void handleReceiveMessage(Message msg) {
+        clientMessenger = msg.replyTo;
+        String action = msg.getData().getString(Constant.ACTION);
+        switch (action) {
             case Constant.ACTION_N_PLAY: {
                 initFlag = false;
-                Bundle bundle = intent.getExtras();
-                playlist = (ArrayList<Item>) bundle.getSerializable(Constant.CURRENT_SONGLIST);
+                Bundle bundle = msg.getData();
+                playlist = (ArrayList<Item>) (bundle.getSerializable(Constant.CURRENT_SONGLIST));
                 index = bundle.getInt(Constant.CURRENT_SONG);
                 play(index);
                 break;
@@ -233,44 +297,59 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                 break;
             }
             case Constant.ACTION_N_INIT: {
-                Log.i("test","init");
-                initFlag = true;
-                Bundle bundle = intent.getExtras();
-                playlist = (ArrayList<Item>) bundle.getSerializable(Constant.CURRENT_SONGLIST);
-                index = bundle.getInt(Constant.CURRENT_SONG);
-                if(!mp.isPlaying() || !initFlag) {
+                try {
+                    clientMessenger = msg.replyTo;
+                    initFlag = true;
+                    if (mp.isPlaying() || mp.isPrepared()) {
+                        Message message = new Message();
+                        Bundle data = new Bundle();
+                        data.putString(Constant.ACTION,Constant.ACTION_N_PLAYING);
+                        data.putBoolean(Constant.IS_PLAYING,mp.isPlaying());
+                        data.putInt(Constant.CURRENT_SONG,index);
+                        data.putSerializable(Constant.CURRENT_SONGLIST,playlist);
+                        data.putInt(Constant.POSITION,progress);
+                        message.setData(data);
+                        clientMessenger.send(message);
+                        initFlag = false;
+                        break;
+                    }
+                    Bundle bundle = msg.getData();
+                    playlist = (ArrayList<Item>) bundle.getSerializable(Constant.CURRENT_SONGLIST);
+                    index = bundle.getInt(Constant.CURRENT_SONG);
+                    progress = bundle.getInt(Constant.POSITION);
                     play(index);
-                } else {
-                    Intent intent1 = new Intent();
-                    intent1.setAction(Constant.ACTION_N_PLAYING);
-                    intent1.putExtra(Constant.CURRENT_SONG, index);
-                    intent1.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-                    intent1.putExtra(Constant.CURRENT_SONGLIST, playlist);
-                    sendBroadcast(intent1);
-                    initFlag = false;
-                    startSendProgress();
+
+                }catch (Exception e) {
+                    Log.e(TAG,e.getMessage());
                 }
-                progress = bundle.getInt(Constant.POSITION);
                 break;
             }
             case Constant.ACTION_N_SEEK_TO: {
-                Bundle data = intent.getExtras();
+                Bundle data = msg.getData();
                 int x = data.getInt(Constant.POSITION);
                 mp.seekTo(x);
                 break;
             }
             case Constant.ACTION_N_ACTIVITY_START: {
-                Intent back = new Intent();
-                back.setAction(Constant.ACTION_N_PLAYING);
-                back.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-                back.putExtra(Constant.CURRENT_SONG, index);
-                back.putExtra(Constant.CURRENT_SONGLIST, playlist);
-                back.putExtra(Constant.POSITION,progress);
-                sendBroadcast(back);
+                try{
+                    Message message = new Message();
+                    Bundle data = new Bundle();
+                    data.putString(Constant.ACTION,Constant.ACTION_N_PLAYING);
+                    data.putBoolean(Constant.IS_PLAYING,mp.isPlaying());
+                    data.putInt(Constant.CURRENT_SONG,index);
+                    data.putSerializable(Constant.CURRENT_SONGLIST,playlist);
+                    data.putInt(Constant.POSITION,progress);
+                    message.setData(data);
+                    clientMessenger.send(message);
+                }catch (Exception e) {
+                    Log.e(TAG,e.getMessage());
+                }
+
                 break;
             }
             case Constant.ACTION_N_CHANGE_MOED: {
-                playMode = intent.getStringExtra(Constant.CURRENT_MODE);
+                Bundle bundle = msg.getData();
+                playMode = bundle.getString(Constant.CURRENT_MODE);
                 break;
             }
             default:
@@ -298,16 +377,22 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
      */
     @Override
     public void replay() {
-        if (mp != null && !mp.isPlaying()) {
-            mp.rePlay();
-            startSendProgress();
-//            Intent intent = new Intent();
-//            intent.setAction(Constant.ACTION_N_PLAYING);
-//            intent.putExtra(Constant.CURRENT_SONG, index);
-//            intent.putExtra(Constant.IS_PLAYING, mp.isPlaying());
-//            intent.putExtra(Constant.CURRENT_SONGLIST, playlist);
-//            sendBroadcast(intent);
+        try {
+            if (mp != null && !mp.isPlaying()) {
+                mp.rePlay();
+                if (clientMessenger != null) {
+                    startSendProgress();
+                    Message message = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(Constant.ACTION,Constant.ACTION_N_RE_PLAY);
+                    message.setData(bundle);
+                    clientMessenger.send(message);
+                }
+            }
+        }catch (Exception e){
+            Log.e(TAG,e.getMessage());
         }
+
 
     }
     /**
@@ -449,6 +534,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
 
     @Override
     public boolean onUnbind(Intent intent) {
+        clientMessenger = null;
         return super.onUnbind(intent);
     }
 

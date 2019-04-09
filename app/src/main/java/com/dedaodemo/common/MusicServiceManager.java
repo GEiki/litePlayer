@@ -13,59 +13,46 @@ import android.util.Log;
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.service.MusicService;
 
+import java.util.ArrayList;
+
 /**
  * Created by Guoss on 2018/6/28.
  */
 
 public class MusicServiceManager {
-    public interface OnMusicListener {
-        void onMusicCallBack(int msg);
+
+    public interface onMusicServiceBind {
+        void  onBind();
     }
 
-    public interface OnProgressListener {
-        void progress(int position, long duration);
-    }
-
-    private OnMusicListener onPlayListener;
-    private OnProgressListener onProgressListener;
-
-    private class MessengerHandler extends android.os.Handler {
-
-
-        public MessengerHandler() {
-            super();
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.arg1 == Constant.ACTION_REQUEST_DURATION && onProgressListener != null) {
-                Bundle bundle = msg.getData();
-                onProgressListener.progress(bundle.getInt(Constant.POSITION), bundle.getLong(Constant.DURATION));
-            } else if (onPlayListener != null) {
-                onPlayListener.onMusicCallBack(msg.arg1);
-            }
-
-        }
-    }
 
 
     private static MusicServiceManager instance;
     private boolean isServiceConnecting = false;
     private Context context = MyApplication.getMyApplicationContext();
     private Messenger messenger;
-    private Messenger replyMessenger = new Messenger(new MessengerHandler());
+    private ArrayList<onMusicServiceBind> mOnMusicServiceBind = new ArrayList<>();
+    private static final String TAG = "MUSIC_SERVICE_MANAGER";
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.i("ServiceConnect", "Connect Success");
+            Log.i(TAG, "服务绑定成功");
             messenger = new Messenger(service);
             isServiceConnecting = true;
             //连接建立后初始化播放器
+            if (mOnMusicServiceBind != null) {
+                for(onMusicServiceBind i:mOnMusicServiceBind) {
+                    i.onBind();
+                }
+                mOnMusicServiceBind.clear();
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "服务解除绑定");
+            messenger = null;
             isServiceConnecting = false;
         }
     };
@@ -88,12 +75,8 @@ public class MusicServiceManager {
     }
 
 
-    public void setOnPlayListener(OnMusicListener onPlayListener) {
-        this.onPlayListener = onPlayListener;
-    }
-
-    public void setOnProgressListener(OnProgressListener onProgressListener) {
-        this.onProgressListener = onProgressListener;
+    public void setmOnMusicServideBind(onMusicServiceBind mOnMusicServiceBind) {
+        this.mOnMusicServiceBind.add(mOnMusicServiceBind);
     }
 
     public void init() {
@@ -101,13 +84,14 @@ public class MusicServiceManager {
         context.startService(intent);
     }
 
-    public void sendMessage(Bundle bundle, int arg) {
-        Message message = new Message();
-        message.replyTo = replyMessenger;
-        message.arg1 = arg;
-        message.setData(bundle);
+    public void sendMessage(Message message) {
         try {
-            messenger.send(message);
+            if (message != null) {
+                messenger.send(message);
+            } else {
+                Log.e(TAG,"播放服务没有绑定");
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -120,7 +104,12 @@ public class MusicServiceManager {
     public void unBindMusicService() {
         if (isServiceConnecting) {
             context.unbindService(serviceConnection);
+            isServiceConnecting = false;
         }
+    }
+
+    public boolean isBind() {
+        return isServiceConnecting;
     }
 
 }

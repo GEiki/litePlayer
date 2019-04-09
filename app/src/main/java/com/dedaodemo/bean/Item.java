@@ -2,6 +2,8 @@ package com.dedaodemo.bean;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
@@ -40,6 +42,10 @@ public class Item implements Serializable
         }else {
             this.type = type;
         }
+
+    }
+
+    public Item() {
 
     }
 
@@ -121,4 +127,5 @@ public class Item implements Serializable
     {
         this.time = time;
     }
+
 }

@@ -36,7 +36,7 @@ public class MyApplication extends Application {
         super.onCreate();
         mContext = getApplicationContext();
         //初始化播放服务
-//        MusicServiceManager.getInstance().init();
+        MusicServiceManager.getInstance().init();
 
 
 

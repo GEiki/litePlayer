@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.os.Message;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
@@ -29,6 +30,7 @@ import com.dedaodemo.common.Constant;
 import com.dedaodemo.common.MusicServiceManager;
 import com.dedaodemo.model.ISheetModel;
 import com.dedaodemo.model.impl.SheetModelImpl;
+import com.dedaodemo.service.MusicService;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
@@ -81,48 +83,10 @@ public class MainActivity extends BaseActivity
         String[] permission={android.Manifest.permission.READ_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(MainActivity.this,permission,1);
 
-        //初始化服务
-        MusicServiceManager.getInstance().init();
+        //绑定服务
+        Intent intent = new Intent(this, MusicService.class);
+        MusicServiceManager.getInstance().bindService(intent);
 
-        //载入播放状态
-        ISheetModel model = new SheetModelImpl();
-        model.loadPlayList()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new io.reactivex.Observer<CurrentPlayStateBean>() {
-                    @Override
-                    public void onSubscribe(@NonNull Disposable d) {
-
-                    }
-
-                    @Override
-                    public void onNext(CurrentPlayStateBean o) {
-                        SongList songList = new SongList();
-                        songList.setSongList((ArrayList<Item>) (o.getPlayList()));
-                        songList.setTitle("播放列表");
-                        Intent intent = new Intent();
-                        Bundle bundle = new Bundle();
-                        int index = o.getIndex();
-                        int progress = o.getProgress();
-                        bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)songList.getSongList());
-                        bundle.putInt(Constant.CURRENT_SONG, index);
-                        bundle.putInt(Constant.POSITION,progress);
-                        intent.putExtras(bundle);
-                        intent.setAction(Constant.ACTION_N_INIT);
-                        MainActivity.this.sendBroadcast(intent);
-
-                    }
-
-                    @Override
-                    public void onError(Throwable t) {
-
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
 
     }
 

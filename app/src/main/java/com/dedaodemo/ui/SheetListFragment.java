@@ -49,6 +49,7 @@ import com.dedaodemo.adapter.SongListAdapter;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.common.Constant;
+import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
@@ -250,9 +251,11 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
             }
             case R.id.action_playAll: {
                 List<Item> songList = sheetList.get(position).getSongList();
-                if (songList != null) {
+                if (songList != null && songList.size() > 0) {
                     Item song = songList.get(0);
                     baseViewModel.playSong(sheetList.get(position),song);
+                } else {
+                    ToastUtil.showShort(getContext(),"歌单中没有歌曲可以播放");
                 }
                 break;
             }

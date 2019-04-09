@@ -54,6 +54,7 @@ import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.SongList;
 import com.dedaodemo.behavior.FadeBehavior;
 import com.dedaodemo.common.Constant;
+import com.dedaodemo.util.ToastUtil;
 import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
@@ -142,6 +143,7 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
          * */
 
         btn_play_list = mView.findViewById(R.id.btn_play_list);
+        btn_play_list.setOnClickListener(this);
 //        CoordinatorLayout.LayoutParams lp = (CoordinatorLayout.LayoutParams) btn_play_list.getLayoutParams();
 ////        lp.setBehavior(new FadeBehavior(getContext(),null));
 ////        btn_play_list.setLayoutParams(lp);
@@ -247,6 +249,15 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
         switch (v.getId()) {
             case R.id.iv_back: {
                 getActivity().onBackPressed();
+                break;
+            }
+            case R.id.btn_play_list: {
+                if (mSongList != null && mSongList.getSongList().size() > 0) {
+                    List<Item> list = mSongList.getSongList();
+                    baseViewModel.playSong(mSongList,list.get(0));
+                } else {
+                    ToastUtil.showShort(getContext(),"歌单中没有歌曲可以播放");
+                }
                 break;
             }
             default:break;

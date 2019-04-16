@@ -174,6 +174,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                     bundle.putBoolean(Constant.IS_PLAYING,mp.isPlaying());
                     bundle.putSerializable(Constant.CURRENT_SONGLIST,playlist);
                     bundle.putString(Constant.ACTION,Constant.ACTION_N_PLAYING);
+                    bundle.putString(Constant.CURRENT_MODE,playMode);
                     msg.setData(bundle);
                     if (clientMessenger != null) {
                         clientMessenger.send(msg);
@@ -188,6 +189,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                     bundle.putSerializable(Constant.CURRENT_SONGLIST,playlist);
                     bundle.putInt(Constant.POSITION,progress);
                     bundle.putString(Constant.ACTION,Constant.ACTION_N_PLAYING);
+                    bundle.putString(Constant.CURRENT_MODE,playMode);
                     msg.setData(bundle);
                     if (clientMessenger != null) {
                         clientMessenger.send(msg);
@@ -308,6 +310,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                         data.putInt(Constant.CURRENT_SONG,index);
                         data.putSerializable(Constant.CURRENT_SONGLIST,playlist);
                         data.putInt(Constant.POSITION,progress);
+                        data.putString(Constant.CURRENT_MODE,playMode);
                         message.setData(data);
                         clientMessenger.send(message);
                         initFlag = false;
@@ -339,6 +342,7 @@ public class MusicService extends Service implements MediaPlayer.OnCompletionLis
                     data.putInt(Constant.CURRENT_SONG,index);
                     data.putSerializable(Constant.CURRENT_SONGLIST,playlist);
                     data.putInt(Constant.POSITION,progress);
+                    data.putString(Constant.CURRENT_MODE,playMode);
                     message.setData(data);
                     clientMessenger.send(message);
                 }catch (Exception e) {

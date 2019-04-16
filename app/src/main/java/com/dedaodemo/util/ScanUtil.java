@@ -59,7 +59,7 @@ public class ScanUtil {
             String name = file.getName();
             String title = name;
             String sub = name.substring(name.lastIndexOf(".")+1);
-            if("mp3".equals(sub)){
+            if("mp3".equals(sub) || "wav".equals(sub) || "flac".equals(sub)){
                 MediaMetadataRetriever mmr = null;
                 try{
                     mmr=new MediaMetadataRetriever();

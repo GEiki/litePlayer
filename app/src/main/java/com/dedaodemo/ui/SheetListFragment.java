@@ -5,6 +5,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,7 +27,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.transition.Explode;
+import android.transition.Fade;
 import android.transition.Slide;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -113,7 +116,7 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
         mView = inflater.inflate(R.layout.fragment_sheet_list, container, false);
         Util.setTranslucentStatus(getActivity());
         toolbar = mView.findViewById(R.id.toolbar);
-        toolbar.setTitle("Lite");
+        toolbar.setTitle(getString(R.string.app_name));
         toolbar.setPopupTheme(R.style.ToolbarPopupTheme);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         super.onCreateView(inflater, container, savedInstanceState);
@@ -225,9 +228,11 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
      * fragment跳转
      */
     public void showFragment(Fragment showFragment, Fragment hideFragment,String TAG) {
-        Slide slide = new Slide();
-        slide.setDuration(500);
-        showFragment.setEnterTransition(slide);
+        Slide slideIn = new Slide();
+        slideIn.setDuration(600);
+        slideIn.setSlideEdge(Gravity.RIGHT);
+        showFragment.setEnterTransition(slideIn);
+        showFragment.setReturnTransition(slideIn);
         showFragment.setAllowEnterTransitionOverlap(true);
         showFragment.setAllowReturnTransitionOverlap(true);
         getFragmentManager().beginTransaction()
@@ -329,6 +334,12 @@ public class SheetListFragment extends Fragment  implements NavigationView.OnNav
                 showSearching();
                 break;
             }
+            case R.id.nav_info: {
+                Intent intent = new Intent(getActivity(),AboutActivity.class);
+                startActivity(intent);
+                break;
+            }
+            default:break;
         }
 
 

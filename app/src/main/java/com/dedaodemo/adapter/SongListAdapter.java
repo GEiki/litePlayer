@@ -102,8 +102,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
             }
         } else if (songList.getSongList() != null && songList.getSongList().size() == 0) {
             final RequestOptions requestOptions = new RequestOptions()
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .skipMemoryCache(true);
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE);
 
             Glide.with(getmContext())
                     .load(R.drawable.default_songlist_background2)
@@ -160,11 +159,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
     private void setPic(String url, final ImageView imageView) {
         final RequestOptions requestOptions = new RequestOptions()
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .skipMemoryCache(true);
-        Glide.with(getmContext())
-                .load(R.drawable.default_songlist_background2)
-                .apply(requestOptions)
-                .into(imageView);
+                .placeholder(R.drawable.default_songlist_background2);
         Glide.with(getmContext())
                 .asDrawable()
                 .apply(requestOptions)
@@ -187,7 +182,7 @@ public class SongListAdapter extends com.dedaodemo.adapter.BaseAdapter<SongListA
         ISearchModel searchModel = new SearchModelImpl();
         SearchBean searchBean = new SearchBean();
         searchBean.setKey(item.getTitle());
-        searchBean.setSearchType(Constant.TYPE_WY);
+        searchBean.setSearchType(Constant.TYPE_QQ);
         searchModel.searchSongOnline(searchBean)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -15,9 +15,5 @@
         android:id="@+id/action_kg"
         android:title="酷狗音乐"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_wy"
-        android:title="网易云音乐"
-        app:showAsAction="never" />
 
 </menu>

@@ -34,6 +34,7 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
     }
 
     private boolean isPlayList;
+    private boolean isSearchList;
     private OnMenuItemOnClickListener onMenuItemOnClickListener;
     private int menuId;
     private int curSongIndex;
@@ -44,9 +45,14 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
 
     }
 
+    public void setSearchList(boolean searchList) {
+        isSearchList = searchList;
+    }
+
     public void setIsPlayList(boolean playList) {
         isPlayList = playList;
     }
+
 
     public OnMenuItemOnClickListener getOnItemAddClickListener() {
         return onMenuItemOnClickListener;
@@ -96,7 +102,11 @@ public class MListAdapter extends com.dedaodemo.adapter.BaseAdapter<MListAdapter
             public void onClick(View v) {
                 //初始化更多菜单
                 PopupMenu popupMenu = new PopupMenu(getmContext(),v);
-                popupMenu.inflate(R.menu.song_menu);
+                if (isSearchList) {
+                    popupMenu.inflate(R.menu.search_menu);
+                } else {
+                    popupMenu.inflate(R.menu.song_menu);
+                }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {

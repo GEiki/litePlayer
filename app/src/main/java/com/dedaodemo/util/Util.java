@@ -3,21 +3,33 @@ package com.dedaodemo.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.dedaodemo.MyApplication;
 import com.dedaodemo.R;
 import com.dedaodemo.bean.Item;
 import com.dedaodemo.bean.LrcBean;
+import com.dedaodemo.bean.SearchBean;
+import com.dedaodemo.common.Constant;
 import com.dedaodemo.model.ISearchModel;
 import com.dedaodemo.model.impl.SearchModelImpl;
 
@@ -28,6 +40,13 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import jp.wasabeef.glide.transformations.BlurTransformation;
 
 /**
  * Created by guoss on 2018/7/12.
@@ -199,5 +218,77 @@ public class Util {
         }
 
         return isConnected;
+    }
+
+    /**
+     * 异步设置图片到imageView
+     * */
+    public static void setSongImgToImageView(Item item,Context context,ImageView imageView){
+        setPic(null,imageView,context);
+        downloadPic(item,imageView,context);
+    }
+
+    public static void setPic(String url, final ImageView imageView,Context context) {
+        final RequestOptions requestOptions = new RequestOptions()
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE);
+        Glide.with(context)
+                .load(R.drawable.default_songlist_background2)
+                .apply(requestOptions)
+                .into(imageView);
+        if (url != null && !url.isEmpty()) {
+                Glide.with(context)
+                        .asDrawable()
+                        .apply(requestOptions)
+                        .load(url).listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        return false;
+                    }
+                }).into(imageView);
+        }
+    }
+
+    private static void downloadPic(final Item item, final ImageView imageView, final Context context) {
+        ISearchModel searchModel = new SearchModelImpl();
+        SearchBean searchBean = new SearchBean();
+        searchBean.setKey(item.getTitle());
+        searchBean.setSearchType(Constant.TYPE_QQ);
+        searchModel.searchSongOnline(searchBean)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<List<Item>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(List<Item> list) {
+                        if (list != null && list.size() > 0) {
+                            Item song = list.get(0);
+                            setPic(song.getPic(),imageView,context);
+                            item.setPic(song.getPic());
+                            DatabaseUtil.updateItem(item);
+                        } else {
+                            setPic(null,imageView,context);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 }

@@ -16,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.transition.Explode;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -70,10 +71,10 @@ BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListen
     private ImageButton btn_list;
     private SeekBar seekBar;
     private BottomSheetDialog playlistDialog;
-    private ImageView iv_mode;
     private ImageView iv_list_delete;
-    private TextView tv_mode;
-    private LinearLayout ll_mode;
+    private LinearLayout ll_order;
+    private LinearLayout ll_random;
+    private LinearLayout ll_single;
     private RecyclerView rlv_playlist;
     private TextView tv_close;
     private LrcView lrcView;
@@ -148,6 +149,7 @@ BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListen
                         message.what = GET_LRC;
                         message.obj = lrc;
                         handler.sendMessage(message);
+                        break;
                     }
                     default:break;
                 }
@@ -335,22 +337,25 @@ BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListen
 
     }
 
+
     /**
      * 初始化播放列表窗口
      * */
     private void initPlaylistDialog() {
         playlistDialog = new BottomSheetDialog(this);
         View view = LayoutInflater.from(this).inflate(R.layout.dialog_playlist,null);
-        iv_mode = view.findViewById(R.id.iv_mode);
+        ll_order = view.findViewById(R.id.ll_order);
+        ll_random = view.findViewById(R.id.ll_random);
+        ll_single = view.findViewById(R.id.ll_single);
         iv_list_delete = view.findViewById(R.id.iv_delete_all);
-        tv_mode = view.findViewById(R.id.tv_mode);
-        ll_mode = view.findViewById(R.id.ll_mode);
         tv_close = view.findViewById(R.id.tv_close);
         rlv_playlist = view.findViewById(R.id.recycler_view);
         rlv_playlist.setLayoutManager(new LinearLayoutManager(this));
-        ll_mode.setOnClickListener(onClickListener);
         iv_list_delete.setOnClickListener(onClickListener);
         tv_close.setOnClickListener(onClickListener);
+        ll_order.setOnClickListener(onClickListener);
+        ll_random.setOnClickListener(onClickListener);
+        ll_single.setOnClickListener(onClickListener);
         playlistDialog.setContentView(view);
     }
 
@@ -393,7 +398,13 @@ BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListen
                 message.what = MSG_GET_LRC;
                 message.obj = item;
                 threadHandler.sendMessage(message);
+                //获取歌曲封面
+                if (!TextUtils.isEmpty(item.getPic())) {
+                    Util.setPic(item.getPic(),iv_circle,BaseActivity.this);
+                } else {
 
+                    Util.setSongImgToImageView(item,BaseActivity.this,iv_circle);
+                }
                 tv_title_expand.setText(item.getTitle());
                 tv_artist_expand.setText(item.getAuthor());
                 String time = baseViewModel.getCurPlaySong().getValue().getTime();
@@ -420,6 +431,39 @@ BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListen
             @Override
             public void onChanged(@Nullable String s) {
                 //播放模式变化
+                if (s != null) {
+                    switch (s) {
+                        case Constant.MODE_LIST_RECYCLE: {
+                            iv_loop.setVisibility(View.VISIBLE);
+                            ll_order.setVisibility(View.VISIBLE);
+                            ll_random.setVisibility(View.GONE);
+                            ll_single.setVisibility(View.GONE);
+                            iv_single.setVisibility(View.GONE);
+                            iv_random.setVisibility(View.GONE);
+                            break;
+                        }
+                        case Constant.MODE_RANDOM: {
+                            iv_random.setVisibility(View.VISIBLE);
+                            ll_random.setVisibility(View.VISIBLE);
+                            ll_order.setVisibility(View.GONE);
+                            ll_single.setVisibility(View.GONE);
+                            iv_single.setVisibility(View.GONE);
+                            iv_loop.setVisibility(View.GONE);
+                            break;
+                        }
+                        case Constant.MOED_SINGLE_RECYCLE:{
+                            ll_single.setVisibility(View.VISIBLE);
+                            ll_order.setVisibility(View.GONE);
+                            ll_random.setVisibility(View.GONE);
+                            iv_single.setVisibility(View.VISIBLE);
+                            iv_random.setVisibility(View.GONE);
+                            iv_loop.setVisibility(View.GONE);
+                            break;
+                        }
+                        default:break;
+                    }
+                }
+
             }
         });
         baseViewModel.observeData(BaseViewModel.IS_PLAYING_DATA, this, new Observer<Boolean>() {
@@ -519,28 +563,38 @@ BaseActivity extends AppCompatActivity  implements BaseAdapter.OnItemClickListen
                         break;
                     }
                     case R.id.iv_loop: {
-                        iv_loop.setVisibility(View.GONE);
-                        iv_single.setVisibility(View.VISIBLE);
                         ToastUtil.showShort(getApplicationContext(), "已切换到单曲循环");
                         changeMode(Constant.MOED_SINGLE_RECYCLE);
                         break;
                     }
                     case R.id.iv_single: {
-                        iv_single.setVisibility(View.GONE);
-                        iv_random.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_RANDOM);
                         ToastUtil.showShort(getApplicationContext(), "已切换到随机播放");
                         break;
                     }
                     case R.id.iv_random: {
-                        iv_random.setVisibility(View.GONE);
-                        iv_loop.setVisibility(View.VISIBLE);
                         changeMode(Constant.MODE_LIST_RECYCLE);
                         ToastUtil.showShort(getApplicationContext(), "已切换到列表循环");
                         break;
                     }
                     case R.id.iv_delete_all: {
                         baseViewModel.removeAllSongFromPlaylist();
+                        break;
+                    }
+                    case R.id.ll_random: {
+                        changeMode(Constant.MODE_LIST_RECYCLE);
+                        ToastUtil.showShort(getApplicationContext(), "已切换到列表循环");
+                        break;
+
+                    }
+                    case R.id.ll_order:{
+                        changeMode(Constant.MOED_SINGLE_RECYCLE);
+                        ToastUtil.showShort(getApplicationContext(), "已切换到单曲循环");
+                        break;
+                    }
+                    case R.id.ll_single:{
+                        changeMode(Constant.MODE_RANDOM);
+                        ToastUtil.showShort(getApplicationContext(), "已切换到随机播放");
                         break;
                     }
                     default:break;

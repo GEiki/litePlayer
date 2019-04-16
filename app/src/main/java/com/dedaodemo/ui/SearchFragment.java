@@ -63,7 +63,7 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
 
     public static final String TAG = "SEARCH_FRAGMENT";
 
-    private String searchSource = Constant.TYPE_WY;
+    private String searchSource = Constant.TYPE_QQ;
     private ArrayList<Item> searchList;
     private SongList searchSongList;
     private BottomSheetDialog bottomSheetDialog;
@@ -138,6 +138,7 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
         mListAdapter.setMenuId(R.menu.search_menu);
         mListAdapter.setOnItemAddClickListener(this);
         mListAdapter.setOnItemClickListener(this);
+        mListAdapter.setSearchList(true);
         recyclerView.setAdapter(mListAdapter);
     }
 
@@ -151,7 +152,7 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
         searchView = new SearchView(getContext());
         searchView.setIconified(false);
         searchView.onActionViewExpanded();
-        searchView.setQueryHint("当前搜索源为网易云");
+        searchView.setQueryHint("当前搜索源为QQ音乐");
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -262,12 +263,6 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
                 ToastUtil.showShort(getContext(), "搜索源变更为酷狗音乐");
                 break;
             }
-            case R.id.action_wy: {
-                searchSource = Constant.TYPE_WY;
-                searchView.setQueryHint("当前搜索源为网易云");
-                ToastUtil.showShort(getContext(), "搜索源变更为网易云音乐");
-                break;
-            }
             default:
                 break;
         }
@@ -280,6 +275,14 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
             case R.id.action_add_song: {
                 showChooseSongListDialog(mListAdapter.getmData().get(position));
                 break;
+            }
+            case R.id.action_add_playlist:{
+                if (searchList != null && searchList.size() >0) {
+                    ArrayList<Item> list = new ArrayList<>();
+                    list.add(searchList.get(position));
+                    baseViewModel.addSongToPlaylist(list);
+                    break;
+                }
             }
             default:
                 break;
@@ -298,9 +301,14 @@ public class SearchFragment extends Fragment implements BaseAdapter.OnItemClickL
         viewModel.getSheetList(this, new Observer<List<SongList>>() {
             @Override
             public void onChanged(@Nullable List<SongList> songLists) {
-                if (songLists != null) {
+                if (songLists != null && songLists.size() > 0) {
                     adapter.setmData(songLists);
                     view.setAdapter(adapter);
+                } else {
+                    ToastUtil.showShort(getContext(),"请先创建歌单");
+                    if (bottomSheetDialog != null && bottomSheetDialog.isShowing()) {
+                        bottomSheetDialog.dismiss();
+                    }
                 }
             }
         });

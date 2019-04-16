@@ -67,6 +67,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
                     }
                     curPlaySong.setValue(curPlayList.getValue().getSongList().get(index));
                     postion.postValue(data.getInt(Constant.POSITION,0));
+                    playMode.setValue(data.getString(Constant.CURRENT_MODE));
                     //保存播放状态
                     if (curPlayList.getValue() != null) {
                         currentPlayStateBean = new CurrentPlayStateBean();
@@ -235,35 +236,38 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
                 @Override
                 public void onNext(CurrentPlayStateBean o) {
-                    SongList songList = new SongList();
-                    songList.setSongList((ArrayList<Item>) (o.getPlayList()));
-                    songList.setTitle("播放列表");
-                    final Message message = new Message();
-                    message.replyTo = replyMessenger;
-                    Bundle bundle = new Bundle();
-                    bundle.putString(Constant.ACTION,Constant.ACTION_N_INIT);
-                    int index = o.getIndex();
-                    int progress = o.getProgress();
-                    if (o.getPlayList() != null) {
-                        curPlayList.setValue(songList);
-                        curPlaySong.setValue(o.getPlayList().get(index));
-                        postion.setValue(o.getProgress());
+                    if (o != null) {
+                        SongList songList = new SongList();
+                        songList.setSongList((ArrayList<Item>) (o.getPlayList()));
+                        songList.setTitle("播放列表");
+                        final Message message = new Message();
+                        message.replyTo = replyMessenger;
+                        Bundle bundle = new Bundle();
+                        bundle.putString(Constant.ACTION,Constant.ACTION_N_INIT);
+                        int index = o.getIndex();
+                        int progress = o.getProgress();
+                        if (o.getPlayList() != null) {
+                            curPlayList.setValue(songList);
+                            curPlaySong.setValue(o.getPlayList().get(index));
+                            postion.setValue(o.getProgress());
+                        }
+                        Log.i("Test",String.valueOf(o.getPlayList().size()));
+                        bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)songList.getSongList());
+                        bundle.putInt(Constant.CURRENT_SONG, index);
+                        bundle.putInt(Constant.POSITION,progress);
+                        message.setData(bundle);
+                        if (MusicServiceManager.getInstance().isBind()) {
+                            MusicServiceManager.getInstance().sendMessage(message);
+                        } else {
+                            MusicServiceManager.getInstance().setmOnMusicServideBind(new MusicServiceManager.onMusicServiceBind() {
+                                @Override
+                                public void onBind() {
+                                    MusicServiceManager.getInstance().sendMessage(message);
+                                }
+                            });
+                        }
                     }
-                    Log.i("Test",String.valueOf(o.getPlayList().size()));
-                    bundle.putSerializable(Constant.CURRENT_SONGLIST, (ArrayList)songList.getSongList());
-                    bundle.putInt(Constant.CURRENT_SONG, index);
-                    bundle.putInt(Constant.POSITION,progress);
-                    message.setData(bundle);
-                    if (MusicServiceManager.getInstance().isBind()) {
-                        MusicServiceManager.getInstance().sendMessage(message);
-                    } else {
-                        MusicServiceManager.getInstance().setmOnMusicServideBind(new MusicServiceManager.onMusicServiceBind() {
-                            @Override
-                            public void onBind() {
-                                MusicServiceManager.getInstance().sendMessage(message);
-                            }
-                        });
-                    }
+
 
 
                 }
@@ -315,7 +319,16 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void addSongToPlaylist(ArrayList<Item> items) {
-        curPlayList.getValue().getSongList().addAll(items);
+        if (curPlayList.getValue() != null) {
+            curPlayList.getValue().getSongList().addAll(items);
+        } else {
+            SongList songList = new SongList();
+            songList.setTitle("播放列表");
+            songList.getSongList().addAll(items);
+            curPlayList.setValue(songList);
+            playSong(songList,items.get(0));
+        }
+
     }
 
     @Override
@@ -473,6 +486,7 @@ public class BaseViewModel extends ViewModel implements BaseContract.Presenter, 
 
     @Override
     public void setPlayMode(String mode) {
+        playMode.setValue(mode);
         Bundle data = new Bundle();
         data.putString(Constant.CURRENT_MODE,mode);
         Message message = new Message();

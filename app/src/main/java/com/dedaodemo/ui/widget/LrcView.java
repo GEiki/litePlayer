@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
 
@@ -15,6 +16,10 @@ import com.dedaodemo.util.Util;
 
 import java.util.ArrayList;
 
+/**
+ * author:guoss
+ * lrc view
+ * */
 public class LrcView extends View {
 
     private ArrayList<LrcBean> beans;
@@ -24,6 +29,8 @@ public class LrcView extends View {
     private Scroller scroller;
     private int lrcIndex = 0;
     private static final int OFFSET = 160;
+    private int preY;
+    private int oldY;
 
 
     public LrcView(Context context) {
@@ -91,7 +98,27 @@ public class LrcView extends View {
 
     }
 
-
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int y = (int) event.getY();
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:{
+                oldY = y;
+                getParent().requestDisallowInterceptTouchEvent(true);
+                break;
+            }
+            case MotionEvent.ACTION_MOVE:{
+                scrollBy(0,preY-y);
+                break;
+            }
+            case MotionEvent.ACTION_UP:{
+                break;
+            }
+            default:break;
+        }
+        preY = y;
+        return true;
+    }
 
     @Override
     public void computeScroll() {

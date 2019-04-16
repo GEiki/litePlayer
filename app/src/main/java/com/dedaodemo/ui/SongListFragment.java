@@ -20,6 +20,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Layout;
+import android.text.TextUtils;
 import android.transition.TransitionInflater;
 import android.util.Log;
 import android.view.Gravity;
@@ -206,28 +207,20 @@ public class SongListFragment extends Fragment implements View.OnClickListener, 
     private void addHeaderImgView(View view, LayoutInflater inflater) {
         iv_head = mView.findViewById(R.id.iv_head);
         final RequestOptions requestOptions = new RequestOptions()
-                .transform(new BlurTransformation(25, 5))
-                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .skipMemoryCache(true);
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE);
         Glide.with(getContext())
                 .load(R.drawable.default_songlist_background)
                 .apply(requestOptions)
                 .into(iv_head);
-        //尝试加载专辑封面
-//        Item item = null;
-//        if (mSongList.getSongList() != null && !mSongList.getSongList().isEmpty()) {
-//            item = mSongList.getSongList().get(0);
-//            viewModel.setPic(item,iv_head);
-//        } else {
-//            final RequestOptions requestOptions = new RequestOptions()
-//                    .transform(new BlurTransformation(25, 5))
-//                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-//                    .skipMemoryCache(true);
-//            Glide.with(getContext())
-//                    .load(R.drawable.default_songlist_background)
-//                    .apply(requestOptions)
-//                    .into(iv_head);
-//        }
+        if (mSongList.getSongList() == null || mSongList.getSongList().size() <= 0) {
+            return;
+        }
+        Item item = mSongList.getSongList().get(0);
+        if (!TextUtils.isEmpty(item.getPic())) {
+            Util.setPic(item.getPic(),iv_head,getContext());
+        } else {
+            Util.setSongImgToImageView(item,getContext(),iv_head);
+        }
 
 
     }

@@ -56,7 +56,7 @@ public class SearchModelImpl implements ISearchModel {
 
                                 Log.i("SearchResult", response.toString());
                                 if (response != null && response.toString().contains("ResultCode")) {
-                                    if (response.getInt("ResultCode") == 1 && response.getJSONArray("Body") != null) {
+                                    if (response.getInt("ResultCode") == 1 && !response.getString("Body").equals("null")) {
                                         ArrayList<Item> itemList = new ArrayList<>();
                                         JSONArray jsonArray = response.getJSONArray("Body");
                                         for (int i = 0; i < jsonArray.length(); i++) {
